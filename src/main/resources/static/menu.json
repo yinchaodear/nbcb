@@ -1,0 +1,207 @@
+[
+	{
+		"id": "474356044148117504",
+		"title": "工作空间",
+		"type": "0",
+		"openType": "",
+		"icon": "layui-icon layui-icon-component",
+		"href": "",
+		"children": [
+			{
+				"id": "474356363552755712",
+				"title": "首页",
+				"type": "1",
+				"openType": "0",
+				"icon": "layui-icon layui-icon-home",
+				"href": "/console",
+				"children": []
+			}
+		]
+	},
+	{
+		"id": "1",
+		"title": "系统管理",
+		"type": "0",
+		"openType": null,
+		"icon": "layui-icon layui-icon-set-fill",
+		"href": "",
+		"children": [
+			{
+				"id": "3",
+				"title": "角色管理",
+				"type": "1",
+				"openType": null,
+				"icon": "layui-icon layui-icon-user",
+				"href": "/system/role/main",
+				"children": [
+					{
+						"id": "442359447487123456",
+						"title": "角色列表",
+						"type": "2",
+						"openType": "",
+						"icon": "layui-icon layui-icon-rate",
+						"href": "",
+						"children": []
+					}
+				]
+			},
+			{
+				"id": "4",
+				"title": "demo管理",
+				"type": "1",
+				"openType": null,
+				"icon": "layui-icon layui-icon-vercode",
+				"href": "/demo/demo/main",
+				"children": []
+			},
+			{
+				"id": "4",
+				"title": "权限管理",
+				"type": "1",
+				"openType": null,
+				"icon": "layui-icon layui-icon-vercode",
+				"href": "/system/power/main",
+				"children": []
+			},
+			{
+				"id": "452678330118967296",
+				"title": "系统配置",
+				"type": "1",
+				"openType": "0",
+				"icon": "layui-icon layui-icon-fonts-code",
+				"href": "/system/config/main",
+				"children": []
+			},
+			{
+				"id": "442722702474743808",
+				"title": "数据字典",
+				"type": "1",
+				"openType": "0",
+				"icon": "layui-icon  layui-icon-form",
+				"href": "/system/dictType/main",
+				"children": []
+			},
+			{
+				"id": "2",
+				"title": "用户管理",
+				"type": "1",
+				"openType": null,
+				"icon": "layui-icon layui-icon-username",
+				"href": "/system/user/main",
+				"children": []
+			}
+		]
+	},
+	{
+		"id": "442417411065516032",
+		"title": "敏捷开发",
+		"type": "0",
+		"openType": "",
+		"icon": "layui-icon layui-icon-senior",
+		"href": "",
+		"children": [
+			{
+				"id": "442418188639145984",
+				"title": "代码生成",
+				"type": "1",
+				"openType": "0",
+				"icon": "layui-icon layui-icon-template-1",
+				"href": "/generator/main",
+				"children": []
+			}
+		]
+	},
+	{
+		"id": "694203021537574912",
+		"title": "系统监控",
+		"type": "0",
+		"openType": "",
+		"icon": "layui-icon  layui-icon-console",
+		"href": "",
+		"children": [
+			{
+				"id": "450300705362808832",
+				"title": "行为日志",
+				"type": "1",
+				"openType": "0",
+				"icon": "layui-icon  layui-icon-chart",
+				"href": "/system/logging/main",
+				"children": []
+			},
+			{
+				"id": "442520236248403968",
+				"title": "数据监控",
+				"type": "1",
+				"openType": "0",
+				"icon": "layui-icon  layui-icon-chart",
+				"href": "/druid/index.html",
+				"children": []
+			},
+			{
+				"id": "694203311615639552",
+				"title": "接口文档",
+				"type": "1",
+				"openType": "0",
+				"icon": "layui-icon  layui-icon-chart",
+				"href": "/swagger-ui.html",
+				"children": []
+			}
+		]
+	},
+	{
+		"id": "442650387514789888",
+		"title": "定时任务",
+		"type": "0",
+		"openType": "",
+		"icon": "layui-icon  layui-icon-log",
+		"href": "",
+		"children": [
+			{
+				"id": "452298073088069632",
+				"title": "任务组",
+				"type": "1",
+				"openType": "0",
+				"icon": "layui-icon  layui-icon-templeate-1",
+				"href": "/schedule/group/main",
+				"children": []
+			},
+			{
+				"id": "442650770626711552",
+				"title": "任务管理",
+				"type": "1",
+				"openType": "0",
+				"icon": "layui-icon  layui-icon-chat",
+				"href": "/schedule/job/main",
+				"children": []
+			},
+			{
+				"id": "442651158935375872",
+				"title": "任务日志",
+				"type": "1",
+				"openType": "0",
+				"icon": "layui-icon  layui-icon-file",
+				"href": "/schedule/log/main",
+				"children": []
+			}
+		]
+	},
+	{
+		"id": "451002662209589248",
+		"title": "工作流程",
+		"type": "0",
+		"openType": "",
+		"icon": "layui-icon  layui-icon-chart",
+		"href": "",
+		"children": [
+			{
+				"id": "451003242072117248",
+				"title": "模型管理",
+				"type": "1",
+				"openType": "0",
+				"icon": "layui-icon  layui-icon-component",
+				"href": "/process/model/main",
+				"children": []
+			}
+		]
+	}
+]

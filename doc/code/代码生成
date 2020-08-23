@@ -1,0 +1,22 @@
+生成代码入口AutoCodeTest
+
+代码模板包括：
+EntityController.java.vm   控制类模板
+main.html.vm  列表模板
+add.html.vm   新增页面模板
+edit.html.vm  编辑页面模板
+
+需要设置：
+srcPath：实体类对应的源码路径
+pojoName：实体类名称
+packageName：包名
+saveToRootx：保存文件路径
+
+生成后，controller放入相应的包下，页面放入resources/templates/下
+
+
+当前进度：
+1、可以生成控制类，列表，新增，编辑页面
+2、尚未实现字段注释作为页面描述功能
+3、尚未实现根据字段不同类型生成不同类型字段
+4、....

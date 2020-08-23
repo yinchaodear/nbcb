@@ -1,0 +1,79 @@
+
+<!DOCTYPE html>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
+<head>
+<meta charset="UTF-8">
+<title>新增</title>
+<link rel="stylesheet" href="../../admin/css/pearCommon.css" />
+<link rel="stylesheet" href="../../component/layui/css/layui.css" />
+</head>
+<body>
+	<form class="layui-form" action="">
+		<div class="mainBox">
+			<div class="main-container">
+				<div class="main-container">
+																																											<div class="layui-form-item">
+								<label class="layui-form-label">attr1</label>
+								<div class="layui-input-block">
+									<input type="text" name="attr1"  autocomplete="off" placeholder="请输入attr1" class="layui-input">
+								</div>
+							</div>
+																																						<div class="layui-form-item">
+								<label class="layui-form-label">attr2</label>
+								<div class="layui-input-block">
+									<input type="text" name="attr2"  autocomplete="off" placeholder="请输入attr2" class="layui-input">
+								</div>
+							</div>
+															</div>
+			</div>
+		</div>
+		<div class="bottom">
+			<div class="button-container">
+				<button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="demo-save">
+					<i class="layui-icon layui-icon-ok"></i>
+					提交
+				</button>
+				<button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">
+					<i class="layui-icon layui-icon-refresh"></i>
+					重置
+				</button>
+			</div>
+		</div>
+	</form>
+	<script src="../../component/layui/layui.js"></script>
+	<script>
+		layui.use([ 'form', 'jquery' ], function() {
+			let form = layui.form;
+			let $ = layui.jquery;
+			let MODULE_PATH = "/demo/demo/";
+			
+			form.on('submit(demo-save)', function(data) {
+				$.ajax({
+					url : MODULE_PATH+'save',
+					data : JSON.stringify(data.field),
+					dataType : 'json',
+					contentType : 'application/json',
+					type : 'post',
+					success : function(result) {
+						if (result.success) {
+							layer.msg(result.msg, {
+								icon : 1,
+								time : 1000
+							}, function() {
+								parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+								parent.layui.table.reload("demo-table");
+							});
+						} else {
+							layer.msg(result.msg, {
+								icon : 2,
+								time : 1000
+							});
+						}
+					}
+				})
+				return false;
+			});
+		})
+	</script>
+</body>
+</html>

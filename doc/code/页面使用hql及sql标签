@@ -1,0 +1,37 @@
+springboot中自定义标签通过thymeleaf的自定义标签实现
+相关java代码包括：
+com.yuqiaotech.common.tools.tag.hql.HQLTag
+com.yuqiaotech.common.tools.tag.hql.HqlListTag
+com.yuqiaotech.common.tools.tag.hql.HqlQueryForUniqueTag
+
+com.yuqiaotech.common.tools.tag.sql.SQLTag
+com.yuqiaotech.common.tools.tag.sql.SqlQueryForlist
+com.yuqiaotech.common.tools.tag.sql.SqlQueryForUniqueTag
+
+页面头部需要引入标签：
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
+
+页面使用方式如下：
+
+HQL列表开始:
+<hql:queryForList hql="from User where id<5" id="users" />
+<div th:each="m : ${users}" >
+	<label th:text="${m.username}"></label>
+</div>
+
+
+HQL指定一个对象：
+<hql:queryForUnique hql="from User where id=10" id="uniqueuser"/>
+<label th:text="${uniqueuser.username}"/>
+
+
+SQL列表开始：
+<nativeSql:sqlQueryForList sql="select * from t_authority where f_id <4" id="aulist"/>
+<div th:each="m : ${aulist}" >
+	<label th:text="${m.f_authority}"></label>
+</div>
+
+
+ SQL指定一个对象：
+<nativeSql:sqlQueryForUnique sql="select * from t_authority where f_id =1" id="oneauthority"/>
+<label th:text="${oneauthority.f_authority}"/>

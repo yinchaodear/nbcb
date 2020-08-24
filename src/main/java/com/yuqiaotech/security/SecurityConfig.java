@@ -91,7 +91,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
         throws Exception
     {
         http.authorizeRequests()
-            .antMatchers("/login/**,/assets/**,/admin/**,/component/**,/favicon.ico".split(","))
+            .antMatchers("/login/**,/assets/**,/admin/**,/component/**,/favicon.ico,/demo/**".split(","))
             .permitAll()
             // 其他的需要登录后才能访问
             .anyRequest()

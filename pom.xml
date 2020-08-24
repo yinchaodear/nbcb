@@ -25,7 +25,6 @@
 		<fastjson.version>1.2.68</fastjson.version>
 		<commons.lang3.version>3.10</commons.lang3.version>
 		<pagehelper.version>1.2.10</pagehelper.version>
-		<lombok.version>1.18.12</lombok.version>
 		<velocity.version>1.7</velocity.version>
 	</properties>
 
@@ -132,12 +131,6 @@
 			<groupId>com.github.pagehelper</groupId>
 			<artifactId>pagehelper-spring-boot-starter</artifactId>
 			<version>${pagehelper.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>${lombok.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.velocity</groupId>

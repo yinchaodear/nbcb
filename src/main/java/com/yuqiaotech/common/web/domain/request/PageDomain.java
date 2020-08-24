@@ -8,16 +8,17 @@ import lombok.Data;
  * CreateTime: 2019/10/23
  * */
 @Data
-public class PageDomain {
-
+public class PageDomain
+{
+    
     /**
      * 当前页
      * */
-    private Integer page;
-
+    private Integer page = 1;
+    
     /**
      * 每页数量
      * */
-    private Integer limit;
-
+    private Integer limit = 10;
+    
 }

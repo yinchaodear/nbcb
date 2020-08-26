@@ -2,10 +2,7 @@ package com.yuqiaotech.zsnews.model;
 
 import com.yuqiaotech.common.web.base.BaseModel;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 /**
  * 频道。
@@ -19,6 +16,8 @@ public class Channel extends BaseModel {
     private String type;
     private String logo;
     private String title;
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="f_column_id")
     private Column column;
     private String description;
 
@@ -31,11 +30,63 @@ public class Channel extends BaseModel {
         this.id = id;
     }
 
+    /**
+     * 标题。
+     * @return
+     */
     public String getTitle() {
         return title;
     }
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    /**
+     * 类型。
+     * @return
+     */
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    /**
+     * logo。
+     * @return
+     */
+    public String getLogo() {
+        return logo;
+    }
+
+    public void setLogo(String logo) {
+        this.logo = logo;
+    }
+
+    /**
+     * 栏目。
+     * @return
+     */
+    public Column getColumn() {
+        return column;
+    }
+
+    public void setColumn(Column column) {
+        this.column = column;
+    }
+
+    /**
+     * 描述。
+     * @return
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

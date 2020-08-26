@@ -1,0 +1,18 @@
+https://blog.csdn.net/zht741322694/article/details/80631285
+
+
+
+
+<select οnchange="getChilds(this.value)" class="form-control select2" id="catId" name="catId">
+   <option value=""> -- 请选择 -- </option>
+   <option  th:selected="${goods.catId eq c.id}" th:each="c:${categoryList}"  th:value="${c.id}" th:text="${c.name}" value="1">蔬菜</option>
+</select>
+
+javascript 中如果使用thymeleaf内容，可以这样用：https://blog.csdn.net/qq_39446719/article/details/81259322
+
+<script th:inline="javascript">
+    var msg = [[${message}]];
+</script>
+<script src=”message.js”></script>
+
+

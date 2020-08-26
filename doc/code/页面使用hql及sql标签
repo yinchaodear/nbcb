@@ -35,3 +35,10 @@ SQL列表开始：
  SQL指定一个对象：
 <nativeSql:sqlQueryForUnique sql="select * from t_authority where f_id =1" id="oneauthority"/>
 <label th:text="${oneauthority.f_authority}"/>
+
+
+
+自定义标签sql或者hql中传入session的值，需要使用下面的方式：
+<nativeSql:sqlQueryForUnique th:sql="'select count(1) cnt,sum(keywordnum) keywordnums from sys_user where sysagentid='+ ${session.CURRENTAGENTID} +' and f_del_tag != 1' " id="usercnt"></nativeSql:sqlQueryForUnique>
+注意：1、使用th:sql属性；2、el表达式需要用字符串方式连接，不可直接编写
+

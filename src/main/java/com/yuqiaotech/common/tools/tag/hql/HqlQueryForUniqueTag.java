@@ -11,19 +11,19 @@ import org.thymeleaf.model.IProcessableElementTag;
 import org.thymeleaf.processor.element.AbstractElementTagProcessor;
 import org.thymeleaf.processor.element.IElementTagStructureHandler;
 import org.thymeleaf.spring5.context.SpringContextUtils;
+import org.thymeleaf.standard.expression.Expression;
+import org.thymeleaf.standard.expression.StandardExpressionParser;
 import org.thymeleaf.templatemode.TemplateMode;
 
-public class HqlQueryForUniqueTag extends AbstractElementTagProcessor
-{
-    
+public class HqlQueryForUniqueTag extends AbstractElementTagProcessor {
+
     // 标签名
     private static final String TAG_NAME = "queryForUnique";
-    
+
     // 优先级
     private static final int PRECEDENCE = 10000;
-    
-    public HqlQueryForUniqueTag(String dialectPrefix)
-    {
+
+    public HqlQueryForUniqueTag(String dialectPrefix) {
         super(
             // 模板类型为HTML
             TemplateMode.HTML,
@@ -40,22 +40,31 @@ public class HqlQueryForUniqueTag extends AbstractElementTagProcessor
             // 优先级
             PRECEDENCE);
     }
-    
+
     @Override
     protected void doProcess(ITemplateContext context, IProcessableElementTag iProcessableElementTag,
-        IElementTagStructureHandler structureHandler)
-    {
+        IElementTagStructureHandler structureHandler) {
         ApplicationContext applicationContext = SpringContextUtils.getApplicationContext(context);
         String id = iProcessableElementTag.getAttributeValue("id");
         String hql = iProcessableElementTag.getAttributeValue("hql");
+        String thhql = iProcessableElementTag.getAttributeValue("th:hql");
+        if (StringUtils.isNotEmpty(thhql)) {
+            hql = (String)executeExpression(thhql, context);
+        }
+
         Object obj = new Object();
-        if (StringUtils.isNoneBlank(hql))
-        {
+        if (StringUtils.isNotEmpty(hql)) {
             EntityManager entityManager = applicationContext.getBean(EntityManager.class);
             obj = entityManager.createQuery(hql).getSingleResult();
         }
         HttpServletRequest request = ((WebEngineContext)context).getRequest();
         request.setAttribute(id, obj);
     }
-    
+
+    private Object executeExpression(String value, ITemplateContext context) {
+        StandardExpressionParser parser = new StandardExpressionParser();
+        Expression parseExpression = parser.parseExpression(context, value);
+        Object execute = parseExpression.execute(context);
+        return execute;
+    }
 }

@@ -17,19 +17,19 @@ import org.thymeleaf.model.IProcessableElementTag;
 import org.thymeleaf.processor.element.AbstractElementTagProcessor;
 import org.thymeleaf.processor.element.IElementTagStructureHandler;
 import org.thymeleaf.spring5.context.SpringContextUtils;
+import org.thymeleaf.standard.expression.Expression;
+import org.thymeleaf.standard.expression.StandardExpressionParser;
 import org.thymeleaf.templatemode.TemplateMode;
 
-public class SqlQueryForUniqueTag extends AbstractElementTagProcessor
-{
-    
+public class SqlQueryForUniqueTag extends AbstractElementTagProcessor {
+
     // 标签名
     private static final String TAG_NAME = "sqlQueryForUnique";
-    
+
     // 优先级
     private static final int PRECEDENCE = 10000;
-    
-    public SqlQueryForUniqueTag(String dialectPrefix)
-    {
+
+    public SqlQueryForUniqueTag(String dialectPrefix) {
         super(
             // 模板类型为HTML
             TemplateMode.HTML,
@@ -46,17 +46,19 @@ public class SqlQueryForUniqueTag extends AbstractElementTagProcessor
             // 优先级
             PRECEDENCE);
     }
-    
+
     @Override
     protected void doProcess(ITemplateContext context, IProcessableElementTag iProcessableElementTag,
-        IElementTagStructureHandler structureHandler)
-    {
+        IElementTagStructureHandler structureHandler) {
         ApplicationContext applicationContext = SpringContextUtils.getApplicationContext(context);
         String id = iProcessableElementTag.getAttributeValue("id");
         String sql = iProcessableElementTag.getAttributeValue("sql");
+        String thsql = iProcessableElementTag.getAttributeValue("th:sql");
+        if (StringUtils.isNotEmpty(thsql)) {
+            sql = (String)executeExpression(thsql, context);
+        }
         Map<String, Object> map = new HashMap<>();
-        if (StringUtils.isNoneBlank(sql))
-        {
+        if (StringUtils.isNotEmpty(sql)) {
             EntityManager entityManager = applicationContext.getBean(EntityManager.class);
             Query query = entityManager.createNativeQuery(sql);
             query.unwrap(NativeQueryImpl.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
@@ -65,5 +67,11 @@ public class SqlQueryForUniqueTag extends AbstractElementTagProcessor
         HttpServletRequest request = ((WebEngineContext)context).getRequest();
         request.setAttribute(id, map);
     }
-    
+
+    private Object executeExpression(String value, ITemplateContext context) {
+        StandardExpressionParser parser = new StandardExpressionParser();
+        Expression parseExpression = parser.parseExpression(context, value);
+        Object execute = parseExpression.execute(context);
+        return execute;
+    }
 }

@@ -10,6 +10,7 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +32,7 @@ import com.yuqiaotech.zsnews.model.Channel;
 
 @RestController
 @RequestMapping("zsnews/channel")
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class ChannelController extends BaseController
 {
     private static String MODULE_PATH = "zsnews/channel/";
@@ -111,5 +113,13 @@ public class ChannelController extends BaseController
             return decide(true);
         }
         return decide(false);
+    }
+    
+    @GetMapping("appListdata")
+    public Result AppChannelData(ModelAndView modelAndView, Long id)
+    {
+    	String hql ="select title  from Channel";
+    	List result = channelRepository.findByHql(hql);
+        return success(result);
     }
 }

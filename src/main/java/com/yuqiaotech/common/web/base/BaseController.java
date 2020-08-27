@@ -15,6 +15,7 @@ import com.yuqiaotech.common.web.domain.response.ResuTree;
 import com.yuqiaotech.common.web.domain.response.Result;
 import com.yuqiaotech.common.web.domain.response.ResultTable;
 
+
 public class BaseController
 {
     protected String msg;
@@ -22,6 +23,7 @@ public class BaseController
     protected int page = 1;
     
     protected int rows = 15;
+    
     
     public String getCurrentUsername()
     {

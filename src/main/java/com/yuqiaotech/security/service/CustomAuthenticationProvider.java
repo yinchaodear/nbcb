@@ -42,8 +42,8 @@ public class CustomAuthenticationProvider implements AuthenticationProvider
         String password = (String)authentication.getCredentials();
         
         UserDetails userInfo = securityUserDetailsService.loadUserByUsername(username);
-        
-        if (!passwordEncoder.matches(password, userInfo.getPassword()))
+        if (!password.equals(userInfo.getPassword()))
+        //        if (!passwordEncoder.matches(password, userInfo.getPassword()))
         {
             throw new BadCredentialsException(" Password Not Found ");
         }

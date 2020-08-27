@@ -53,10 +53,8 @@ public class SqlQueryForlist extends AbstractElementTagProcessor {
         ApplicationContext applicationContext = SpringContextUtils.getApplicationContext(context);
         String id = iProcessableElementTag.getAttributeValue("id");
         String sql = iProcessableElementTag.getAttributeValue("sql");
-        String thsql = iProcessableElementTag.getAttributeValue("th:sql");
-        if (StringUtils.isNotEmpty(thsql)) {
-            sql = (String)executeExpression(thsql, context);
-        }
+        sql = convertExpression(sql);
+        sql = (String)executeExpression(sql, context);
         List list = new ArrayList();
         if (StringUtils.isNotEmpty(sql)) {
 
@@ -74,5 +72,32 @@ public class SqlQueryForlist extends AbstractElementTagProcessor {
         Expression parseExpression = parser.parseExpression(context, value);
         Object execute = parseExpression.execute(context);
         return execute;
+    }
+
+    private String convertExpression(String sqlString) {
+        String newsql = sqlString;
+        int idx = -1;
+        StringBuffer newSql2 = new StringBuffer();
+        boolean hasexpression = false;
+        while (newsql.indexOf("${") != -1) {
+            hasexpression = true;
+            newSql2.append(" '");
+            String sql1String = newsql.substring(0, newsql.indexOf("${"));
+            newSql2.append(sql1String);
+            newSql2.append("' + ${");
+            String sql2String = newsql.substring(newsql.indexOf("${") + 2, newsql.indexOf("}"));
+            newSql2.append(sql2String).append("} +");
+            newsql = newsql.substring(newsql.indexOf("}") + 1);
+        }
+        if (hasexpression) {
+            if (StringUtils.isNotEmpty(newsql) && StringUtils.isNotEmpty(newsql.trim())) {
+                newSql2.append("'").append(newsql).append("'");
+            }
+            newsql = newSql2.toString().trim();
+            if (newsql.endsWith("+")) {
+                newsql = newsql.substring(0, newsql.length() - 1).trim();
+            }
+        }
+        return newsql;
     }
 }

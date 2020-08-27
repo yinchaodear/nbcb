@@ -38,7 +38,6 @@ SQL列表开始：
 
 
 
-自定义标签sql或者hql中传入session的值，需要使用下面的方式：
-<nativeSql:sqlQueryForUnique th:sql="'select count(1) cnt,sum(keywordnum) keywordnums from sys_user where sysagentid='+ ${session.CURRENTAGENTID} +' and f_del_tag != 1' " id="usercnt"></nativeSql:sqlQueryForUnique>
-注意：1、使用th:sql属性；2、el表达式需要用字符串方式连接，不可直接编写
-
+自定义标签sql或者hql中传入session的值，直接使用如下方式：
+<nativeSql:sqlQueryForUnique sql="select count(1) cnt,sum(keywordnum) keywordnums from sys_user where sysagentid= ${session.CURRENTAGENTID} and f_del_tag != 1" id="usercnt"></nativeSql:sqlQueryForUnique>
+标签解析代码处自动对EL表达式计算赋值

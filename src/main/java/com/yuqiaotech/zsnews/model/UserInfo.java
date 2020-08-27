@@ -12,7 +12,7 @@ import javax.persistence.Id;
  * User是登录后台的用户。
  */
 @Entity
-public class AppUser extends BaseModel {
+public class UserInfo extends BaseModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

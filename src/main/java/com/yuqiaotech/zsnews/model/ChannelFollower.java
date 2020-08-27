@@ -1,8 +1,12 @@
 package com.yuqiaotech.zsnews.model;
 
-import com.yuqiaotech.sysadmin.model.User;
-
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 /**
  * 频道关注。
@@ -10,47 +14,59 @@ import javax.persistence.*;
  *
  */
 @Entity
-public class ChannelFollower {
+public class ChannelFollower
+{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne(fetch= FetchType.LAZY)
-    @JoinColumn(name="f_channel_id")
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "f_channel_id")
     private Channel channel;
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="f_app_user_id")
-    private AppUser appUser;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "f_user_info_id")
+    private UserInfo userInfo;
+    
     private Integer displayOrder;//
-
-    public Long getId() {
+    
+    public Long getId()
+    {
         return id;
     }
-
-    public void setId(Long id) {
+    
+    public void setId(Long id)
+    {
         this.id = id;
     }
-
-    public Channel getChannel() {
+    
+    public Channel getChannel()
+    {
         return channel;
     }
-
-    public void setChannel(Channel channel) {
+    
+    public void setChannel(Channel channel)
+    {
         this.channel = channel;
     }
-
-    public AppUser getAppUser() {
-        return appUser;
+    
+    public UserInfo getUserInfo()
+    {
+        return userInfo;
     }
-
-    public void setAppUser(AppUser appUser) {
-        this.appUser = appUser;
+    
+    public void setUserInfo(UserInfo userInfo)
+    {
+        this.userInfo = userInfo;
     }
-
-    public Integer getDisplayOrder() {
+    
+    public Integer getDisplayOrder()
+    {
         return displayOrder;
     }
-
-    public void setDisplayOrder(Integer displayOrder) {
+    
+    public void setDisplayOrder(Integer displayOrder)
+    {
         this.displayOrder = displayOrder;
     }
 }

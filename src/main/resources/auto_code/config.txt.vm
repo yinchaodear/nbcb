@@ -1,0 +1,10 @@
+#set( $entityName = $entityParser.getEntityName() )
+{
+	"id": "1012",
+	"title": "${entityName}管理",
+	"type": "1",
+	"openType": null,
+	"icon": "layui-icon layui-icon-vercode",
+	"href": "${requestmapping}main",
+	"children": []
+}

@@ -1,7 +1,5 @@
-#set( $entityClassName = $entityParser.entityClassName )
-#set( $varEntityClassName = $entityParser.varEntityClassName )
 
-package ${controllerPackage};
+package com.yuqiaotech.zsnews.controller;
 
 import java.util.Arrays;
 import java.util.List;
@@ -9,7 +7,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,17 +27,16 @@ import com.yuqiaotech.common.web.domain.dao.PaginationSupport;
 import com.yuqiaotech.common.web.domain.request.PageDomain;
 import com.yuqiaotech.common.web.domain.response.Result;
 import com.yuqiaotech.common.web.domain.response.ResultTable;
-
-import ${entityFullClassName};
+import com.yuqiaotech.zsnews.model.News;
 
 @RestController
-@RequestMapping("${requestmapping}")
-public class ${entityClassName}Controller extends BaseController
+@RequestMapping("zsnews/news")
+public class NewsController extends BaseController
 {
-    private static String MODULE_PATH = "${requestmapping}/";
+    private static String MODULE_PATH = "zsnews/news/";
     
     @Autowired
-    private BaseRepository<${entityClassName}, Long> ${varEntityClassName}Repository;
+    private BaseRepository<News, Long> newsRepository;
     
     @GetMapping("main")
     public ModelAndView main()
@@ -49,16 +45,16 @@ public class ${entityClassName}Controller extends BaseController
     }
     
     @GetMapping("data")
-    public ResultTable data(${entityClassName} ${varEntityClassName}, PageDomain pageDomain)
+    public ResultTable data(News news, PageDomain pageDomain)
     {
-        DetachedCriteria dc = composeDetachedCriteria(${varEntityClassName});
-        PaginationSupport ps = ${varEntityClassName}Repository.paginateByCriteria(dc, pageDomain.getPage(), pageDomain.getLimit());
+        DetachedCriteria dc = composeDetachedCriteria(news);
+        PaginationSupport ps = newsRepository.paginateByCriteria(dc, pageDomain.getPage(), pageDomain.getLimit());
         return pageTable(ps.getItems(), ps.getTotalCount());
     }
     
-    public DetachedCriteria composeDetachedCriteria(${entityClassName} ${varEntityClassName})
+    public DetachedCriteria composeDetachedCriteria(News news)
     {
-        DetachedCriteria dc = DetachedCriteria.forClass(${entityClassName}.class);
+        DetachedCriteria dc = DetachedCriteria.forClass(News.class);
         return dc;
     }
     
@@ -69,26 +65,26 @@ public class ${entityClassName}Controller extends BaseController
     }
     
     @PostMapping("save")
-    public Result save(@RequestBody ${entityClassName} ${varEntityClassName})
+    public Result save(@RequestBody News news)
     {
-        ${varEntityClassName}Repository.save(${varEntityClassName});
+        newsRepository.save(news);
         return decide(true);
     }
     
     @GetMapping("edit")
     public ModelAndView edit(ModelAndView modelAndView, Long id)
     {
-        modelAndView.addObject("${varEntityClassName}", ${varEntityClassName}Repository.get(id, ${entityClassName}.class));
+        modelAndView.addObject("news", newsRepository.get(id, News.class));
         modelAndView.setViewName(MODULE_PATH + "edit");
         return modelAndView;
     }
     
     @PutMapping("update")
-    public Result update(@RequestBody ${entityClassName} ${varEntityClassName})
+    public Result update(@RequestBody News news)
     {
-        ${entityClassName} ${varEntityClassName}db = ${varEntityClassName}Repository.findUniqueBy("id", ${varEntityClassName}.getId(), ${entityClassName}.class);
-        BeanUtils.copyProperties(${varEntityClassName}, ${varEntityClassName}db, getNullPropertyNames(${varEntityClassName}));
-        ${varEntityClassName}Repository.update(${varEntityClassName}db);
+        News newsdb = newsRepository.findUniqueBy("id", news.getId(), News.class);
+        BeanUtils.copyProperties(news, newsdb, getNullPropertyNames(news));
+        newsRepository.update(newsdb);
         return decide(true);
     }
     
@@ -96,7 +92,7 @@ public class ${entityClassName}Controller extends BaseController
     @Logging(title = "删除角色")
     public Result remove(@PathVariable Long id)
     {
-        ${varEntityClassName}Repository.remove(id, ${entityClassName}.class);
+        newsRepository.remove(id, News.class);
         return decide(true);
     }
     
@@ -108,10 +104,10 @@ public class ${entityClassName}Controller extends BaseController
         {
             List<Long> cdids =
                 Arrays.asList(ids.split(",")).stream().map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
-            DetachedCriteria dc = DetachedCriteria.forClass(${entityClassName}.class);
+            DetachedCriteria dc = DetachedCriteria.forClass(News.class);
             dc.add(Restrictions.in("id", cdids));
-            List<${entityClassName}> ${varEntityClassName}List = ${varEntityClassName}Repository.findByCriteria(dc);
-            ${varEntityClassName}List.forEach(${varEntityClassName}Repository::delete);
+            List<News> newsList = newsRepository.findByCriteria(dc);
+            newsList.forEach(newsRepository::delete);
             return decide(true);
         }
         return decide(false);

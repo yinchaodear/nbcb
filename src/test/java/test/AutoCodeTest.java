@@ -21,10 +21,10 @@ public class AutoCodeTest
     public void gencode()
     {
         AutoCodeUtil acu = new AutoCodeUtil();
-        acu.srcPath = "D:/yuqiaoworkspace/yuqiao-admin-springboot-hibernate/src/main/java";
-        acu.pojoName = "Demo";
-        acu.packageName = "demo";
-        acu.saveToRootx = "D:/yuqiaoworkspace/yuqiao-admin-springboot-hibernate/tmp";
+        acu.srcPath = "C:/Users/Admin/git/yuqiao-admin-springboot/src/main/java";
+        acu.pojoName = "Topic";
+        acu.packageName = "zsnews";
+        acu.saveToRootx = "C:/Users/Admin/git/yuqiao-admin-springboot/tmp";
         acu.autoCodeOneModel();
     }
 }

@@ -156,5 +156,32 @@ public class AutoCodeUtil
                 }
             }
         });
+        
+        velocityTemplate.produce("config.txt.vm", new ProduceCallback()
+        {
+            public void preProcess()
+            {
+                context.put("requestmapping", "/" + packageName + "/" + pojoName.toLowerCase() + "/");
+            }
+            
+            public void process(StringWriter writer)
+            {
+                try
+                {
+                    String filepath = saveToRootx + File.separator + pojoName + "/resources/" + packageName + "/"
+                        + pojoName.toLowerCase() + "/config.txt";
+                    File file = new File(filepath);
+                    if (!file.getParentFile().exists())
+                        file.getParentFile().mkdirs();
+                    if (!file.exists())
+                        file.createNewFile();
+                    FileUtil.save(writer.toString(), "utf-8", new File(filepath));
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 }

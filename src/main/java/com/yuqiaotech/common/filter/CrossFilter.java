@@ -21,10 +21,11 @@ public class CrossFilter implements Filter
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
         throws IOException, ServletException
     {
+    	System.err.println("添加1");
         HttpServletRequest request = (HttpServletRequest)req;
         HttpServletResponse response = (HttpServletResponse)res;
-        
-        response.setHeader("Access-Control-Allow-Origin", "*");
+        System.err.println(request.getHeader("Origin"));
+        response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
         response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Allow-Headers",
             "Content-Type,Content-Length, Authorization, Accept,X-Requested-With,X-App-Id, X-Token,Origin");

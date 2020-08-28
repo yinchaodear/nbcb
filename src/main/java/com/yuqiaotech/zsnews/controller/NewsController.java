@@ -30,7 +30,7 @@ import com.yuqiaotech.common.web.domain.response.ResultTable;
 import com.yuqiaotech.zsnews.model.News;
 
 @RestController
-@RequestMapping("zsnews/news")
+@RequestMapping(value = {"zsnews/news", "ws/news"})
 public class NewsController extends BaseController
 {
     private static String MODULE_PATH = "zsnews/news/";

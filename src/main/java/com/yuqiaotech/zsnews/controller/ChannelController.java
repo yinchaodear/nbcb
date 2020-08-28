@@ -2,7 +2,9 @@
 package com.yuqiaotech.zsnews.controller;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -116,10 +119,42 @@ public class ChannelController extends BaseController
     }
     
     @GetMapping("appListdata")
-    public Result AppChannelData(ModelAndView modelAndView, Long id)
+    public Result AppChannelData(ModelAndView modelAndView,@RequestParam Long id)
     {
-    	String hql ="select title  from Channel";
-    	List result = channelRepository.findByHql(hql);
+    	System.out.println("ChannelController.AppChannelData()"+id);
+    	String sql ="SELECT t.f_title, t1.f_id as cfid FROM t_channel_follower  "
+    			+ "t1 inner join t_channel t on t1.f_channel_id = t.f_id  where f_user_info_id ="+id;
+    	List mymenu = channelRepository.findMapByNativeSql(sql);
+    	String sqlleft =" select f_title,f_id from t_channel    where f_id not in"
+    			+ "   (SELECT  f_channel_id  FROM t_channel_follower where f_user_info_id ="+id+")";   
+    	List moremenu = channelRepository.findMapByNativeSql(sqlleft);
+    	Map result =new HashMap<>();
+    	result.put("mymenu", mymenu);
+    	result.put("moremenu", moremenu);
+        return success(result);
+    }
+    
+    @GetMapping("deleteselfchannel")
+    public Result DeleteSelfChannel(ModelAndView modelAndView,@RequestParam Long cfid)
+    {
+    	System.out.println("ChannelController.DeleteSelfChannel()"+cfid);
+    	String sql ="delete from t_channel_follower where f_id="+cfid;
+    	channelRepository.executeUpdateByNativeSql(sql, null);
+    	Map result =new HashMap<>();
+    	result.put("msg","1");
+        return success(result);
+    }
+    
+    @GetMapping("addselfchannel")
+    public Result AddSelfChannel(ModelAndView modelAndView,@RequestParam Long id,@RequestParam Long cid)
+    {
+    	System.err.println(id);
+    	System.err.println(cid);
+        String sql = "insert into t_channel_follower (f_channel_id,f_user_info_id) values ("+id+","+cid+")";
+        channelRepository.executeUpdateByNativeSql(sql, null);
+//    	channelRepository.executeUpdateByNativeSql(sql, null);
+    	Map result =new HashMap<>();
+    	result.put("msg","1");
         return success(result);
     }
 }

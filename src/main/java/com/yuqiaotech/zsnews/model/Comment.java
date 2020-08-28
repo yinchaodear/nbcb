@@ -31,8 +31,6 @@ public class Comment extends BaseModel
     
     private String comment;
     
-    private String type;//类型到底是评论还是回答
-    
     public Long getId()
     {
         return id;
@@ -72,14 +70,4 @@ public class Comment extends BaseModel
     {
         this.comment = comment;
     }
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-	
-		this.type = type;
-	}
-    
 }

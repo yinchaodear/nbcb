@@ -39,7 +39,6 @@ public class News extends BaseModel
     private String attaches;//附件
     
     private Integer displayOrder;//小的数字排在前面
-    private String displaytype;//展现形式，如果是1 就名称加三个图片 如果是2 就是左边是名称 右边一个图
     
     public Long getId()
     {
@@ -161,14 +160,4 @@ public class News extends BaseModel
     {
         this.displayOrder = displayOrder;
     }
-
-	public String getDisplaytype() {
-		return displaytype;
-	}
-
-	public void setDisplaytype(String displaytype) {
-		this.displaytype = displaytype;
-	}
-    
-    
 }

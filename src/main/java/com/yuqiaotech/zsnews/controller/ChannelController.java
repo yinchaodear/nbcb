@@ -122,7 +122,7 @@ public class ChannelController extends BaseController
     public Result AppChannelData(ModelAndView modelAndView,@RequestParam Long id)
     {
     	System.out.println("ChannelController.AppChannelData()"+id);
-    	String sql ="SELECT t.f_title, t.f_id as f_id, t1.f_id as cfid FROM t_channel_follower  "
+    	String sql ="SELECT t.f_title, t1.f_id as cfid FROM t_channel_follower  "
     			+ "t1 inner join t_channel t on t1.f_channel_id = t.f_id  where f_user_info_id ="+id;
     	List mymenu = channelRepository.findMapByNativeSql(sql);
     	String sqlleft =" select f_title,f_id from t_channel    where f_id not in"

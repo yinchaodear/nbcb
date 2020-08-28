@@ -118,7 +118,8 @@ public class ChannelController extends BaseController
     @GetMapping("appListdata")
     public Result AppChannelData(ModelAndView modelAndView, Long id)
     {
-    	String hql ="select title  from Channel";
+    	String sql ="SELECT t.f_title FROM t_channel_follower  "
+    			+ "t1 inner join t_channel t on t1.f_f_channel_id = t.f_id  where f_f_user_info_id =";
     	List result = channelRepository.findByHql(hql);
         return success(result);
     }

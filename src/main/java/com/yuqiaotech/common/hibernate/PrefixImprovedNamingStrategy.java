@@ -21,51 +21,82 @@ public class PrefixImprovedNamingStrategy implements PhysicalNamingStrategy
     @Override
     public Identifier toPhysicalCatalogName(Identifier name, JdbcEnvironment jdbcEnvironment)
     {
-        if (name != null && StringUtils.isNotEmpty(name.toString()))
+        if (name != null)
         {
-            return Identifier.toIdentifier(name.toString().toLowerCase());
+            String text = name.getText();
+            if (text != null && StringUtils.isNotEmpty(text) && Character.isUpperCase(text.charAt(0)))
+            {
+                return Identifier.toIdentifier(text.toLowerCase());
+            }
         }
-        return null;
+        return name;
     }
     
     @Override
     public Identifier toPhysicalSchemaName(Identifier name, JdbcEnvironment jdbcEnvironment)
     {
-        if (name != null && StringUtils.isNotEmpty(name.toString()))
+        if (name != null)
         {
-            return Identifier.toIdentifier(name.toString().toLowerCase());
+            String text = name.getText();
+            if (text != null && StringUtils.isNotEmpty(text) && Character.isUpperCase(text.charAt(0)))
+            {
+                return Identifier.toIdentifier(text.toLowerCase());
+            }
         }
-        return null;
+        return name;
     }
     
     @Override
     public Identifier toPhysicalTableName(Identifier name, JdbcEnvironment jdbcEnvironment)
     {
-        if (name != null && StringUtils.isNotEmpty(name.toString()))
+        if (name != null)
         {
-            return Identifier.toIdentifier(classToTableName(name.toString()));
+            String text = name.getText();
+            if (text != null && StringUtils.isNotEmpty(text) && Character.isUpperCase(text.charAt(0)))
+            {
+                return Identifier.toIdentifier(classToTableName(text));
+            }
         }
-        return null;
+        return name;
     }
     
     @Override
     public Identifier toPhysicalSequenceName(Identifier name, JdbcEnvironment jdbcEnvironment)
     {
-        if (name != null && StringUtils.isNotEmpty(name.toString()))
+        if (name != null)
         {
-            return Identifier.toIdentifier(name.toString().toLowerCase());
+            String text = name.getText();
+            if (text != null && StringUtils.isNotEmpty(text) && Character.isUpperCase(text.charAt(0)))
+            {
+                return Identifier.toIdentifier(text.toLowerCase());
+            }
         }
-        return null;
+        return name;
     }
     
     @Override
     public Identifier toPhysicalColumnName(Identifier name, JdbcEnvironment jdbcEnvironment)
     {
-        if (name != null && StringUtils.isNotEmpty(name.toString()))
+        if (name != null)
         {
-            return Identifier.toIdentifier(propertyToColumnName(name.toString()));
+            String text = name.getText();
+            if (text != null && StringUtils.isNotEmpty(text))
+            {
+                if (text.startsWith("yq_"))
+                {
+                    return Identifier.toIdentifier(text.replace("yq_", ""));
+                }
+                else if (text.startsWith("f_"))
+                {
+                    return Identifier.toIdentifier(text);
+                }
+                else
+                {
+                    return Identifier.toIdentifier(propertyToColumnName(text));
+                }
+            }
         }
-        return null;
+        return name;
     }
     
     private String convert(String name)

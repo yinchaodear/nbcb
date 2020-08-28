@@ -20,6 +20,8 @@ public class TokenFilter implements Filter
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
         throws IOException, ServletException
     {
+//    	HttpServletRequest request = (HttpServletRequest)req;
+//        HttpServletResponse response = (HttpServletResponse)res;
         System.out.println("in token filter");
         chain.doFilter(request, response);
     }

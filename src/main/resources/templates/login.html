@@ -42,7 +42,7 @@
             let loader = layer.load();
             $(".login").html("<i class='layui-icon layui-anim layui-anim-rotate layui-anim-loop layui-icon-loading' />");
             $.ajax({
-                url:'/auth/login',
+                url:'/login',
                 data:data.field,
                 type:"post",
                 dataType:'json',

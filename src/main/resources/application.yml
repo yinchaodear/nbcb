@@ -1,6 +1,6 @@
 # Tomcat 端口
 server:
-  port: 9191
+  port: 9292
 
 spring:
   # Druid Pool 运行环境
@@ -14,6 +14,8 @@ spring:
       enabled: true
   jpa: 
     open-in-view: true
+  main:
+    allow-bean-definition-overriding: true
 # mybatis 配置
 mybatis:
   # 配 置 扫 描
@@ -35,6 +37,7 @@ logging:
   level:
     # 日 志 包 配 置
     com.yuqiao.*: DEBUG
+  
 
 
 

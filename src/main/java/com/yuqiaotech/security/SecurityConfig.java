@@ -2,6 +2,7 @@ package com.yuqiaotech.security;
 
 import javax.annotation.Resource;
 
+import com.yuqiaotech.security.domain.SecurityUserDetailsService;
 import com.yuqiaotech.security.filter.AuthenticationTokenFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -56,15 +57,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Resource
 	private CustomAccessDeniedHandler securityAccessDeniedHander;
 
-    @Resource
-	private AuthenticationTokenFilter authenticationTokenFilter;
-
-//    @Bean
-//    public AuthenticationTokenFilter authenticationTokenFilter() {
-//        System.out.println("AuthenticationTokenFilter init");
-//        return new AuthenticationTokenFilter();
-//    }
-
+	@Resource
+	private SecurityUserDetailsService securityUserDetailsService;
 
 	/**
 	 * Describe: 自定义权限注解实现
@@ -112,7 +106,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http)
 			throws Exception {
-		http.addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class)
+		http.addFilterBefore(new AuthenticationTokenFilter(securityUserDetailsService), UsernamePasswordAuthenticationFilter.class)
 				.authorizeRequests()
 				.antMatchers(passUrls.split(","))
 				.permitAll()// 其他的需要登录后才能访问

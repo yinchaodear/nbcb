@@ -33,11 +33,24 @@ import java.io.IOException;
  *
  * @Author;fanchuanbin
  */
-@Component
 public class AuthenticationTokenFilter extends OncePerRequestFilter {
 
-	@Autowired
-	private SecurityUserDetailsService securityUserDetailsService; //用户信息service
+	/**
+	 * 用户信息service
+	 */
+	private SecurityUserDetailsService securityUserDetailsService;
+
+	public SecurityUserDetailsService getSecurityUserDetailsService() {
+		return securityUserDetailsService;
+	}
+
+	public void setSecurityUserDetailsService(SecurityUserDetailsService securityUserDetailsService) {
+		this.securityUserDetailsService = securityUserDetailsService;
+	}
+
+	public AuthenticationTokenFilter(SecurityUserDetailsService securityUserDetailsService) {
+		this.securityUserDetailsService = securityUserDetailsService;
+	}
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {

@@ -33,7 +33,7 @@ import java.io.IOException;
  *
  * @Author;fanchuanbin
  */
-//@Component
+@Component
 public class AuthenticationTokenFilter extends OncePerRequestFilter {
 
 	@Autowired

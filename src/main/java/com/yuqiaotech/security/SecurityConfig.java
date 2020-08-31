@@ -56,8 +56,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Resource
 	private CustomAccessDeniedHandler securityAccessDeniedHander;
 
-//    @Resource
-//    AuthenticationTokenFilter authenticationTokenFilter = new AuthenticationTokenFilter(); // token 拦截器
+    @Resource
+	private AuthenticationTokenFilter authenticationTokenFilter;
 
 //    @Bean
 //    public AuthenticationTokenFilter authenticationTokenFilter() {
@@ -112,7 +112,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http)
 			throws Exception {
-		http.addFilterBefore(new AuthenticationTokenFilter(), UsernamePasswordAuthenticationFilter.class)
+		http.addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class)
 				.authorizeRequests()
 				.antMatchers(passUrls.split(","))
 				.permitAll()// 其他的需要登录后才能访问

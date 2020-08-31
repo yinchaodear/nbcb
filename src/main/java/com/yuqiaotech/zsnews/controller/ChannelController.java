@@ -34,7 +34,7 @@ import com.yuqiaotech.common.web.domain.response.ResultTable;
 import com.yuqiaotech.zsnews.model.Channel;
 
 @RestController
-@RequestMapping("zsnews/channel")
+@RequestMapping(value = {"zsnews/channel", "ws/channel"})
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class ChannelController extends BaseController
 {
@@ -122,7 +122,7 @@ public class ChannelController extends BaseController
     public Result AppChannelData(ModelAndView modelAndView,@RequestParam Long id)
     {
     	System.out.println("ChannelController.AppChannelData()"+id);
-    	String sql ="SELECT t.f_title, t1.f_id as cfid FROM t_channel_follower  "
+    	String sql ="SELECT t.f_title, t1.f_id as cfid,t.f_id as f_id FROM t_channel_follower  "
     			+ "t1 inner join t_channel t on t1.f_channel_id = t.f_id  where f_user_info_id ="+id;
     	List mymenu = channelRepository.findMapByNativeSql(sql);
     	String sqlleft =" select f_title,f_id from t_channel    where f_id not in"

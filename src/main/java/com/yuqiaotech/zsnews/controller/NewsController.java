@@ -2,7 +2,9 @@
 package com.yuqiaotech.zsnews.controller;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -28,6 +31,7 @@ import com.yuqiaotech.common.web.domain.request.PageDomain;
 import com.yuqiaotech.common.web.domain.response.Result;
 import com.yuqiaotech.common.web.domain.response.ResultTable;
 import com.yuqiaotech.zsnews.model.News;
+import com.yuqiaotech.zsnews.model.NewsFollower;
 
 @RestController
 @RequestMapping(value = {"zsnews/news", "ws/news"})
@@ -37,6 +41,9 @@ public class NewsController extends BaseController
     
     @Autowired
     private BaseRepository<News, Long> newsRepository;
+    @Autowired
+    private BaseRepository<NewsFollower, Long> newsFollowerRepository;
+    
     
     @GetMapping("main")
     public ModelAndView main()
@@ -111,5 +118,37 @@ public class NewsController extends BaseController
             return decide(true);
         }
         return decide(false);
+    }
+    
+    @GetMapping("appListdata")
+    public Result AppNewsData(ModelAndView modelAndView,@RequestParam Long id)
+    {
+    	
+    	String sql =" SELECT *  FROM t_news t left join  ( SELECT  f_news_id  as id1,count(1) as number FROM t_comment "
+    			+ " where f_type ='评论' group by f_news_id ) a on a.id1 =t.f_id left join  ( SELECT f_news_id  as id2, count(1) "
+    			+ "as apprisecount FROM t_comment  where f_type ='回答' group by f_news_id ) b on b.id2 =t.f_id where f_channel_id ="+id 
+    			+" order by f_display_order asc ";
+    	List news = newsRepository.findMapByNativeSql(sql);	
+    	Map result =new HashMap<>();
+    	result.put("news", news);
+        return success(result);
+    }
+    
+    @GetMapping("newsDetail")
+    public Result newsDetail(ModelAndView modelAndView,@RequestParam Long id,@RequestParam Long cid)
+    {
+    	
+    	String sql ="select * FROM t_news where f_id ="+id;
+    	List<Map<String, Object>> news = newsRepository.findMapByNativeSql(sql);
+    	Map result =new HashMap<>();
+    	String sqlfollower = "SELECT * FROM t_news_follower where f_news_id = "+id+" and  f_user_info_id ="+cid;
+    	List follower= newsFollowerRepository.findMapByNativeSql(sqlfollower);
+    	if(follower.isEmpty()){
+    		result.put("exist", false);
+    	}else{
+    		result.put("exist", true);
+    	}
+    	result.put("news", news);
+        return success(result);
     }
 }

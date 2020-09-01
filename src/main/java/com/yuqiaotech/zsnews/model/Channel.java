@@ -13,7 +13,7 @@ public class Channel extends BaseModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String type;
+    private String type; //1 :首页  2浙商号 3 政务 4 社区 
     private String logo;
     private String title;
     @ManyToOne(fetch=FetchType.LAZY)

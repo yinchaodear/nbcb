@@ -119,18 +119,29 @@ public class ChannelController extends BaseController
     }
     
     @GetMapping("appListdata")
-    public Result AppChannelData(ModelAndView modelAndView,@RequestParam Long id)
+    public Result AppChannelData(ModelAndView modelAndView,@RequestParam Long cid)
     {
-    	System.out.println("ChannelController.AppChannelData()"+id);
+    	System.out.println("ChannelController.AppChannelData()"+cid);
     	String sql ="SELECT t.f_title, t1.f_id as cfid,t.f_id as f_id FROM t_channel_follower  "
-    			+ "t1 inner join t_channel t on t1.f_channel_id = t.f_id  where f_user_info_id ="+id;
+    			+ "t1 inner join t_channel t on t1.f_channel_id = t.f_id  where f_user_info_id ="+cid;
     	List mymenu = channelRepository.findMapByNativeSql(sql);
     	String sqlleft =" select f_title,f_id from t_channel    where f_id not in"
-    			+ "   (SELECT  f_channel_id  FROM t_channel_follower where f_user_info_id ="+id+")";   
+    			+ "   (SELECT  f_channel_id  FROM t_channel_follower where f_user_info_id ="+cid+")";   
     	List moremenu = channelRepository.findMapByNativeSql(sqlleft);
     	Map result =new HashMap<>();
     	result.put("mymenu", mymenu);
     	result.put("moremenu", moremenu);
+        return success(result);
+    }
+    
+    @GetMapping("appListchannel")
+    public Result ChannelDataByType(ModelAndView modelAndView,@RequestParam String type)
+    {
+    	System.out.println("ChannelController.ChannelDataByType()"+type);
+    	String sql ="SELECT t.f_title,t.f_id as f_id FROM t_channel t  where f_type =" +type;   		
+    	List channel = channelRepository.findMapByNativeSql(sql);
+    	Map result =new HashMap<>();
+    	result.put("channel", channel);
         return success(result);
     }
     

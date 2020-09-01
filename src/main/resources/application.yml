@@ -37,7 +37,8 @@ logging:
   level:
     # 日 志 包 配 置
     com.yuqiao.*: DEBUG
-  
+
+attachmentRoot: /Users/fanchuanbin/tmp/erp/localhost
 
 
 

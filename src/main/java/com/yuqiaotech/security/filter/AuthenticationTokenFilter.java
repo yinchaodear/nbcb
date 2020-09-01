@@ -90,6 +90,14 @@ public class AuthenticationTokenFilter extends OncePerRequestFilter {
 									new UsernamePasswordAuthenticationToken(userDetails, null, null);
 							authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 							//设置为已登录
+							request.getSession()
+									.setAttribute(SysConstants.SECURITY_CONTEXT_KEY, (SecurityUserDetails)authentication.getPrincipal());
+							request.getSession()
+									.setAttribute(SysConstants.SECURITY_USERNAME_KEY,
+											((SecurityUserDetails)authentication.getPrincipal()).getUsername());
+							request.getSession()
+									.setAttribute(SysConstants.SECURITY_USERID_KEY,
+											((SecurityUserDetails)authentication.getPrincipal()).getId());
 							SecurityContextHolder.getContext().setAuthentication(authentication);
 						}
 					}

@@ -1,28 +1,6 @@
 
 package com.yuqiaotech.zsnews.controller;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Restrictions;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
-
 import com.yuqiaotech.common.logging.annotation.Logging;
 import com.yuqiaotech.common.web.base.BaseController;
 import com.yuqiaotech.common.web.base.BaseRepository;
@@ -30,8 +8,27 @@ import com.yuqiaotech.common.web.domain.dao.PaginationSupport;
 import com.yuqiaotech.common.web.domain.request.PageDomain;
 import com.yuqiaotech.common.web.domain.response.Result;
 import com.yuqiaotech.common.web.domain.response.ResultTable;
+import com.yuqiaotech.sysadmin.model.User;
 import com.yuqiaotech.zsnews.model.News;
 import com.yuqiaotech.zsnews.model.NewsFollower;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.servlet.ModelAndView;
+import sun.misc.BASE64Decoder;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = {"zsnews/news", "ws/news"})
@@ -41,6 +38,10 @@ public class NewsController extends BaseController
     
     @Autowired
     private BaseRepository<News, Long> newsRepository;
+
+    @Autowired
+    private BaseRepository<User, Long> userRepository;
+
     @Autowired
     private BaseRepository<NewsFollower, Long> newsFollowerRepository;
     
@@ -74,10 +75,96 @@ public class NewsController extends BaseController
     @PostMapping("save")
     public Result save(@RequestBody News news)
     {
+        System.out.println(attachmentRoot);
+        Long userId = getCurrentUserId();
+        User user = userRepository.get(userId, User.class);
+        news.setUser(user);
+        String content = news.getContent();
+
+        if (!StringUtils.isEmpty(content)) {
+            if (content.contains("data:image") && content.contains("base64")) {
+                content = abstractImg(content);
+            }
+            content = content.replace("&amp;", "&");
+            news.setContent(content);
+        }
+
+        if(!StringUtils.isEmpty(content)){
+            if(news.getContent().contains("<img>")){
+                news.setContent(news.getContent().replace("<img>", ""));
+            }
+        }
+
         newsRepository.save(news);
         return decide(true);
     }
-    
+
+    private String abstractImg(String s) {
+        String key = "data:image/png;base64,";
+        int keyIndex = s.indexOf(key);
+        if(keyIndex<0){
+            key = "data:image/jpeg;base64,";
+            keyIndex = s.indexOf(key);
+        }
+        if(keyIndex<0){
+            key = "data:image/gif;base64,";
+            keyIndex = s.indexOf(key);
+        }
+        if(keyIndex<0){
+            key = "data:image/x-icon;base64,";
+            keyIndex = s.indexOf(key);
+        }
+        if (keyIndex < 0) {
+            return s;
+        }
+        int base64Start = keyIndex + key.length();
+        int srcStart = s.lastIndexOf("\"", base64Start);
+        int base64End = s.indexOf("\"", base64Start);
+        String base64Str = s.substring(base64Start, base64End);
+        Date now = new Date();
+
+        String uploadPath = attachmentRoot+"/news/content/";   //设置保存目录
+        String fileName = java.util.UUID.randomUUID().toString()+ ".jpg";  //采用UUID的方式随机命名
+        File dirFile = new File(uploadPath);
+        if(!dirFile.exists()){
+            dirFile.mkdirs();
+        }
+        String saveTo = uploadPath + fileName;
+        generateImage(base64Str, saveTo);
+        String imgPath = "/attachment/showImage?objectType=news&objectId=content&fileName="+fileName;
+
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+        String rtn = s.substring(0, srcStart + 1) + request.getContextPath() + imgPath + s.substring(base64End);
+        return abstractImg(rtn);
+    }
+
+    private void generateImage(String realStr, String filePath) {
+        BASE64Decoder decoder = new BASE64Decoder();
+        BufferedOutputStream bos = null;
+        try {
+            File f = new File(filePath);
+            if (!f.getParentFile().exists()) {
+                f.getParentFile().mkdirs();
+            }
+            byte[] data = decoder.decodeBuffer(realStr);
+            bos = new BufferedOutputStream(new FileOutputStream(filePath));
+            bos.write(data);
+            bos.flush();
+            bos.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        } finally {
+            if (bos != null){
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     @GetMapping("edit")
     public ModelAndView edit(ModelAndView modelAndView, Long id)
     {

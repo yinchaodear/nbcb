@@ -1,13 +1,19 @@
 package com.yuqiaotech.common.web.base;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.yuqiaotech.common.tools.servlet.ServletUtil;
@@ -23,7 +29,9 @@ public class BaseController
     protected int page = 1;
     
     protected int rows = 15;
-    
+
+    @Value("${attachmentRoot}")
+    public String attachmentRoot;
     
     public String getCurrentUsername()
     {
@@ -219,5 +227,21 @@ public class BaseController
         }
         String[] result = new String[emptyNames.size()];
         return emptyNames.toArray(result);
+    }
+
+
+    protected void responseWrite(String str) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+        HttpServletResponse response = attributes.getResponse();
+
+        response.setCharacterEncoding("utf-8");
+        response.setContentType("text/html;charset=utf-8");
+
+        try {
+            response.getWriter().write(str);
+        } catch (IOException var3) {
+            throw new RuntimeException(var3.getMessage(), var3);
+        }
     }
 }

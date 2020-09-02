@@ -1,6 +1,7 @@
 package com.yuqiaotech.zsnews.model;
 
 import com.yuqiaotech.common.web.base.BaseModel;
+import com.yuqiaotech.sysadmin.model.User;
 
 import javax.persistence.*;
 
@@ -21,7 +22,9 @@ public class Channel extends BaseModel {
     @JoinColumn(name="f_column_id")
     private Column column;
     private String description;
-
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="f_user_id")
+    private User user;//属于哪个运营人员
 
     public Long getId() {
         return id;
@@ -98,5 +101,15 @@ public class Channel extends BaseModel {
 	public void setKind(String kind) {
 		this.kind = kind;
 	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+	
+	
     
 }

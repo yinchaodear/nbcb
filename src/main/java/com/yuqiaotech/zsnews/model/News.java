@@ -29,7 +29,11 @@ public class News extends BaseModel
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "f_user_id")
     private User user;
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "f_userinfo_id")
+    private UserInfo userinfo;
+    private String from; //文章发布方(平台/个人)，如果是平台 取User的信息， 如果是个人app发布 就是取UserInfo的
+    
     private String type;//新闻，投稿，提问
     
     private String mediaType;//图片、文章、链接、视频
@@ -176,4 +180,22 @@ public class News extends BaseModel
     {
         this.displayOrder = displayOrder;
     }
+
+	public UserInfo getUserinfo() {
+		return userinfo;
+	}
+
+	public void setUserinfo(UserInfo userinfo) {
+		this.userinfo = userinfo;
+	}
+
+	public String getFrom() {
+		return from;
+	}
+
+	public void setFrom(String from) {
+		this.from = from;
+	}
+    
+    
 }

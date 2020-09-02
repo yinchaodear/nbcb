@@ -71,6 +71,8 @@ public class User extends BaseModel implements UserDetails, Serializable
     private Integer version;
     
     private Organisation organisation;
+   
+    private String remark;//运营人的一些说明
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -359,5 +361,15 @@ public class User extends BaseModel implements UserDetails, Serializable
     {
         this.postalCode = postalCode;
     }
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+    
+    
     
 }

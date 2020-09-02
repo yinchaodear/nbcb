@@ -21,6 +21,7 @@ public class UserInfo extends BaseModel {
     private String mobile;
     private String gender;
     private String avatar;
+    private String remark;//个人的一些详细说明
 
     public Long getId() {
         return id;

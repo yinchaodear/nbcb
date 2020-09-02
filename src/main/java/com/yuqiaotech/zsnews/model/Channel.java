@@ -13,6 +13,7 @@ public class Channel extends BaseModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String kind; //频道  浙商号 小组 
     private String type; //1 :首页  2浙商号 3 政务 4 社区 
     private String logo;
     private String title;
@@ -89,4 +90,13 @@ public class Channel extends BaseModel {
     public void setDescription(String description) {
         this.description = description;
     }
+
+	public String getKind() {
+		return kind;
+	}
+
+	public void setKind(String kind) {
+		this.kind = kind;
+	}
+    
 }

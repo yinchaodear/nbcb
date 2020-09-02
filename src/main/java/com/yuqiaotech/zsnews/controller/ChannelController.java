@@ -32,6 +32,7 @@ import com.yuqiaotech.common.web.domain.request.PageDomain;
 import com.yuqiaotech.common.web.domain.response.Result;
 import com.yuqiaotech.common.web.domain.response.ResultTable;
 import com.yuqiaotech.zsnews.model.Channel;
+import com.yuqiaotech.zsnews.model.ChannelFollower;
 
 @RestController
 @RequestMapping(value = {"zsnews/channel", "ws/channel"})
@@ -42,6 +43,9 @@ public class ChannelController extends BaseController
     
     @Autowired
     private BaseRepository<Channel, Long> channelRepository;
+    
+    @Autowired
+    private BaseRepository<ChannelFollower, Long>  channelFollowerRepository;
     
     @GetMapping("main")
     public ModelAndView main()
@@ -118,15 +122,17 @@ public class ChannelController extends BaseController
         return decide(false);
     }
     
+    /*
+     * 对于出现在首页的频道的代码
+     */
     @GetMapping("appListdata")
     public Result AppChannelData(ModelAndView modelAndView,@RequestParam Long cid)
     {
-    	System.out.println("ChannelController.AppChannelData()"+cid);
     	String sql ="SELECT t.f_title, t1.f_id as cfid,t.f_id as f_id FROM t_channel_follower  "
-    			+ "t1 inner join t_channel t on t1.f_channel_id = t.f_id  where f_user_info_id ="+cid;
+    			+ "t1 inner join t_channel t on t1.f_channel_id = t.f_id  where t.f_kind='频道' and f_user_info_id ="+cid;
     	List mymenu = channelRepository.findMapByNativeSql(sql);
-    	String sqlleft =" select f_title,f_id from t_channel    where f_id not in"
-    			+ "   (SELECT  f_channel_id  FROM t_channel_follower where f_user_info_id ="+cid+")";   
+    	String sqlleft =" select f_title,f_id from t_channel  t  where f_id not in"
+    			+ "   (SELECT  f_channel_id  FROM t_channel_follower where f_user_info_id ="+cid+") and f_kind='频道' " ;   
     	List moremenu = channelRepository.findMapByNativeSql(sqlleft);
     	Map result =new HashMap<>();
     	result.put("mymenu", mymenu);
@@ -148,7 +154,6 @@ public class ChannelController extends BaseController
     @GetMapping("deleteselfchannel")
     public Result DeleteSelfChannel(ModelAndView modelAndView,@RequestParam Long cfid)
     {
-    	System.out.println("ChannelController.DeleteSelfChannel()"+cfid);
     	String sql ="delete from t_channel_follower where f_id="+cfid;
     	channelRepository.executeUpdateByNativeSql(sql, null);
     	Map result =new HashMap<>();
@@ -159,11 +164,15 @@ public class ChannelController extends BaseController
     @GetMapping("addselfchannel")
     public Result AddSelfChannel(ModelAndView modelAndView,@RequestParam Long id,@RequestParam Long cid)
     {
-    	System.err.println(id);
-    	System.err.println(cid);
+    	String sqlexist ="select  * from t_channel_follower where f_channel_id ="+id +" and f_user_info_id ="+cid;
+    	List exist =channelFollowerRepository.findMapByNativeSql(sqlexist);
+    	if(!exist.isEmpty()){
+    		Map result =new HashMap<>();
+        	result.put("msg","2");//这里表示已经添加过,正常不会走到这段，怕数据出错
+            return success(result);
+    	}
         String sql = "insert into t_channel_follower (f_channel_id,f_user_info_id) values ("+id+","+cid+")";
         channelRepository.executeUpdateByNativeSql(sql, null);
-//    	channelRepository.executeUpdateByNativeSql(sql, null);
     	Map result =new HashMap<>();
     	result.put("msg","1");
         return success(result);

@@ -14,7 +14,7 @@ public class Channel extends BaseModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String kind; //频道  浙商号 小组 
-    private String type; //1 :首页  2浙商号 3 政务 4 社区 
+    private String type; //浙商号里面分为(商会号,企业号,媒体号,个人号,)  小组里面(科技，农业之类的)
     private String logo;
     private String title;
     @ManyToOne(fetch=FetchType.LAZY)

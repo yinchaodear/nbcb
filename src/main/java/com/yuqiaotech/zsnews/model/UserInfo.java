@@ -89,4 +89,14 @@ public class UserInfo extends BaseModel {
     public void setAvatar(String avatar) {
         this.avatar = avatar;
     }
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+    
+    
 }

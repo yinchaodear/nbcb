@@ -237,7 +237,8 @@ public class NewsController extends BaseController
     public Result newsDetail(ModelAndView modelAndView,@RequestParam Long id,@RequestParam Long cid)
     {
     	
-    	String sql ="select * FROM t_news where f_id ="+id;
+    	String sql ="select t.* ,a.f_remark as remark1 , a.f_username as name1,b.f_remark as remark2 ,b.f_username as name2 FROM t_news  t left join app_user a on a.f_id "
+    			+ "=t.f_user_id left join t_user_info b on b.f_id = t.f_userinfo_id   where t.f_id  = "+id;
     	List<Map<String, Object>> news = newsRepository.findMapByNativeSql(sql);
     	Map result =new HashMap<>();
     	String sqlfollower = "SELECT * FROM t_news_follower where f_news_id = "+id+" and  f_user_info_id ="+cid;

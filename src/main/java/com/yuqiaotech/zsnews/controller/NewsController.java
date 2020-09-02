@@ -207,14 +207,26 @@ public class NewsController extends BaseController
         return decide(false);
     }
     
+    /*
+     * 这里是首页进来的时候 判断的  推荐的目前就是所有的, 关注的就是自己关注的频道的
+     */
     @GetMapping("appListdata")
-    public Result AppNewsData(ModelAndView modelAndView,@RequestParam Long id)
+    public Result AppNewsData(ModelAndView modelAndView,@RequestParam Long id,@RequestParam String type,@RequestParam Long cid)
     {
-    	
-    	String sql =" SELECT *  FROM t_news t left join  ( SELECT  f_news_id  as id1,count(1) as number FROM t_comment "
+    	String wheresql ="where 1 =1 and c.f_kind ='频道'";
+        if(type.equals("推荐")){
+        	
+        }else if(type.equals("关注")){
+        	wheresql+= " and f_channel_id  in  ( select f_channel_id from t_channel_follower where f_user_info_id ="+cid+" )";
+        }else{
+        	wheresql+= " and f_channel_id ="+id; 
+        }
+    	String sql =" SELECT  t.* ,c.f_title as channelname FROM t_news t left join  ( SELECT  f_news_id  as id1,count(1) as number FROM t_comment "
     			+ " where f_type ='评论' group by f_news_id ) a on a.id1 =t.f_id left join  ( SELECT f_news_id  as id2, count(1) "
-    			+ "as apprisecount FROM t_comment  where f_type ='回答' group by f_news_id ) b on b.id2 =t.f_id where f_channel_id ="+id 
+    			+ "as apprisecount FROM t_comment  where f_type ='回答' group by f_news_id ) b on b.id2 =t.f_id "
+    			+ "inner join t_channel  c on  c.f_id = t.f_channel_id  "+wheresql
     			+" order by f_display_order asc ";
+    	System.err.println(sql);
     	List news = newsRepository.findMapByNativeSql(sql);	
     	Map result =new HashMap<>();
     	result.put("news", news);
@@ -238,4 +250,26 @@ public class NewsController extends BaseController
     	result.put("news", news);
         return success(result);
     }
+    /*
+     * 根据类型来 判断是 浙商号页面下的,还是小组
+     * 
+     */
+    
+    @GetMapping("querynewsByKindAndType")
+    public Result AppNewsData(ModelAndView modelAndView,@RequestParam String kind,@RequestParam String type)
+    {
+    	
+    	System.out.println("NewsController.AppNewsData()"+kind +type);
+    	String sql ="SELECT t.*  ,c.f_kind as channelkind,c.f_type as channeltype, a.number ,b.apprisecount ,c.f_title as channelname FROM t_news t left join  ( SELECT  f_news_id  as id1,count(1) as number FROM t_comment cm1 "
+    			+ "where cm1.f_type ='评论' group by f_news_id ) a on a.id1 =t.f_id left join  ( SELECT f_news_id  as id2, count(1) "
+    			+ "as apprisecount FROM t_comment cm where cm.f_type ='回答' group by f_news_id ) b on b.id2 =t.f_id "
+    			+ "inner join t_channel  c on  c.f_id = t.f_channel_id  where c.f_kind ='"+kind+"' and c.f_type ='"+type+"'"
+    			+ " order by f_display_order asc ";
+    	List news = newsRepository.findMapByNativeSql(sql);	
+    	Map result =new HashMap<>();
+    	result.put("news", news);
+        return success(result);
+    }
+    
+  
 }

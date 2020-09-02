@@ -79,11 +79,12 @@ public class NewsController extends BaseController
         Long userId = getCurrentUserId();
         User user = userRepository.get(userId, User.class);
         news.setUser(user);
+        news = newsRepository.save(news);
         String content = news.getContent();
 
         if (!StringUtils.isEmpty(content)) {
             if (content.contains("data:image") && content.contains("base64")) {
-                content = abstractImg(content);
+                content = abstractImg(content, news);
             }
             content = content.replace("&amp;", "&");
             news.setContent(content);
@@ -96,10 +97,11 @@ public class NewsController extends BaseController
         }
 
         newsRepository.save(news);
+
         return decide(true);
     }
 
-    private String abstractImg(String s) {
+    private String abstractImg(String s, News news) {
         String key = "data:image/png;base64,";
         int keyIndex = s.indexOf(key);
         if(keyIndex<0){
@@ -123,7 +125,11 @@ public class NewsController extends BaseController
         String base64Str = s.substring(base64Start, base64End);
         Date now = new Date();
 
-        String uploadPath = attachmentRoot+"/news/content/";   //设置保存目录
+        String uploadPath = attachmentRoot+"/news/";   //设置保存目录
+        if (news != null && news.getId() != null) {
+            uploadPath += news.getId() + "/";
+        }
+
         String fileName = java.util.UUID.randomUUID().toString()+ ".jpg";  //采用UUID的方式随机命名
         File dirFile = new File(uploadPath);
         if(!dirFile.exists()){
@@ -131,12 +137,12 @@ public class NewsController extends BaseController
         }
         String saveTo = uploadPath + fileName;
         generateImage(base64Str, saveTo);
-        String imgPath = "/attachment/showImage?objectType=news&objectId=content&fileName="+fileName;
+        String imgPath = "/attachment/showImage?objectType=news&objectId=" + news.getId() + "&fileName="+fileName;
 
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
         String rtn = s.substring(0, srcStart + 1) + request.getContextPath() + imgPath + s.substring(base64End);
-        return abstractImg(rtn);
+        return abstractImg(rtn, news);
     }
 
     private void generateImage(String realStr, String filePath) {

@@ -1,12 +1,6 @@
 package com.yuqiaotech.zsnews.model;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 import com.yuqiaotech.common.web.base.BaseModel;
 import com.yuqiaotech.sysadmin.model.User;
@@ -35,7 +29,8 @@ public class News extends BaseModel
     private String mediaType;//图片、文章、链接、视频
     
     private String title;
-    
+
+    @Lob
     private String content;
     
     private String link;

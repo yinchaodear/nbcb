@@ -19,25 +19,19 @@
 	<div class="layui-layout layui-layout-admin">
 		<div class="layui-header">
 			<ul class="layui-nav layui-layout-left">
-				<li class="collaspe layui-nav-item">
-					<a href="#" class="layui-icon layui-icon-shrink-right"></a>
-				</li>
-				<li class="refresh layui-nav-item">
-					<a href="#" class="layui-icon layui-icon-refresh-1"></a>
+				<li style="vertical-align: middle; line-height: 70px; position: relative; display: inline-block;">
+					<a href="javascript:void(0);" style="height: 27px; font-size: 28px; font-family: Source Han Sans CN; font-weight: 500; color: #333333; line-height: 31px;">世界浙商运营管理平台</a>
 				</li>
 			</ul>
 			<div id="control" class="layui-layout-control"></div>
 			<ul class="layui-nav layui-layout-right">
-				<li class="layui-nav-item layui-hide-xs">
-					<a href="#" class="fullScreen layui-icon layui-icon-screen-full"></a>
-				</li>
-				<li class="layui-nav-item layui-hide-xs">
-					<a href="http://www.pearadmin.cn" class="layui-icon layui-icon-website"></a>
-				</li>
 				<li class="layui-nav-item layui-hide-xs" id="headerNotice"></li>
+				<li class="refresh layui-nav-item">
+					<a href="#" class="layui-icon layui-icon-refresh-1"></a>
+				</li>
 				<li class="layui-nav-item" lay-unselect="">
 					<a href="javascript:;">
-						<img src="admin/images/avatar.jpg" class="layui-nav-img">
+						<img src="admin/images/avatar.png" class="layui-nav-img" style="border-radius: 0%;">
 						<label th:text="${session.CURRENTUSERNAME}"></label>
 					</a>
 					<dl class="layui-nav-child">
@@ -45,12 +39,9 @@
 							<a href="javascript:;" class="pearson">个人信息</a>
 						</dd>
 						<dd>
-							<a href="javascript:;" class="logout">注销登陆</a>
+							<a href="javascript:;" class="logout">注销登录</a>
 						</dd>
 					</dl>
-				</li>
-				<li class="setting layui-nav-item">
-					<a href="#" class="layui-icon layui-icon-more-vertical"></a>
 				</li>
 			</ul>
 		</div>
@@ -60,8 +51,7 @@
 				<span class="title">世界浙商运营管理平台</span>
 			</div>
 			<div class="layui-side-scroll">
-				<div id="sideMenu">
-				</div>
+				<div id="sideMenu" style="margin-top: 30px; width: 100px !important;"></div>
 			</div>
 		</div>
 		<div class="layui-body">
@@ -96,10 +86,9 @@
 				theme : "dark-theme", // 默 认 主 题 样 式 dark-theme 默认主题 light-theme 亮主题
 				index : '/console', // 默 认 加 载 主 页
 				data : '/menu.json', // 菜 单 数 据 加 载 地 址
-				select : '474356363552755712', // 默 认 选 中 菜 单 项
 				notice : false, // 消 息 列 表 数 据
 				auth : false,
-				collapse:true
+				collapse : true
 			// 前端权限限制，false 关闭该功能
 			};
 

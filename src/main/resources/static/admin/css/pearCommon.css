@@ -45,7 +45,7 @@
 
 .layui-laypage .layui-laypage-curr .layui-laypage-em {
 	border-radius: 50px !important;
-	background-color: #5FB878 !important;
+	background-color: #4B96F3 !important;
 }
 
 .layui-table tr {
@@ -86,7 +86,7 @@
 }
 
 .layui-elem-quote {
-	border-left: 5px solid #5FB878 !important;
+	border-left: 5px solid #4B96F3 !important;
 }
 
 body::-webkit-scrollbar {

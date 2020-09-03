@@ -49,17 +49,17 @@
 						if (result.success) {
 							layer.msg(result.msg, {
 								icon : 1,
-								time : 1000
+								time : 2000
 							}, function() {
 								location.href = "/index";
 							})
 						} else {
 							layer.msg(result.msg, {
 								icon : 2,
-								time : 1000
+								time : 5000
 							});
 						}
-						$(".login").html("登 入")
+						$(".login").html("登 录")
 					}
 				});
 				return false;

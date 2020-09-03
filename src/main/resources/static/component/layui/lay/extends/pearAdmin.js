@@ -188,13 +188,11 @@ layui.define(['table', 'jquery', 'element', 'form', 'pearAuth', 'pearTab', 'pear
 			this.keepLoad = function(option) {
 				// 关 闭 加 载 层
 				compatible();
-
 				setTimeout(function() {
-
 					$(".loader-main").fadeOut(option.done);
 
 					// 设 置 关 闭 时 间
-				}, option.keepLoad)
+				}, 5000)
 			}
 
 
@@ -487,7 +485,7 @@ layui.define(['table', 'jquery', 'element', 'form', 'pearAuth', 'pearTab', 'pear
 
 
 			html +=
-				"<div class='select-color'><div class='select-color-title'>主题色</div><div class='select-color-content'><span class='select-color-item ' style='background-color:#FF5722;'></span><span class='select-color-item layui-icon layui-icon-ok' style='background-color:#5FB878;'></span><span class='select-color-item'  style='background-color:#1E9FFF;'></span><span class='select-color-item' style='background-color:#FFB800;'></span><span class='select-color-item' style='background-color:darkgray;'></span></div></div>"
+				"<div class='select-color'><div class='select-color-title'>主题色</div><div class='select-color-content'><span class='select-color-item ' style='background-color:#FF5722;'></span><span class='select-color-item layui-icon layui-icon-ok' style='background-color:#4B96F3;'></span><span class='select-color-item'  style='background-color:#1E9FFF;'></span><span class='select-color-item' style='background-color:#FFB800;'></span><span class='select-color-item' style='background-color:darkgray;'></span></div></div>"
 
 			openRight(html);
 

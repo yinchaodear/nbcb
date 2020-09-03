@@ -17,7 +17,7 @@
 				width: 50px;
 				height: 50px;
 				line-height: 50px;
-				background-color: #5FB878;
+				background-color: #4B96F3;
 				z-index: 9999;
 				right: 40px;
 				bottom: 25px;
@@ -67,19 +67,19 @@
 			}
 			.pear-admin .layui-logo{
 				width: 220px;
-			    height: 60px;
+			    height: 80px;
 				position: relative;
 				background-color: #28333E;
 	
 			}
 			.pear-admin .layui-logo img{
-				width: 36px;
-				height: 36px;
+				width: 60px;
+				height: 60px;
 			}
 			.pear-admin .layui-logo .title{
 				font-size: 21px;
 				font-weight: 550;
-				color: #5FB878;
+				color: #4B96F3;
 				position: relative;
 				top: 5px;
 				margin-left: 5px;
@@ -123,17 +123,17 @@
 			
 			/** 隐 藏 布 局 样 式 */
 			.pear-mini .layui-side{
-				width: 60px;
+				width: 100px;
 			}
 			.pear-mini .layui-header{
-				left: 60px;
-				width: calc(100% - 60px);
+				left: 100px;
+				width: calc(100% - 100px);
 			}
 			.pear-mini .layui-body{
-				left: 60px;
+				left: 100px;
 			}
 			.pear-mini .layui-logo{
-				width: 60px;
+				width: 100px;
 			}
 			.pear-mini .layui-nav-tree .layui-nav-item span{
 				display: none;
@@ -142,7 +142,7 @@
 				width: 100%!important;
 			}
 			.pear-mini .layui-side-scroll{
-				height: calc(100% - 60px);
+				height: calc(100% - 100px);
 			}
 		
 			
@@ -151,7 +151,7 @@
 			.pear-admin .layui-header .layui-nav .layui-nav-bar {
 				top: 0px !important;
 				height: 2px !important;
-				background-color: #5FB878;
+				background-color: #4B96F3;
 			}
 			.pear-admin .layui-header .layui-nav .layui-this:after {
 				display: none;

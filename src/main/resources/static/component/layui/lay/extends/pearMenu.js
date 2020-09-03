@@ -198,7 +198,7 @@ layui.define(['table', 'jquery', 'element'], function(exports) {
 			$("#" + this.option.elem).addClass("pear-nav-mini");
 
 			$("#" + this.option.elem).animate({
-				width: "60px"
+				width: "100px"
 			}, 400);
 			isHoverMenu(true, config);
 		}
@@ -241,11 +241,10 @@ layui.define(['table', 'jquery', 'element'], function(exports) {
 		$.each(option.data, function(i, item) {
 			// 创 建 每 一 个 菜 单 项
 
-
-			var content = '<li class="layui-nav-item" >';
+			var content = '<li class="layui-nav-item" style="margin-top:25px;margin-bottom:50px;">';
 
 			if (i == option.defaultOpen) {
-				content = '<li class="layui-nav-item layui-nav-itemed" >';
+				content = '<li class="layui-nav-item layui-nav-itemed" style="margin-bottom:50px;">';
 			}
 
 			var href = "javascript:;";
@@ -261,11 +260,13 @@ layui.define(['table', 'jquery', 'element'], function(exports) {
 			// 判 断 菜 单 类 型 0 是 不可跳转的目录 1 是 可 点 击 跳 转 的 菜 单
 			if (item.type == 0) {
 				// 创 建 目 录 结 构
-				content += '<a  href="javascript:;" menu-type="' + item.type + '" menu-id="' + item.id + '" href="' + href +
+				/*content += '<a  href="javascript:;" menu-type="' + item.type + '" menu-id="' + item.id + '" href="' + href +
 					'" ' + target + '><i class="' + item.icon + '"></i><span>' + item.title +
-					'</span></a>';
+					'</span></a>';*/
+					content += '<a  href="javascript:;" style="padding-left:20px;overflow: inherit !important;" menu-type="' + item.type + '" menu-id="' + item.id + '" href="' + href +
+					'" ' + target + '><img src="'+item.icon+'" style="width:60px;height:60px;"/><div style="margin-top: -10px;color: white;">' + item.title +
+					'</div></a>';
 			} else if (item.type == 1) {
-				
 				// 创 建 菜 单 结 构
 				content += '<a class="' + calss + '" menu-type="' + item.type + '" menu-url="' + item.href + '" menu-id="' +
 					item.id +
@@ -326,7 +327,7 @@ layui.define(['table', 'jquery', 'element'], function(exports) {
 			index++;
 
 			$.each(item.children, function(i, note) {
-
+				console.log(11111);
 				// 创 建 每 一 个 菜 单 项
 				var content = '<li class="layui-nav-item" >';
 
@@ -346,11 +347,13 @@ layui.define(['table', 'jquery', 'element'], function(exports) {
 
 				// 判 断 菜 单 类 型 0 是 不可跳转的目录 1 是 可 点 击 跳 转 的 菜 单
 				if (note.type == 0) {
+					alert(1);
 					// 创 建 目 录 结 构
 					content += '<a  href="' + href + '" ' + target + ' menu-type="' + note.type + '" menu-id="' + note.id +
 						'" ><i class="' + note.icon + '"></i><span>' + note.title +
 						'</span></a>';
 				} else if (note.type == 1) {
+					alert(2);
 					// 创 建 菜 单 结 构
 					content += '<a ' + target + ' class="' + calss + '" menu-type="' + note.type + '" menu-url="' + note.href +
 						'" menu-id="' + note.id +
@@ -425,14 +428,18 @@ layui.define(['table', 'jquery', 'element'], function(exports) {
 
 				// 判 断 子 项 类 型
 				if (note.type == 0) {
+					alert(3);
 					// 创 建 目 录 结 构
 					content += '<a ' + target + '  href="' + href + '" menu-type="' + note.type + '" menu-id="' + note.id +
 						'"><i class="' + note.icon + '"></i><span>' + note.title + '</span></a>';
 				} else if (note.type == 1) {
 					// 创 建 菜 单 结 构
-					content += '<a ' + target + ' class="' + calss + '" menu-type="' + note.type + '" menu-url="' + note.href +
+				content += '<a ' + target + ' class="' + calss + '" menu-type="' + note.type + '" menu-url="' + note.href +
 						'" menu-id="' + note.id + '" menu-title="' + note.title + '" menu-icon="' + note.icon + '" href="' + href +
 						'" ><i class="' + note.icon + '"></i><span>' + note.title + '</span></a>';
+				/*content += '<a ' + target + ' class="' + calss + '" menu-type="' + note.type + '" menu-url="' + note.href +
+						'" menu-id="' + note.id + '" menu-title="' + note.title + '" menu-icon="' + note.icon + '" href="' + href +
+						'" ><img src="../admin/images/logo.png"/><span>' + note.title + '</span></a>';*/
 				}
 				// 加 载 子 项 目 录
 				content += loadchild(note);
@@ -514,15 +521,16 @@ layui.define(['table', 'jquery', 'element'], function(exports) {
 
 				if (!$(this).is(".layui-nav-item")) {
 
-					var left = $(this).offset().left + 132;
+					var left = $(this).offset().left + 170;
+					console.log('left:'+left	);
 
 					$(this).children(".layui-nav-child").offset({
 						left: left
 					});
 
 				} else {
-					var left = $(this).offset().left + 62;
-
+					var left = $(this).offset().left + 100;
+console.log('left2:'+left	);
 					$(this).children(".layui-nav-child").offset({
 						left: left
 					});

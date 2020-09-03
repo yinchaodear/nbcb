@@ -22,21 +22,24 @@ public class News extends BaseModel
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    
     /**
      * 发布者
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "f_user_id")
     private User user;
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "f_userinfo_id")
     private UserInfo userinfo;
+    
     private String from; //文章发布方(平台/个人)，如果是平台 取User的信息， 如果是个人app发布 就是取UserInfo的
     
     private String type;//新闻，投稿，提问, 加个政务,(政务活动,政务通告,政务)
     
     private String kind;//属于  政务 /社区/浙商
+    
     private String mediaType;//图片、文章、链接、视频
     
     private String title;
@@ -48,6 +51,10 @@ public class News extends BaseModel
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "f_channel_id")
     private Channel channel;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "f_author_channel_id")
+    private Channel authorChannel;
     
     private String attaches;//附件
     
@@ -62,15 +69,17 @@ public class News extends BaseModel
     {
         this.id = id;
     }
-
-    public User getUser() {
+    
+    public User getUser()
+    {
         return user;
     }
-
-    public void setUser(User user) {
+    
+    public void setUser(User user)
+    {
         this.user = user;
     }
-
+    
     /**
      * 类型。
      * @return
@@ -181,30 +190,49 @@ public class News extends BaseModel
     {
         this.displayOrder = displayOrder;
     }
-
-	public UserInfo getUserinfo() {
-		return userinfo;
-	}
-
-	public void setUserinfo(UserInfo userinfo) {
-		this.userinfo = userinfo;
-	}
-
-	public String getFrom() {
-		return from;
-	}
-
-	public void setFrom(String from) {
-		this.from = from;
-	}
-
-	public String getKind() {
-		return kind;
-	}
-
-	public void setKind(String kind) {
-		this.kind = kind;
-	}
     
+    public UserInfo getUserinfo()
+    {
+        return userinfo;
+    }
+    
+    public void setUserinfo(UserInfo userinfo)
+    {
+        this.userinfo = userinfo;
+    }
+    
+    public String getFrom()
+    {
+        return from;
+    }
+    
+    public void setFrom(String from)
+    {
+        this.from = from;
+    }
+    
+    public String getKind()
+    {
+        return kind;
+    }
+    
+    public void setKind(String kind)
+    {
+        this.kind = kind;
+    }
+    
+    /**
+     * 新闻作者
+     * @return
+     */
+    public Channel getAuthorChannel()
+    {
+        return authorChannel;
+    }
+    
+    public void setAuthorChannel(Channel authorChannel)
+    {
+        this.authorChannel = authorChannel;
+    }
     
 }

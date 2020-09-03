@@ -177,4 +177,31 @@ public class ChannelController extends BaseController
     	result.put("msg","1");
         return success(result);
     }
+    
+    
+    //社区页面 查询小组等相关信息
+    @GetMapping("querynewsCommunityGroup")
+    public Result AppNewsCommunityGroup(ModelAndView modelAndView,@RequestParam Long cid,@RequestParam String  category)
+    {
+    	System.out.println("NewsController.AppNewsCommunityGroup()"+category);
+    	String wheresql ="";
+    	if(!StringUtils.isEmpty(category)&&!"所有".equals(category)){
+    		wheresql = " and t.f_category = '"+category+"'";
+    	}
+    	String sql ="SELECT f_category FROM t_channel where f_kind ='社区' and f_type ='小组'  group by f_category";
+    	List categorygroup = channelRepository.findMapByNativeSql(sql);
+    	String sqlgroup ="SELECT * FROM  t_channel t  left  join (select cf.f_id as cfid ,cf.f_channel_id as chid "
+    			+ ",cf.f_user_info_id as cid from t_channel_follower cf inner join t_channel c  on c.f_id = "
+    			+ "cf.f_channel_id  where f_user_info_id = "+cid+" and c.f_type ='小组' and c.f_kind ='社区') b on t.f_id = b.chid "
+    			+" left join (select c.f_id as channelid ,count(1) as number from t_channel_follower cf inner"
+    			+ " join t_channel c  on c.f_id = cf.f_channel_id  where c.f_type ='小组' and c.f_kind ='社区' "
+    			+ " group by  cf.f_channel_id) c on c.channelid  = t.f_id"
+    			+ " where t.f_type ='小组' and t.f_kind ='社区'"+wheresql;
+    	List group = channelRepository.findMapByNativeSql(sqlgroup);
+    	Map result =new HashMap<>();
+    	result.put("category",categorygroup);
+    	result.put("groupchannel", group);
+        return success(result);
+    }
+    
 }

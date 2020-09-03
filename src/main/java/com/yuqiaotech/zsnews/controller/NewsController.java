@@ -272,5 +272,19 @@ public class NewsController extends BaseController
         return success(result);
     }
     
+    
+    //政务下面的文章 就固定是文章了，没有channel关联  分别为 政务,政务活动，政务通知
+    @GetMapping("querynewsGovernment")
+    public Result AppNewsGovernment(ModelAndView modelAndView,@RequestParam String type)
+    {
+    	System.out.println("NewsController.AppNewsGovernment()"+type);
+    	String sql ="SELECT * FROM t_news where t_type ='"+type+"'";
+    	List news = newsRepository.findMapByNativeSql(sql);	
+    	Map result =new HashMap<>();
+    	result.put("news", news);
+        return success(result);
+    }
+    
+    
   
 }

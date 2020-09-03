@@ -26,6 +26,11 @@ public class Channel extends BaseModel {
     @JoinColumn(name="f_user_id")
     private User user;//属于哪个运营人员
 
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="f_userinfo_id")
+    private UserInfo userinfo;//属于哪个app用户
+    
+    private String remark;//频道的描述
     public Long getId() {
         return id;
     }
@@ -108,6 +113,22 @@ public class Channel extends BaseModel {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+	public UserInfo getUserinfo() {
+		return userinfo;
+	}
+
+	public void setUserinfo(UserInfo userinfo) {
+		this.userinfo = userinfo;
+	}
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
 	}
 	
 	

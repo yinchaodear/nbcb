@@ -36,6 +36,7 @@ public class News extends BaseModel
     
     private String type;//新闻，投稿，提问, 加个政务,(政务活动,政务通告,政务)
     
+    private String kind;//属于  政务 /社区/浙商
     private String mediaType;//图片、文章、链接、视频
     
     private String title;
@@ -195,6 +196,14 @@ public class News extends BaseModel
 
 	public void setFrom(String from) {
 		this.from = from;
+	}
+
+	public String getKind() {
+		return kind;
+	}
+
+	public void setKind(String kind) {
+		this.kind = kind;
 	}
     
     

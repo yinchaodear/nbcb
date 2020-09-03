@@ -16,6 +16,7 @@ public class Channel extends BaseModel {
     private Long id;
     private String kind; //频道  浙商号 小组 
     private String type; //浙商号里面分为(商会号,企业号,媒体号,个人号,)  小组里面(科技，农业之类的)
+    private String category;//小组 专用的字段  属于 科技，还是教育
     private String logo;
     private String title;
     @ManyToOne(fetch=FetchType.LAZY)
@@ -129,6 +130,14 @@ public class Channel extends BaseModel {
 
 	public void setRemark(String remark) {
 		this.remark = remark;
+	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
 	}
 	
 	

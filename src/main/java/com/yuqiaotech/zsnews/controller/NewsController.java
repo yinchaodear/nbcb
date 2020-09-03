@@ -243,7 +243,8 @@ public class NewsController extends BaseController
     public Result newsDetail(ModelAndView modelAndView,@RequestParam Long id,@RequestParam Long cid)
     {
     	
-    	String sql ="select * FROM t_news where f_id ="+id;
+    	String sql ="select t.* ,a.f_remark as remark1 , a.f_username as name1,b.f_remark as remark2 ,b.f_username as name2 FROM t_news  t left join app_user a on a.f_id "
+    			+ "=t.f_user_id left join t_user_info b on b.f_id = t.f_userinfo_id   where t.f_id  = "+id;
     	List<Map<String, Object>> news = newsRepository.findMapByNativeSql(sql);
     	Map result =new HashMap<>();
     	String sqlfollower = "SELECT * FROM t_news_follower where f_news_id = "+id+" and  f_user_info_id ="+cid;
@@ -276,6 +277,45 @@ public class NewsController extends BaseController
     	result.put("news", news);
         return success(result);
     }
+    
+    
+    //政务下面的文章 就固定是文章了，没有channel关联  分别为 政务,政务活动，政务通知
+    @GetMapping("querynewsGovernment")
+    public Result AppNewsGovernment(ModelAndView modelAndView,@RequestParam String type,@RequestParam String kind)
+    {
+    	System.out.println("NewsController.AppNewsGovernment()"+type);
+    	String sql ="SELECT t.*  ,c.f_kind as channelkind,c.f_type as channeltype, a.number ,b.apprisecount ,b1.agreecount,"
+    			+ "c.f_title as channelname FROM t_news t "
+    			+ "left join  ( SELECT  f_news_id  as id1,count(1) as number FROM t_comment cm1 "
+    			+ "where cm1.f_type ='评论' group by f_news_id ) a on a.id1 =t.f_id left join  ( SELECT f_news_id  as id2, count(1) "
+    			+ "as apprisecount FROM t_comment cm where cm.f_type ='回答' group by f_news_id ) b on b.id2 =t.f_id left join "
+    			+ "( SELECT f_news_id  as id3, count(1)  as agreecount FROM t_comment cm1 where cm1.f_type ='点赞' group by f_news_id ) "
+    			+ "b1 on b1.id3 =t.f_id"
+    			+ " left join t_channel  c on  c.f_id = t.f_channel_id  where t.f_type='"+type+"' and t.f_kind='"+kind+"'"
+    			+ " order by f_display_order asc ";
+    	System.err.println(sql);
+    	List news = newsRepository.findMapByNativeSql(sql);	
+    	Map result =new HashMap<>();
+    	result.put("news", news);
+        return success(result);
+    }
+    
+    
+    //社区页面 查询小组等相关信息
+    @GetMapping("querynewsCommunityGroup")
+    public Result AppNewsCommunityGroup(ModelAndView modelAndView,@RequestParam String type,@RequestParam String kind)
+    {
+    	System.out.println("NewsController.AppNewsCommunityGroup()");
+    	String sql ="SELECT f_category FROM t_channel where f_kind ='社区' and f_type ='小组'  group by f_category";
+    	
+    	System.err.println(sql);
+    	List news = newsRepository.findMapByNativeSql(sql);	
+    	Map result =new HashMap<>();
+    	result.put("news", news);
+        return success(result);
+    }
+    
+    
     
   
 }

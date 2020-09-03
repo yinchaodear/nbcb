@@ -1,6 +1,7 @@
 package com.yuqiaotech.zsnews.model;
 
 import com.yuqiaotech.common.web.base.BaseModel;
+import com.yuqiaotech.sysadmin.model.User;
 
 import javax.persistence.*;
 
@@ -15,14 +16,22 @@ public class Channel extends BaseModel {
     private Long id;
     private String kind; //频道  浙商号 小组 
     private String type; //浙商号里面分为(商会号,企业号,媒体号,个人号,)  小组里面(科技，农业之类的)
+    private String category;//小组 专用的字段  属于 科技，还是教育
     private String logo;
     private String title;
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="f_column_id")
     private Column column;
     private String description;
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="f_user_id")
+    private User user;//属于哪个运营人员
 
-
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="f_userinfo_id")
+    private UserInfo userinfo;//属于哪个app用户
+    
+    private String remark;//频道的描述
     public Long getId() {
         return id;
     }
@@ -98,5 +107,39 @@ public class Channel extends BaseModel {
 	public void setKind(String kind) {
 		this.kind = kind;
 	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public UserInfo getUserinfo() {
+		return userinfo;
+	}
+
+	public void setUserinfo(UserInfo userinfo) {
+		this.userinfo = userinfo;
+	}
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
+	}
+	
+	
     
 }

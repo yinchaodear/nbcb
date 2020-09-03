@@ -297,15 +297,18 @@ public class NewsController extends BaseController
     
     //社区页面 查询小组等相关信息
     @GetMapping("querynewsCommunityGroup")
-    public Result AppNewsCommunityGroup(ModelAndView modelAndView,@RequestParam String type,@RequestParam String kind)
+    public Result AppNewsCommunityGroup(ModelAndView modelAndView,@RequestParam Long cid)
     {
     	System.out.println("NewsController.AppNewsCommunityGroup()");
     	String sql ="SELECT f_category FROM t_channel where f_kind ='社区' and f_type ='小组'  group by f_category";
-    	
-    	System.err.println(sql);
-    	List news = newsRepository.findMapByNativeSql(sql);	
+    	List category = newsRepository.findMapByNativeSql(sql);
+    	String sqlgroup ="SELECT * FROM  t_channel t  left  join (select cf.f_id as cfid ,cf.f_channel_id as chid "
+    			+ ",cf.f_user_info_id as cid from t_channel_follower cf inner join t_channel c  on c.f_id = "
+    			+ "cf.f_channel_id  where f_user_info_id = "+cid+" and c.f_type ='小组' and c.f_kind ='社区') b "
+    			+ "on t.f_id = b.chid  where t.f_type ='小组' and t.f_kind ='社区'";
+
     	Map result =new HashMap<>();
-    	result.put("news", news);
+    	result.put("category",category);
         return success(result);
     }
     

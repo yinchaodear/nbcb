@@ -123,7 +123,7 @@ public class ChannelController extends BaseController
     }
     
     /*
-     * 对于出现在首页的频道的代码
+     * 对于出现在首页的频道的代码,只取频道
      */
     @GetMapping("appListdata")
     public Result AppChannelData(ModelAndView modelAndView,@RequestParam Long cid)

@@ -208,7 +208,7 @@ public class NewsController extends BaseController
     }
     
     /*
-     * 这里是首页进来的时候 判断的  推荐的目前就是所有的, 关注的就是自己关注的频道的
+     * 这里是首页进来的时候 判断的  推荐的目前就是所有的, 关注的就是自己关注的channel的 现在关注的 都是 authchannel  文章里面是
      */
     @GetMapping("appListdata")
     public Result AppNewsData(ModelAndView modelAndView,@RequestParam Long id,@RequestParam String type,@RequestParam Long cid)
@@ -221,10 +221,10 @@ public class NewsController extends BaseController
         }else{
         	wheresql+= " and f_channel_id ="+id; 
         }
-    	String sql =" SELECT  t.* ,c.f_title as channelname FROM t_news t left join  ( SELECT  f_news_id  as id1,count(1) as number FROM t_comment "
-    			+ " where f_type ='评论' group by f_news_id ) a on a.id1 =t.f_id left join  ( SELECT f_news_id  as id2, count(1) "
-    			+ "as apprisecount FROM t_comment  where f_type ='回答' group by f_news_id ) b on b.id2 =t.f_id "
-    			+ "inner join t_channel  c on  c.f_id = t.f_channel_id  "+wheresql
+    	String sql =" SELECT  t.* ,d.f_title as channelname ,b.apprisecount as apprisecount FROM t_news t "
+    			+" left join  ( SELECT f_news_id  as id2, count(1) "
+    			+ "as apprisecount FROM t_comment  where f_type ='评论' or f_type ='回答' group by f_news_id ) b on b.id2 =t.f_id "
+    			+ "inner join t_channel  c on  c.f_id = t.f_channel_id  inner join t_channel d on d.f_id =t.f_author_channel_id "+wheresql
     			+" order by f_display_order asc ";
     	System.err.println(sql);
     	List news = newsRepository.findMapByNativeSql(sql);	
@@ -237,11 +237,12 @@ public class NewsController extends BaseController
     public Result newsDetail(ModelAndView modelAndView,@RequestParam Long id,@RequestParam Long cid)
     {
     	
-    	String sql ="select t.* ,a.f_remark as remark1 , a.f_username as name1,b.f_remark as remark2 ,b.f_username as name2 FROM t_news  t left join app_user a on a.f_id "
-    			+ "=t.f_user_id left join t_user_info b on b.f_id = t.f_userinfo_id   where t.f_id  = "+id;
+    	String sql ="select t.* ,c.f_title as channeltitle , c.f_remark as channelremark,cf.f_id as cfid FROM t_news  "
+    			+ "t left join t_channel c on c.f_id = t.f_author_channel_id  left join t_channel_follower cf "
+    			+ "on t.f_author_channel_id = cf.f_channel_id where t.f_id =" +id;
     	List<Map<String, Object>> news = newsRepository.findMapByNativeSql(sql);
     	Map result =new HashMap<>();
-    	String sqlfollower = "SELECT * FROM t_news_follower where f_news_id = "+id+" and  f_user_info_id ="+cid;
+    	String sqlfollower = "SELECT * FROM t_news_follower where f_news_id = "+id+" and  f_user_info_id ="+cid;//这边看的是文章收藏
     	List follower= newsFollowerRepository.findMapByNativeSql(sqlfollower);
     	if(follower.isEmpty()){
     		result.put("exist", false);

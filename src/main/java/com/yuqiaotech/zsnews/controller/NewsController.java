@@ -242,26 +242,33 @@ public class NewsController extends BaseController
     			+ " on t.f_author_channel_id = cf.f_channel_id  and cf.f_user_info_id =   "+cid
     			+ " left join t_news_follower n on n.f_news_id = t.f_id and n.f_user_info_id = "+cid
     			+ " where t.f_id = " +id;
-    	System.err.println(sql);
     	List<Map<String, Object>> news = newsRepository.findMapByNativeSql(sql);
     	Map result =new HashMap<>();
     	result.put("news", news);
         return success(result);
     }
     /*
-     * 根据类型来 判断是 浙商号页面下的,还是小组
+     * 根据类型来 判断是 浙商号页面下的,还是小组,然后根据status 来判断是推荐，还是关注
      * 
      */
     
     @GetMapping("querynewsByKindAndType")
-    public Result AppNewsData(ModelAndView modelAndView,@RequestParam String kind,@RequestParam String type)
+    public Result AppNewsData(ModelAndView modelAndView,@RequestParam String kind,@RequestParam String type,@RequestParam String currentstatus,@RequestParam Long cid)
     {
     	
-    	System.out.println("NewsController.AppNewsData()"+kind +type);
+    	System.out.println("NewsController.AppNewsData()"+kind +type+currentstatus+cid);
+    	String wheresql ="";
+    	if("已关注".equals(currentstatus)){
+    	  wheresql = "inner join t_channel_follower cf on cf.f_channel_id = t.f_channel_id and cf.f_user_info_id = "+cid;
+    	}
+    	
+    	
     	String sql ="SELECT t.*  ,c.f_kind as channelkind,c.f_type as channeltype, a.number ,b.apprisecount ,c.f_title as channelname FROM t_news t left join  ( SELECT  f_news_id  as id1,count(1) as number FROM t_comment cm1 "
     			+ "where cm1.f_type ='评论' group by f_news_id ) a on a.id1 =t.f_id left join  ( SELECT f_news_id  as id2, count(1) "
     			+ "as apprisecount FROM t_comment cm where cm.f_type ='回答' group by f_news_id ) b on b.id2 =t.f_id "
-    			+ "inner join t_channel  c on  c.f_id = t.f_channel_id  where c.f_kind ='"+kind+"' and c.f_type ='"+type+"'"
+    			+ "inner join t_channel  c on  c.f_id = t.f_channel_id "
+    			+ wheresql
+    			+" where c.f_kind ='"+kind+"' and c.f_type ='"+type+"'"
     			+ " order by f_display_order asc ";
     	List news = newsRepository.findMapByNativeSql(sql);	
     	Map result =new HashMap<>();

@@ -40,6 +40,8 @@ public class News extends BaseModel
     
     private String kind;//属于  政务 /社区/浙商
     
+    private String category;//文章所属分类 ,科学,还是教育,根据Category表来，可以多选
+    
     private String mediaType;//图片、文章、链接、视频
     
     private String title;
@@ -234,5 +236,15 @@ public class News extends BaseModel
     {
         this.authorChannel = authorChannel;
     }
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
+	}
+    
+    
     
 }

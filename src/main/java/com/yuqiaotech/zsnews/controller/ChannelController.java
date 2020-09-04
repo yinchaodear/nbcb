@@ -31,6 +31,7 @@ import com.yuqiaotech.common.web.domain.dao.PaginationSupport;
 import com.yuqiaotech.common.web.domain.request.PageDomain;
 import com.yuqiaotech.common.web.domain.response.Result;
 import com.yuqiaotech.common.web.domain.response.ResultTable;
+import com.yuqiaotech.zsnews.model.Category;
 import com.yuqiaotech.zsnews.model.Channel;
 import com.yuqiaotech.zsnews.model.ChannelFollower;
 
@@ -46,6 +47,9 @@ public class ChannelController extends BaseController
     
     @Autowired
     private BaseRepository<ChannelFollower, Long>  channelFollowerRepository;
+    
+    @Autowired
+    private BaseRepository<Category, Long>  categoryRepository;
     
     @GetMapping("main")
     public ModelAndView main()
@@ -217,15 +221,18 @@ public class ChannelController extends BaseController
     public Result AppChannelGroup(ModelAndView modelAndView,@RequestParam Long cid,@RequestParam Long id)
     {
 
-    	String sqlgroup ="SELECT  t.* , b.* ,case when c.number >=10000  then  concat(cast(  convert(c.number/10000,decimal(10,1)) as char),'万' ) else cast(c.number  as char)  end as number "
+    	String sql="SELECT  t.* , b.* ,case when c.number >=10000  then  concat(cast(  convert(c.number/10000,decimal(10,1)) as char),'万' ) else cast(c.number  as char)  end as number "
     			+ "FROM  t_channel t  left  join (select cf.f_id as cfid ,cf.f_channel_id as chid ,cf.f_user_info_id "
     			+ "as cid from t_channel_follower cf inner join t_channel c  on c.f_id = cf.f_channel_id "
     			+ "where f_user_info_id = "+cid+") b on t.f_id = b.chid "
     			+ "left join (select c.f_id as channelid ,count(1) as number from t_channel_follower cf inner join t_channel c  on c.f_id = cf.f_channel_id "
     			+ "where  c.f_id ="+id+" ) c on c.channelid  = t.f_id where t.f_id = " +id;
-    	List channel = channelRepository.findMapByNativeSql(sqlgroup);
+    	List channel = channelRepository.findMapByNativeSql(sql);
+    	String sqlcategory ="SELECT * FROM t_category where f_channel_id = "+id+" and f_type ='局部' and f_show ='显示'";
+    	List category = categoryRepository.findMapByNativeSql(sqlcategory);
     	Map result =new HashMap<>();
     	result.put("channel",channel);
+    	result.put("category",category);
         return success(result);
     }
     

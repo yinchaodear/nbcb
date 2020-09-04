@@ -24,6 +24,7 @@ public class Category extends BaseModel
     
     private String name;//分类名称
     private String type;//(全局/局部)
+    private String show;//(显示/隐藏)
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "f_channel_id")
@@ -59,6 +60,12 @@ public class Category extends BaseModel
 	}
 	public void setDisplayOrder(Integer displayOrder) {
 		this.displayOrder = displayOrder;
+	}
+	public String getShow() {
+		return show;
+	}
+	public void setShow(String show) {
+		this.show = show;
 	}
     
     

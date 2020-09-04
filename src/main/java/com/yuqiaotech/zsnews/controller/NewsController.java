@@ -237,18 +237,14 @@ public class NewsController extends BaseController
     public Result newsDetail(ModelAndView modelAndView,@RequestParam Long id,@RequestParam Long cid)
     {
     	
-    	String sql ="select t.* ,c.f_title as channeltitle , c.f_remark as channelremark,cf.f_id as cfid FROM t_news  "
-    			+ "t left join t_channel c on c.f_id = t.f_author_channel_id  left join t_channel_follower cf "
-    			+ "on t.f_author_channel_id = cf.f_channel_id where t.f_id =" +id;
+    	String sql ="select t.* ,c.f_title as channeltitle , c.f_remark as channelremark,cf.f_id as cfid ,n.f_id as nfid FROM t_news  "
+    			+ " t left join t_channel c on c.f_id = t.f_author_channel_id  left join t_channel_follower cf "
+    			+ " on t.f_author_channel_id = cf.f_channel_id  and cf.f_user_info_id =   "+cid
+    			+ " left join t_news_follower n on n.f_news_id = t.f_id and n.f_user_info_id = "+cid
+    			+ " where t.f_id = " +id;
+    	System.err.println(sql);
     	List<Map<String, Object>> news = newsRepository.findMapByNativeSql(sql);
     	Map result =new HashMap<>();
-    	String sqlfollower = "SELECT * FROM t_news_follower where f_news_id = "+id+" and  f_user_info_id ="+cid;//这边看的是文章收藏
-    	List follower= newsFollowerRepository.findMapByNativeSql(sqlfollower);
-    	if(follower.isEmpty()){
-    		result.put("exist", false);
-    	}else{
-    		result.put("exist", true);
-    	}
     	result.put("news", news);
         return success(result);
     }
@@ -294,6 +290,38 @@ public class NewsController extends BaseController
     	result.put("news", news);
         return success(result);
     }
+    
+    
+    //添加文章的收藏 
+    @GetMapping("addselfcollect")
+    public Result AddSelfCollect(ModelAndView modelAndView,@RequestParam Long nid,@RequestParam Long cid)
+    {
+    	String sqlexist ="select  * from t_news_follower where f_news_id ="+nid +" and f_user_info_id ="+cid;
+    	List exist =newsFollowerRepository.findMapByNativeSql(sqlexist);
+    	if(!exist.isEmpty()){
+    		Map result =new HashMap<>();
+        	result.put("msg","2");//这里表示已经添加过,正常不会走到这段，怕数据出错
+            return success(result);
+    	}
+        String sql = "insert into t_news_follower (f_news_id,f_user_info_id) values ("+nid+","+cid+")";
+        newsFollowerRepository.executeUpdateByNativeSql(sql, null);
+    	Map result =new HashMap<>();
+    	result.put("msg","1");
+        return success(result);
+    }
+    
+    
+    //删除文章的收藏
+    @GetMapping("deleteselfcollect")
+    public Result DeleteSelfnews(ModelAndView modelAndView,@RequestParam Long nfid)
+    {
+    	String sql ="delete from t_news_follower where f_id="+nfid;
+    	newsFollowerRepository.executeUpdateByNativeSql(sql, null);
+    	Map result =new HashMap<>();
+    	result.put("msg","1");
+        return success(result);
+    }
+    
     
     
   

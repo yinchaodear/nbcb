@@ -1,29 +1,10 @@
 [
 	{
-		"id": "474356044148117504",
-		"title": "系统概览",
-		"type": "0",
-		"openType": "",
-		"icon": "layui-icon layui-icon-component",
-		"href": "",
-		"children": [
-			{
-				"id": "474356363552755712",
-				"title": "首页",
-				"type": "1",
-				"openType": "0",
-				"icon": "layui-icon layui-icon-home",
-				"href": "/console",
-				"children": []
-			}
-		]
-	},
-	{
 		"id": "101",
 		"title": "发布管理",
 		"type": "0",
 		"openType": null,
-		"icon": "layui-icon layui-icon-set-fill",
+		"icon": "../admin/images/fbgl.png",
 		"href": "",
 		"children": [
 			{
@@ -32,7 +13,7 @@
 				"type": "1",
 				"openType": null,
 				"icon": "layui-icon layui-icon-user",
-				"href": "/zsnews/column/main",
+				"img":"../admin/images/fbgl.png",
 				"children": []
 			},
 			{
@@ -96,7 +77,7 @@
 		"title": "资源管理",
 		"type": "0",
 		"openType": null,
-		"icon": "layui-icon layui-icon-set-fill",
+		"icon": "../admin/images/zygl.png",
 		"href": "",
 		"children": [
 			{
@@ -142,7 +123,7 @@
 		"title": "审核管理",
 		"type": "0",
 		"openType": null,
-		"icon": "layui-icon layui-icon-set-fill",
+		"icon": "../admin/images/shgl.png",
 		"href": "",
 		"children": [
 			{
@@ -197,7 +178,7 @@
 		"title": "客户反馈",
 		"type": "0",
 		"openType": null,
-		"icon": "layui-icon layui-icon-set-fill",
+		"icon": "../admin/images/khfk.png",
 		"href": "",
 		"children": [
 			{
@@ -216,7 +197,7 @@
 		"title": "个人中心",
 		"type": "0",
 		"openType": null,
-		"icon": "layui-icon layui-icon-set-fill",
+		"icon": "../admin/images/grzx.png",
 		"href": "",
 		"children": [
 			{

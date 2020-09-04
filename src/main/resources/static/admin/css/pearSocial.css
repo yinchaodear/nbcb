@@ -7,7 +7,7 @@
 	height: 50px;
 	line-height: 50px;
 	text-align: center;
-	background-color: #5FB878;
+	background-color: #4B96F3;
 	border-radius: 50px;
 	box-shadow: 0px 0px 10px gray;
 	color: whitesmoke;
@@ -152,7 +152,7 @@
 }
 
 .pear-social .pear-social-side .pear-social-control .layui-this {
-	color: #5FB878;
+	color: #4B96F3;
 }
 
 .pear-social .pear-social-list .pear-social-list-header {
@@ -218,7 +218,7 @@
 }
 
 .pear-social .pear-social-list .pear-social-list-body .body .body-item .dot.online {
-	background-color: #5FB878;
+	background-color: #4B96F3;
 }
 
 .pear-social .pear-social-list .pear-social-list-body .body .body-item:hover {
@@ -312,7 +312,7 @@
 }
 
 .pear-social-body-content-input-enter:hover {
-	background-color: #5FB878;
+	background-color: #4B96F3;
 	color: white;
 }
 

@@ -1,6 +1,7 @@
 
 package com.yuqiaotech.zsnews.controller;
 
+import com.yuqiaotech.common.SysConstants;
 import com.yuqiaotech.common.logging.annotation.Logging;
 import com.yuqiaotech.common.web.base.BaseController;
 import com.yuqiaotech.common.web.base.BaseRepository;
@@ -9,6 +10,7 @@ import com.yuqiaotech.common.web.domain.request.PageDomain;
 import com.yuqiaotech.common.web.domain.response.Result;
 import com.yuqiaotech.common.web.domain.response.ResultTable;
 import com.yuqiaotech.sysadmin.model.User;
+import com.yuqiaotech.zsnews.model.Channel;
 import com.yuqiaotech.zsnews.model.News;
 import com.yuqiaotech.zsnews.model.NewsFollower;
 import org.apache.commons.lang3.StringUtils;
@@ -41,6 +43,9 @@ public class NewsController extends BaseController
 
     @Autowired
     private BaseRepository<User, Long> userRepository;
+
+	@Autowired
+	private BaseRepository<Channel, Long> channelRepository;
 
     @Autowired
     private BaseRepository<NewsFollower, Long> newsFollowerRepository;
@@ -77,13 +82,25 @@ public class NewsController extends BaseController
     {
         System.out.println(attachmentRoot);
         Long userId = getCurrentUserId();
-        User user = userRepository.get(userId, User.class);
-        news.setUser(user);
+		String userType = getCurrentUserType();
+		Channel channel = null;
+		if (!StringUtils.isEmpty(userType) && userType.equals(SysConstants.SECURITY_USERTYPE_FRONT)) {
+			channel =  channelRepository.queryUniqueResult("from Channel where userinfo.id = " + userId, null);
+
+		}else {
+			channel = channelRepository.queryUniqueResult("from Channel where user.id = " + userId, null);
+		}
+
+		if(channel != null) {
+			news.setAuthorChannel(channel);
+		}
+
+        news = newsRepository.save(news);
         String content = news.getContent();
 
         if (!StringUtils.isEmpty(content)) {
             if (content.contains("data:image") && content.contains("base64")) {
-                content = abstractImg(content);
+                content = abstractImg(content, news);
             }
             content = content.replace("&amp;", "&");
             news.setContent(content);
@@ -96,10 +113,11 @@ public class NewsController extends BaseController
         }
 
         newsRepository.save(news);
+
         return decide(true);
     }
 
-    private String abstractImg(String s) {
+    private String abstractImg(String s, News news) {
         String key = "data:image/png;base64,";
         int keyIndex = s.indexOf(key);
         if(keyIndex<0){
@@ -123,7 +141,11 @@ public class NewsController extends BaseController
         String base64Str = s.substring(base64Start, base64End);
         Date now = new Date();
 
-        String uploadPath = attachmentRoot+"/news/content/";   //设置保存目录
+        String uploadPath = attachmentRoot+"/news/";   //设置保存目录
+        if (news != null && news.getId() != null) {
+            uploadPath += news.getId() + "/";
+        }
+
         String fileName = java.util.UUID.randomUUID().toString()+ ".jpg";  //采用UUID的方式随机命名
         File dirFile = new File(uploadPath);
         if(!dirFile.exists()){
@@ -131,12 +153,12 @@ public class NewsController extends BaseController
         }
         String saveTo = uploadPath + fileName;
         generateImage(base64Str, saveTo);
-        String imgPath = "/attachment/showImage?objectType=news&objectId=content&fileName="+fileName;
+        String imgPath = "/attachment/showImage?objectType=news&objectId=" + news.getId() + "&fileName="+fileName;
 
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
         String rtn = s.substring(0, srcStart + 1) + request.getContextPath() + imgPath + s.substring(base64End);
-        return abstractImg(rtn);
+        return abstractImg(rtn, news);
     }
 
     private void generateImage(String realStr, String filePath) {

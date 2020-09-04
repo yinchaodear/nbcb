@@ -4,8 +4,10 @@ import javax.annotation.Resource;
 
 import com.yuqiaotech.security.domain.SecurityUserDetailsService;
 import com.yuqiaotech.security.filter.AuthenticationTokenFilter;
+import com.yuqiaotech.security.filter.CustomerAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,7 +36,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    public static final String passUrls = "/attachment/showImage/**,/login/**,/assets/**,/admin/**,/component/**,/favicon.ico,/demo/**";
+    public static final String passUrls = "/attachment/**,/login/**,/assets/**,/admin/**,/component/**,/favicon.ico,/demo/**";
 
 	@Resource
 	private CustomPermissionEvaluator securityPowerEvaluator;
@@ -59,6 +61,22 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Resource
 	private SecurityUserDetailsService securityUserDetailsService;
+
+	@Bean
+	@Override
+	public AuthenticationManager authenticationManagerBean() throws Exception {
+		AuthenticationManager manager = super.authenticationManagerBean();
+		return manager;
+	}
+
+	@Bean
+	CustomerAuthenticationFilter customerAuthenticationFilter() throws Exception {
+		CustomerAuthenticationFilter filter = new CustomerAuthenticationFilter();
+		filter.setAuthenticationManager(authenticationManagerBean());
+		filter.setAuthenticationSuccessHandler(securityAccessSuccessHander);
+		filter.setAuthenticationFailureHandler(securityAccessFailureHander);
+		return filter;
+	}
 
 	/**
 	 * Describe: 自定义权限注解实现
@@ -106,6 +124,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http)
 			throws Exception {
+		http.addFilterAt(customerAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 		http.addFilterBefore(new AuthenticationTokenFilter(securityUserDetailsService), UsernamePasswordAuthenticationFilter.class)
 				.authorizeRequests()
 				.antMatchers(passUrls.split(","))

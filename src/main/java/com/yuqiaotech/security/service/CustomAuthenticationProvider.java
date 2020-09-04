@@ -2,6 +2,7 @@ package com.yuqiaotech.security.service;
 
 import javax.annotation.Resource;
 
+import com.yuqiaotech.security.domain.SecurityUserDetails;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,12 +38,11 @@ public class CustomAuthenticationProvider implements AuthenticationProvider
     public Authentication authenticate(Authentication authentication)
         throws AuthenticationException
     {
-        
         String username = (String)authentication.getPrincipal();
         String password = (String)authentication.getCredentials();
         
-        UserDetails userInfo = securityUserDetailsService.loadUserByUsername(username);
-        if (!password.equals(userInfo.getPassword()))
+        SecurityUserDetails userInfo = (SecurityUserDetails) securityUserDetailsService.loadUserByUsername(username);
+        if (userInfo.getLoginType().equals("COMMON") && !password.equals(userInfo.getPassword()))
         //        if (!passwordEncoder.matches(password, userInfo.getPassword()))
         {
             throw new BadCredentialsException(" Password Not Found ");

@@ -68,7 +68,6 @@ public class AuthenticationTokenFilter extends OncePerRequestFilter {
 			try {
 				if (SecurityContextHolder.getContext().getAuthentication() == null) {
 					if (request.getRequestURI().equals("/auth/login")) {
-						//此处先暂时处理，后续考虑自定义UsernamePasswordAuthenticationFilter处理
 						chain.doFilter(request, response);
 						return;
 					}
@@ -83,21 +82,24 @@ public class AuthenticationTokenFilter extends OncePerRequestFilter {
 
 					if (username != null) {
 						//根据用户名获取用户对象
-						UserDetails userDetails = securityUserDetailsService.loadUserByUsername(username);
+						SecurityUserDetails userDetails = (SecurityUserDetails) securityUserDetailsService.loadUserByUsername(username);
 
 						if (userDetails != null) {
 							UsernamePasswordAuthenticationToken authentication =
 									new UsernamePasswordAuthenticationToken(userDetails, null, null);
 							authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 							//设置为已登录
+							request.getSession().setAttribute(SysConstants.SECURITY_USERTYPE_KEY, userDetails.getType());
+							request.getSession().setAttribute(SysConstants.SECURITY_USER_LOGINTYPE_KEY, userDetails.getLoginType());
+
 							request.getSession()
-									.setAttribute(SysConstants.SECURITY_CONTEXT_KEY, (SecurityUserDetails)authentication.getPrincipal());
+									.setAttribute(SysConstants.SECURITY_CONTEXT_KEY, (SecurityUserDetails) authentication.getPrincipal());
 							request.getSession()
 									.setAttribute(SysConstants.SECURITY_USERNAME_KEY,
-											((SecurityUserDetails)authentication.getPrincipal()).getUsername());
+											((SecurityUserDetails) authentication.getPrincipal()).getUsername());
 							request.getSession()
 									.setAttribute(SysConstants.SECURITY_USERID_KEY,
-											((SecurityUserDetails)authentication.getPrincipal()).getId());
+											((SecurityUserDetails) authentication.getPrincipal()).getId());
 							SecurityContextHolder.getContext().setAuthentication(authentication);
 						}
 					}

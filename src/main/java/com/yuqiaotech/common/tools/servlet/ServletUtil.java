@@ -70,7 +70,21 @@ public class ServletUtil
         }
         return null;
     }
-    
+
+    /**
+     * 当前用户类别 前端用户|后端管理人员
+     * @return
+     */
+    public static String getCurrentUserType()
+    {
+        Object userType = getSession().getAttribute(SysConstants.SECURITY_USERTYPE_KEY);
+        if (userType != null && !"".equals(userType))
+        {
+            return (String) userType;
+        }
+        return null;
+    }
+
     /**
      * 当前用户id
      * @return

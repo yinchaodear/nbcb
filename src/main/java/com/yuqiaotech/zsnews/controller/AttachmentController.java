@@ -1,6 +1,7 @@
 package com.yuqiaotech.zsnews.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.yuqiaotech.common.tools.UcpaasSms.UcpaasSms;
 import com.yuqiaotech.common.web.base.BaseController;
 import com.yuqiaotech.common.web.domain.response.Result;
 import org.apache.commons.lang3.StringUtils;
@@ -137,5 +138,49 @@ public class AttachmentController  extends BaseController {
 			}
 			in.close();
 		}
+	}
+
+
+	/**
+	 * 获取手机验证码
+	 * @param params
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping("/phoneCode")
+	public Result GetCode(@RequestParam Map<String, Object> params) {
+		Result<Object> result = new Result<>();
+		try {
+			/**
+			 * 这里还要加上发送短信验证码的代码
+			 */
+			String mobile = (String) params.get("phone");
+			String templateId = "560383";
+
+			String number = "";
+			number = GenerateNumber();
+			String coderesult = UcpaasSms.templateSMS(templateId, mobile, number);
+			JSONObject smsRes = JSONObject.parseObject(coderesult);
+			System.out.println("smsRes:" + smsRes);
+			if(smsRes.containsKey("code") && "000000".equals(smsRes.getString("code"))) {
+				result.setSuccess(true);
+				result.setData(number);
+				result.setMsg("发送成功");
+			}else {
+				result.setSuccess(false);
+				result.setMsg(" 短信平台返回码异常：" + smsRes.getString("code") + ",msg=" + smsRes.getString("msg"));
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			result.setSuccess(false);
+			result.setMsg(" 后台出现异常，请联系相关人员检查！");
+		}
+		return result;
+	}
+
+	private String GenerateNumber() {
+		int x = (int) (1 + Math.random() * (9999 - 1 + 1));
+		String param = String.format("%04d", x);// 前面补0
+		return param;
 	}
 }

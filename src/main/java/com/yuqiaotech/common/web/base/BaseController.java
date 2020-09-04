@@ -37,7 +37,11 @@ public class BaseController
     {
         return ServletUtil.getCurrentUsername();
     }
-    
+
+    public String getCurrentUserType() {
+        return ServletUtil.getCurrentUserType();
+    }
+
     public Long getCurrentUserId()
     {
         return ServletUtil.getCurrentUserId();

@@ -1,6 +1,7 @@
 
 package com.yuqiaotech.zsnews.controller;
 
+import com.yuqiaotech.common.SysConstants;
 import com.yuqiaotech.common.logging.annotation.Logging;
 import com.yuqiaotech.common.web.base.BaseController;
 import com.yuqiaotech.common.web.base.BaseRepository;
@@ -9,6 +10,7 @@ import com.yuqiaotech.common.web.domain.request.PageDomain;
 import com.yuqiaotech.common.web.domain.response.Result;
 import com.yuqiaotech.common.web.domain.response.ResultTable;
 import com.yuqiaotech.sysadmin.model.User;
+import com.yuqiaotech.zsnews.model.Channel;
 import com.yuqiaotech.zsnews.model.News;
 import com.yuqiaotech.zsnews.model.NewsFollower;
 import org.apache.commons.lang3.StringUtils;
@@ -41,6 +43,9 @@ public class NewsController extends BaseController
 
     @Autowired
     private BaseRepository<User, Long> userRepository;
+
+	@Autowired
+	private BaseRepository<Channel, Long> channelRepository;
 
     @Autowired
     private BaseRepository<NewsFollower, Long> newsFollowerRepository;
@@ -77,8 +82,19 @@ public class NewsController extends BaseController
     {
         System.out.println(attachmentRoot);
         Long userId = getCurrentUserId();
-        User user = userRepository.get(userId, User.class);
-        news.setUser(user);
+		String userType = getCurrentUserType();
+		Channel channel = null;
+		if (!StringUtils.isEmpty(userType) && userType.equals(SysConstants.SECURITY_USERTYPE_FRONT)) {
+			channel =  channelRepository.queryUniqueResult("from Channel where userinfo.id = " + userId, null);
+
+		}else {
+			channel = channelRepository.queryUniqueResult("from Channel where user.id = " + userId, null);
+		}
+
+		if(channel != null) {
+			news.setAuthorChannel(channel);
+		}
+
         news = newsRepository.save(news);
         String content = news.getContent();
 

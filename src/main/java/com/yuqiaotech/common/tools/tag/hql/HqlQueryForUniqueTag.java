@@ -15,15 +15,17 @@ import org.thymeleaf.standard.expression.Expression;
 import org.thymeleaf.standard.expression.StandardExpressionParser;
 import org.thymeleaf.templatemode.TemplateMode;
 
-public class HqlQueryForUniqueTag extends AbstractElementTagProcessor {
-
+public class HqlQueryForUniqueTag extends AbstractElementTagProcessor
+{
+    
     // 标签名
     private static final String TAG_NAME = "queryForUnique";
-
+    
     // 优先级
     private static final int PRECEDENCE = 10000;
-
-    public HqlQueryForUniqueTag(String dialectPrefix) {
+    
+    public HqlQueryForUniqueTag(String dialectPrefix)
+    {
         super(
             // 模板类型为HTML
             TemplateMode.HTML,
@@ -40,38 +42,47 @@ public class HqlQueryForUniqueTag extends AbstractElementTagProcessor {
             // 优先级
             PRECEDENCE);
     }
-
+    
     @Override
     protected void doProcess(ITemplateContext context, IProcessableElementTag iProcessableElementTag,
-        IElementTagStructureHandler structureHandler) {
+        IElementTagStructureHandler structureHandler)
+    {
         ApplicationContext applicationContext = SpringContextUtils.getApplicationContext(context);
         String id = iProcessableElementTag.getAttributeValue("id");
         String hql = iProcessableElementTag.getAttributeValue("hql");
         hql = convertExpression(hql);
-        hql = (String)executeExpression(hql, context);
-
+        if (hql.indexOf("${") != -1)
+        {
+            hql = (String)executeExpression(hql, context);
+        }
+        
         Object obj = new Object();
-        if (StringUtils.isNotEmpty(hql)) {
+        if (StringUtils.isNotEmpty(hql))
+        {
             EntityManager entityManager = applicationContext.getBean(EntityManager.class);
             obj = entityManager.createQuery(hql).getSingleResult();
         }
+        
         HttpServletRequest request = ((WebEngineContext)context).getRequest();
         request.setAttribute(id, obj);
     }
-
-    private Object executeExpression(String value, ITemplateContext context) {
+    
+    private Object executeExpression(String value, ITemplateContext context)
+    {
         StandardExpressionParser parser = new StandardExpressionParser();
         Expression parseExpression = parser.parseExpression(context, value);
         Object execute = parseExpression.execute(context);
         return execute;
     }
-
-    private String convertExpression(String sqlString) {
+    
+    private String convertExpression(String sqlString)
+    {
         String newsql = sqlString;
         int idx = -1;
         StringBuffer newSql2 = new StringBuffer();
         boolean hasexpression = false;
-        while (newsql.indexOf("${") != -1) {
+        while (newsql.indexOf("${") != -1)
+        {
             hasexpression = true;
             newSql2.append(" '");
             String sql1String = newsql.substring(0, newsql.indexOf("${"));
@@ -81,12 +92,15 @@ public class HqlQueryForUniqueTag extends AbstractElementTagProcessor {
             newSql2.append(sql2String).append("} +");
             newsql = newsql.substring(newsql.indexOf("}") + 1);
         }
-        if (hasexpression) {
-            if (StringUtils.isNotEmpty(newsql) && StringUtils.isNotEmpty(newsql.trim())) {
+        if (hasexpression)
+        {
+            if (StringUtils.isNotEmpty(newsql) && StringUtils.isNotEmpty(newsql.trim()))
+            {
                 newSql2.append("'").append(newsql).append("'");
             }
             newsql = newSql2.toString().trim();
-            if (newsql.endsWith("+")) {
+            if (newsql.endsWith("+"))
+            {
                 newsql = newsql.substring(0, newsql.length() - 1).trim();
             }
         }

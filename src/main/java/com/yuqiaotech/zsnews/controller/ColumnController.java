@@ -3,10 +3,14 @@ package com.yuqiaotech.zsnews.controller;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +31,7 @@ import com.yuqiaotech.common.web.domain.dao.PaginationSupport;
 import com.yuqiaotech.common.web.domain.request.PageDomain;
 import com.yuqiaotech.common.web.domain.response.Result;
 import com.yuqiaotech.common.web.domain.response.ResultTable;
+import com.yuqiaotech.zsnews.NewsDicConstants;
 import com.yuqiaotech.zsnews.model.Column;
 
 @RestController
@@ -48,13 +53,48 @@ public class ColumnController extends BaseController
     public ResultTable data(Column column, PageDomain pageDomain)
     {
         DetachedCriteria dc = composeDetachedCriteria(column);
+        dc.addOrder(Order.asc("displayOrder"));
         PaginationSupport ps = columnRepository.paginateByCriteria(dc, pageDomain.getPage(), pageDomain.getLimit());
         return pageTable(ps.getItems(), ps.getTotalCount());
+    }
+    
+    @GetMapping("status/{cid}")
+    public Result status(@PathVariable Long cid)
+    {
+        Column column = columnRepository.findUniqueBy("id", cid, Column.class);
+        if (column != null)
+        {
+            if (column.getStatus() == null || column.getStatus() == NewsDicConstants.ICommon.STATUS_DOWN)
+            {
+                column.setStatus(NewsDicConstants.ICommon.STATUS_UP);
+            }
+            else
+            {
+                column.setStatus(NewsDicConstants.ICommon.STATUS_DOWN);
+            }
+            
+            columnRepository.update(column);
+        }
+        return success();
     }
     
     public DetachedCriteria composeDetachedCriteria(Column column)
     {
         DetachedCriteria dc = DetachedCriteria.forClass(Column.class);
+        if (column != null)
+        {
+            if (StringUtils.isNotEmpty(column.getTitle()))
+            {
+                dc.add(Restrictions.or(Restrictions.ilike("title", column.getTitle(), MatchMode.ANYWHERE),
+                    Restrictions.ilike("remark", column.getTitle(), MatchMode.ANYWHERE)));
+            }
+            if (column.getStatus() != null)
+            {
+                dc.add(Restrictions.eq("status", column.getStatus()));
+            }
+        }
+        dc.add(Restrictions.eq("deltag", NewsDicConstants.ICommon.DELETE_NO));
+        
         return dc;
     }
     
@@ -67,8 +107,27 @@ public class ColumnController extends BaseController
     @PostMapping("save")
     public Result save(@RequestBody Column column)
     {
+        column.setStatus(NewsDicConstants.ICommon.STATUS_UP);//默认上架
+        column.setDeltag(NewsDicConstants.ICommon.DELETE_NO);//默认未删除
+        if (column.getDisplayOrder() == null)
+        {
+            column.setDisplayOrder(getNextDisplayOrder());
+        }
         columnRepository.save(column);
         return decide(true);
+    }
+    
+    private Integer getNextDisplayOrder()
+    { //查当前最大的顺序号
+        String sql = "select ifnull(max(f_display_order),0) maxorder from t_column where f_display_order is not null";
+        List<Map<String, Object>> rst = columnRepository.findMapByNativeSql(sql);
+        Integer displayOrder = 1;
+        if (CollectionUtils.isNotEmpty(rst) && rst.get(0) != null && !rst.get(0).isEmpty())
+        {
+            displayOrder = com.yuqiaotech.common.tools.common.StringUtils
+                .parseInt(com.yuqiaotech.common.tools.common.StringUtils.parseNull(rst.get(0).get("maxorder"))) + 1;
+        }
+        return displayOrder;
     }
     
     @GetMapping("edit")
@@ -84,6 +143,18 @@ public class ColumnController extends BaseController
     {
         Column columndb = columnRepository.findUniqueBy("id", column.getId(), Column.class);
         BeanUtils.copyProperties(column, columndb, getNullPropertyNames(column));
+        if (columndb.getDisplayOrder() == null)
+        {
+            columndb.setDisplayOrder(getNextDisplayOrder());
+        }
+        if (columndb.getDeltag() == null)
+        {
+            columndb.setDeltag(NewsDicConstants.ICommon.DELETE_NO);
+        }
+        if (columndb.getStatus() == null)
+        {
+            columndb.setStatus(NewsDicConstants.ICommon.STATUS_UP);
+        }
         columnRepository.update(columndb);
         return decide(true);
     }
@@ -92,7 +163,12 @@ public class ColumnController extends BaseController
     @Logging(title = "删除角色")
     public Result remove(@PathVariable Long id)
     {
-        columnRepository.remove(id, Column.class);
+        
+        //TODO:这里要看，有没有关联，如果有的话，不能删除
+        //FIXME:栏目删除为逻辑删除
+        Column columndb = columnRepository.findUniqueBy("id", id, Column.class);
+        columndb.setDeltag(NewsDicConstants.ICommon.DELETE_YES);
+        columnRepository.update(columndb);
         return decide(true);
     }
     
@@ -107,7 +183,11 @@ public class ColumnController extends BaseController
             DetachedCriteria dc = DetachedCriteria.forClass(Column.class);
             dc.add(Restrictions.in("id", cdids));
             List<Column> columnList = columnRepository.findByCriteria(dc);
-            columnList.forEach(columnRepository::delete);
+            for (Column columndb : columnList)
+            {
+                columndb.setDeltag(NewsDicConstants.ICommon.DELETE_YES);
+                columnRepository.update(columndb);
+            }
             return decide(true);
         }
         return decide(false);

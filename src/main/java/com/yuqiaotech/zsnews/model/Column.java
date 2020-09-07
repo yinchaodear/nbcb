@@ -14,11 +14,23 @@ import com.yuqiaotech.common.web.base.BaseModel;
 @Entity
 public class Column extends BaseModel
 {
+    private static final long serialVersionUID = -4466172520715268788L;
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
     private String title;
+    
+    private String remark;
+    
+    private Integer status;//0：上架状态  1：下架状态
+    
+    private String h5href;//外部链接地址
+    
+    private Integer deltag;//删除标识
+    
+    private Integer displayOrder;//顺序号，顺序越小越靠前
     
     public Long getId()
     {
@@ -42,5 +54,55 @@ public class Column extends BaseModel
     public void setTitle(String title)
     {
         this.title = title;
+    }
+    
+    public String getRemark()
+    {
+        return remark;
+    }
+    
+    public void setRemark(String remark)
+    {
+        this.remark = remark;
+    }
+    
+    public Integer getStatus()
+    {
+        return status;
+    }
+    
+    public void setStatus(Integer status)
+    {
+        this.status = status;
+    }
+    
+    public String getH5href()
+    {
+        return h5href;
+    }
+    
+    public void setH5href(String h5href)
+    {
+        this.h5href = h5href;
+    }
+    
+    public Integer getDeltag()
+    {
+        return deltag;
+    }
+    
+    public void setDeltag(Integer deltag)
+    {
+        this.deltag = deltag;
+    }
+    
+    public Integer getDisplayOrder()
+    {
+        return displayOrder;
+    }
+    
+    public void setDisplayOrder(Integer displayOrder)
+    {
+        this.displayOrder = displayOrder;
     }
 }

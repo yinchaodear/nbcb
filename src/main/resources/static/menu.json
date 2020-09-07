@@ -13,7 +13,7 @@
 				"type": "1",
 				"openType": null,
 				"icon": "layui-icon layui-icon-user",
-				"img":"../admin/images/fbgl.png",
+				"href": "/zsnews/column/main",
 				"children": []
 			},
 			{

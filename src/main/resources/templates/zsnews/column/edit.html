@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang="en"  xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
 <head>
 <meta charset="UTF-8">
 <title>编辑</title>
@@ -12,21 +12,37 @@
 		<div class="mainBox">
 			<div class="main-container">
 				<div class="main-container">
-																														<div class="layui-form-item layui-hide"  >
-																				<label class="layui-form-label">id</label>
-								<div class="layui-input-block">
-									<input type="text" name="id" th:value="${ column.id }"  autocomplete="off" placeholder="请输入id" class="layui-input">
-								</div>
-							</div>
-					
-																														<div class="layui-form-item"  >
-														<label class="layui-form-label">名称</label>
-								<div class="layui-input-block">
-									<input type="text" name="title" th:value="${ column.title }"  autocomplete="off" placeholder="请输入title" class="layui-input">
-								</div>
-							</div>
-					
-									</div>
+					<div class="layui-form-item layui-hide">
+						<label class="layui-form-label">id</label>
+						<div class="layui-input-block">
+							<input type="text" name="id" th:value="${ column.id }" autocomplete="off" placeholder="请输入id" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">名称</label>
+						<div class="layui-input-block">
+							<input type="text" name="title" autocomplete="off" placeholder="请输入名称" th:value="${ column.title }" class="layui-input" maxlength="50">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">地址</label>
+						<div class="layui-input-block">
+							<input type="text" name="h5href" autocomplete="off" placeholder="请输入地址" th:value="${ column.h5href }" class="layui-input" maxlength="200">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">顺序号</label>
+						<div class="layui-input-block">
+							<input type="text" name="displayOrder" autocomplete="off" placeholder="请输入顺序号" class="layui-input" maxlength="5" th:value="${ column.displayOrder}" lay-verify="required|number">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">描述</label>
+						<div class="layui-input-block">
+							<textarea name="remark" placeholder="请输入描述" class="layui-textarea" maxlength="500" th:value="${ column.remark}"></textarea>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="bottom">
@@ -48,10 +64,10 @@
 			let form = layui.form;
 			let $ = layui.jquery;
 			let MODULE_PATH = "/zsnews/column/";
-			
+
 			form.on('submit(column-save)', function(data) {
 				$.ajax({
-					url : MODULE_PATH+'update',
+					url : MODULE_PATH + 'update',
 					data : JSON.stringify(data.field),
 					dataType : 'json',
 					contentType : 'application/json',

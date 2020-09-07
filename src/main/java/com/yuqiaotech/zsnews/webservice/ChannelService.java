@@ -69,7 +69,8 @@ public class ChannelService extends BaseController
      */
     @GetMapping("appListdata")
     public Result AppChannelData(ModelAndView modelAndView, @RequestParam Long cid)
-    {
+    {   
+    	System.out.println("ChannelService.AppChannelData()"+getCurrentUserId());
     	String sql ="SELECT t.f_title, t1.f_id as cfid,t.f_id as f_id FROM t_channel_follower  "
     			+ "t1 inner join t_channel t on t1.f_channel_id = t.f_id  where t.f_kind='频道' and f_user_info_id ="+getCurrentUserId();
     	List mymenu = channelRepository.findMapByNativeSql(sql);

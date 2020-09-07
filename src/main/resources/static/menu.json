@@ -27,11 +27,11 @@
 			},
 			{
 				"id": "1013",
-				"title": "分类管理——TODO",
+				"title": "分类管理",
 				"type": "1",
 				"openType": null,
 				"icon": "layui-icon layui-icon-vercode",
-				"href": "",
+				"href": "/zsnews/category/main",
 				"children": []
 			},
 			{

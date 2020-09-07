@@ -27,7 +27,7 @@
 					<div class="layui-form-item">
 						<label class="layui-form-label">顺序号</label>
 						<div class="layui-input-block">
-							<input type="text" name="displayOrder" autocomplete="off" placeholder="请输入顺序号" class="layui-input" maxlength="5" lay-verify="required|number">
+							<input type="text" name="displayOrder" autocomplete="off" placeholder="请输入顺序号" class="layui-input" th:value="${displayOrder}" maxlength="5" lay-verify="number">
 						</div>
 					</div>
 					<div class="layui-form-item">

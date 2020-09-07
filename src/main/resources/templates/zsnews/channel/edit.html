@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang="en"  xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
 <head>
 <meta charset="UTF-8">
 <title>编辑</title>
@@ -12,49 +12,49 @@
 		<div class="mainBox">
 			<div class="main-container">
 				<div class="main-container">
-																														<div class="layui-form-item layui-hide"  >
-																				<label class="layui-form-label">id</label>
-								<div class="layui-input-block">
-									<input type="text" name="id" th:value="${ channel.id }"  autocomplete="off" placeholder="请输入id" class="layui-input">
-								</div>
-							</div>
-					
-																														<div class="layui-form-item"  >
-														<label class="layui-form-label">标题</label>
-								<div class="layui-input-block">
-									<input type="text" name="title" th:value="${ channel.title }"  autocomplete="off" placeholder="请输入title" class="layui-input">
-								</div>
-							</div>
-					
-																														<div class="layui-form-item"  >
-														<label class="layui-form-label">类型</label>
-								<div class="layui-input-block">
-									<input type="text" name="type" th:value="${ channel.type }"  autocomplete="off" placeholder="请输入type" class="layui-input">
-								</div>
-							</div>
-					
-																														<div class="layui-form-item"  >
-														<label class="layui-form-label">logo</label>
-								<div class="layui-input-block">
-									<input type="text" name="logo" th:value="${ channel.logo }"  autocomplete="off" placeholder="请输入logo" class="layui-input">
-								</div>
-							</div>
-					
-																														<div class="layui-form-item"  >
-														<label class="layui-form-label">栏目</label>
-								<div class="layui-input-block">
-									<input type="text" name="column" th:value="${ channel.column }"  autocomplete="off" placeholder="请输入column" class="layui-input">
-								</div>
-							</div>
-					
-																														<div class="layui-form-item"  >
-														<label class="layui-form-label">描述</label>
-								<div class="layui-input-block">
-									<input type="text" name="description" th:value="${ channel.description }"  autocomplete="off" placeholder="请输入description" class="layui-input">
-								</div>
-							</div>
-					
-									</div>
+					<div class="layui-form-item layui-hide">
+						<label class="layui-form-label">id</label>
+						<div class="layui-input-block">
+							<input type="text" name="id" th:value="${ channel.id }" autocomplete="off" placeholder="请输入id" class="layui-input">
+						</div>
+					</div>
+					<hql:queryForList hql="from Column where status=0 and deltag=0 order by displayOrder" id="columnlist" />
+					<div class="layui-form-item">
+						<label class="layui-form-label">所属栏目</label>
+						<div class="layui-input-block">
+							<select name="columnid" lay-verify="required" lay-search>
+								<option></option>
+								<option th:each="c : ${columnlist}" th:value="${c.id}" th:text="${c.title}"  th:selected="${channel.column!=null && channel.column.id eq c.id}"></option>
+							</select>
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">频道名称</label>
+						<div class="layui-input-block">
+							<input type="text" name="title" th:value="${ channel.title }" autocomplete="off" placeholder="请输入频道名称" class="layui-input" maxlength="50" lay-verify="required">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">地址</label>
+						<div class="layui-input-block">
+							<input type="text" name="h5href" autocomplete="off" placeholder="请输入地址" class="layui-input" maxlength="200" th:value="${ channel.h5href }">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">顺序号</label>
+						<div class="layui-input-block">
+							<input type="text" name="displayOrder" autocomplete="off" placeholder="请输入顺序号" class="layui-input" maxlength="5" lay-verify="number" th:value="${ channel.displayOrder}">
+						</div>
+					</div>
+
+					<div class="layui-form-item">
+						<label class="layui-form-label">描述</label>
+						<div class="layui-input-block">
+							<textarea name="remark" placeholder="请输入描述" class="layui-textarea" maxlength="500" th:text="${ channel.remark}" ></textarea>
+						</div>
+					</div>
+
+				</div>
 			</div>
 		</div>
 		<div class="bottom">
@@ -76,10 +76,10 @@
 			let form = layui.form;
 			let $ = layui.jquery;
 			let MODULE_PATH = "/zsnews/channel/";
-			
+
 			form.on('submit(channel-save)', function(data) {
 				$.ajax({
-					url : MODULE_PATH+'update',
+					url : MODULE_PATH + 'update',
 					data : JSON.stringify(data.field),
 					dataType : 'json',
 					contentType : 'application/json',

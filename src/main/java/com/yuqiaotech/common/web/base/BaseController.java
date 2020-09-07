@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -20,7 +21,7 @@ import com.yuqiaotech.common.tools.servlet.ServletUtil;
 import com.yuqiaotech.common.web.domain.response.ResuTree;
 import com.yuqiaotech.common.web.domain.response.Result;
 import com.yuqiaotech.common.web.domain.response.ResultTable;
-
+import com.yuqiaotech.sysadmin.model.User;
 
 public class BaseController
 {
@@ -29,19 +30,28 @@ public class BaseController
     protected int page = 1;
     
     protected int rows = 15;
-
+    
     @Value("${attachmentRoot}")
     public String attachmentRoot;
+    
+    @Resource
+    private BaseRepository<User, Long> userRepository;
+    
+    public User getCurrentUser()
+    {
+        return userRepository.findUniqueBy("id", getCurrentUserId(), User.class);
+    }
     
     public String getCurrentUsername()
     {
         return ServletUtil.getCurrentUsername();
     }
-
-    public String getCurrentUserType() {
+    
+    public String getCurrentUserType()
+    {
         return ServletUtil.getCurrentUserType();
     }
-
+    
     public Long getCurrentUserId()
     {
         return ServletUtil.getCurrentUserId();
@@ -232,19 +242,22 @@ public class BaseController
         String[] result = new String[emptyNames.size()];
         return emptyNames.toArray(result);
     }
-
-
-    protected void responseWrite(String str) {
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+    
+    protected void responseWrite(String str)
+    {
+        ServletRequestAttributes attributes = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
         HttpServletResponse response = attributes.getResponse();
-
+        
         response.setCharacterEncoding("utf-8");
         response.setContentType("text/html;charset=utf-8");
-
-        try {
+        
+        try
+        {
             response.getWriter().write(str);
-        } catch (IOException var3) {
+        }
+        catch (IOException var3)
+        {
             throw new RuntimeException(var3.getMessage(), var3);
         }
     }

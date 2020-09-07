@@ -12,6 +12,22 @@
 		<div class="layui-card-body">
 			<form class="layui-form" action="">
 				<div class="layui-form-item">
+					<div class="layui-form-item layui-inline">
+						<label class="layui-form-label">频道</label>
+						<div class="layui-input-inline">
+							<input type="text" name="title" placeholder="请输入频道名称或者描述" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item layui-inline">
+						<label class="layui-form-label">状态</label>
+						<div class="layui-input-inline">
+							<select name="status">
+								<option value=""></option>
+								<option value="0">已上架</option>
+								<option value="1">已下架</option>
+							</select>
+						</div>
+					</div>
 					<button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="channel-query">
 						<i class="layui-icon layui-icon-search"></i>
 						查询
@@ -47,6 +63,10 @@
     <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i class="layui-icon layui-icon-delete"></i></button>
 </script>
 
+<script type="text/html" id="status-enable">
+	<input type="checkbox" value="{{d.id}}" lay-skin="switch" lay-text="已上架|已下架"  lay-filter="status-enable" {{ d.status == 0 ? 'checked' : '' }}>
+</script>
+
 <script src="../../component/layui/layui.js"></script>
 <script>
 	layui.use([ 'table', 'form', 'jquery' ], function() {
@@ -58,42 +78,53 @@
 
 		let cols = [ [ {
 			type : 'checkbox'
-		}, 
-																		{
-					title : '标题',
-					field : 'title',
-					align : 'center',
-					width : 100
-				},
-																{
-					title : '类型',
-					field : 'type',
-					align : 'center',
-					width : 100
-				},
-																{
-					title : 'logo',
-					field : 'logo',
-					align : 'center',
-					width : 100
-				},
-																{
-					title : '栏目',
-					field : 'column',
-					align : 'center',
-					width : 100
-				},
-																{
-					title : '描述',
-					field : 'description',
-					align : 'center',
-					width : 100
-				},
-							 {
+		}, {
+			title : '序号',
+			type : 'numbers',
+			align : 'center',
+			width : 80
+		}, {
+			title : '频道名称',
+			field : 'title',
+			align : 'center',
+			width : 200
+		}, {
+			title : '所属栏目',
+			field : 'column',
+			align : 'center',
+			width : 200,
+			templet : function(d) {
+				if (d.column == null)
+					return '';
+				else
+					return '<div>' + d.column.title + '</div>';
+			}
+		}, {
+			title : '栏目描述',
+			field : 'remark',
+			align : 'center',
+			width : 500
+		}, {
+			title : '展示顺序',
+			field : 'displayOrder',
+			align : 'center',
+			width : 150
+		}, {
+			title : '状态',
+			field : 'status',
+			align : 'center',
+			width : 200,
+			templet : '#status-enable'
+		}, {
+			title : '创建时间',
+			field : 'created',
+			align : 'center',
+			width : 200,
+			templet : "<div>{{layui.util.toDateString(d.created, 'yyyy-MM-dd HH:mm:ss')}}</div>"
+		}, {
 			title : '操作',
 			toolbar : '#channel-bar',
-			align : 'center',
-			width : 195
+			align : 'center'
 		} ] ]
 
 		table.render({
@@ -134,6 +165,36 @@
 				where : data.field
 			})
 			return false;
+		});
+
+		form.on('switch(status-enable)', function(obj) {
+			let loading = layer.load();
+			$.ajax({
+				url : MODULE_PATH + "status/" + this.value,
+				dataType : 'json',
+				type : 'get',
+				success : function(result) {
+					layer.close(loading);
+					if (result.success) {
+						if (obj.elem.checked) {
+							layer.msg('启用成功', {
+								icon : 1,
+								time : 5000
+							});
+						} else {
+							layer.msg('停用成功', {
+								icon : 1,
+								time : 5000
+							});
+						}
+					} else {
+						layer.msg('状态更新失败', {
+							icon : 2,
+							time : 1000
+						});
+					}
+				}
+			})
 		});
 
 		window.add = function() {

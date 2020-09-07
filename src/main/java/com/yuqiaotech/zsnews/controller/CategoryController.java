@@ -104,7 +104,9 @@ public class CategoryController extends BaseController
     @GetMapping("add")
     public ModelAndView add(ModelAndView modelAndView)
     {
-        return JumpPage(MODULE_PATH + "add");
+        modelAndView.addObject("displayOrder", getNextDisplayOrder());
+        modelAndView.setViewName(MODULE_PATH + "add");
+        return modelAndView;
     }
     
     @PostMapping("save")

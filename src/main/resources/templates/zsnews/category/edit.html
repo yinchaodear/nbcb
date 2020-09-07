@@ -29,14 +29,14 @@
 					<div class="layui-form-item">
 						<label class="layui-form-label">顺序号</label>
 						<div class="layui-input-block">
-							<input type="text" name="displayOrder" th:value="${ category.displayOrder }" autocomplete="off" placeholder="请输入顺序号" class="layui-input" maxlength="5" lay-verify="required|number">
+							<input type="text" name="displayOrder" th:value="${ category.displayOrder }" autocomplete="off" placeholder="请输入顺序号" class="layui-input" maxlength="5" lay-verify="number">
 						</div>
 					</div>
 
 					<div class="layui-form-item">
 						<label class="layui-form-label">描述</label>
 						<div class="layui-input-block">
-							<textarea name="remark" placeholder="请输入描述" class="layui-textarea" maxlength="500" th:value="${ category.remark}"></textarea>
+							<textarea name="remark" placeholder="请输入描述" class="layui-textarea" maxlength="500" th:text="${ category.remark}"></textarea>
 						</div>
 					</div>
 

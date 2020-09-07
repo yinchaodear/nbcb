@@ -133,10 +133,10 @@ public class ChannelController extends BaseController
     public Result AppChannelData(ModelAndView modelAndView,@RequestParam Long cid)
     {
     	String sql ="SELECT t.f_title, t1.f_id as cfid,t.f_id as f_id FROM t_channel_follower  "
-    			+ "t1 inner join t_channel t on t1.f_channel_id = t.f_id  where t.f_kind='频道' and f_user_info_id ="+cid;
+    			+ "t1 inner join t_channel t on t1.f_channel_id = t.f_id  where t.f_kind='频道' and f_user_info_id ="+getCurrentUserId();
     	List mymenu = channelRepository.findMapByNativeSql(sql);
     	String sqlleft =" select f_title,f_id from t_channel  t  where f_id not in"
-    			+ "   (SELECT  f_channel_id  FROM t_channel_follower where f_user_info_id ="+cid+") and f_kind='频道' " ;   
+    			+ "   (SELECT  f_channel_id  FROM t_channel_follower where f_user_info_id ="+getCurrentUserId()+") and f_kind='频道' " ;   
     	List moremenu = channelRepository.findMapByNativeSql(sqlleft);
     	Map result =new HashMap<>();
     	result.put("mymenu", mymenu);
@@ -168,14 +168,15 @@ public class ChannelController extends BaseController
     @GetMapping("addselfchannel")
     public Result AddSelfChannel(ModelAndView modelAndView,@RequestParam Long id,@RequestParam Long cid)
     {
-    	String sqlexist ="select  * from t_channel_follower where f_channel_id ="+id +" and f_user_info_id ="+cid;
+    	System.out.println("ChannelController.AddSelfChannel()"+getCurrentUserId());
+    	String sqlexist ="select  * from t_channel_follower where f_channel_id ="+id +" and f_user_info_id ="+getCurrentUserId();
     	List exist =channelFollowerRepository.findMapByNativeSql(sqlexist);
     	if(!exist.isEmpty()){
     		Map result =new HashMap<>();
         	result.put("msg","2");//这里表示已经添加过,正常不会走到这段，怕数据出错
             return success(result);
     	}
-        String sql = "insert into t_channel_follower (f_channel_id,f_user_info_id) values ("+id+","+cid+")";
+        String sql = "insert into t_channel_follower (f_channel_id,f_user_info_id) values ("+id+","+getCurrentUserId()+")";
         channelRepository.executeUpdateByNativeSql(sql, null);
     	Map result =new HashMap<>();
     	result.put("msg","1");
@@ -199,7 +200,7 @@ public class ChannelController extends BaseController
     	String sqlgroup ="SELECT t.* , b.* , case when c.number >=10000  then  concat(cast(  convert(c.number/10000,decimal(10,1)) as char),'万' )"
     			+ " else cast(c.number  as char)  end as number  FROM  t_channel t  left  join (select cf.f_id as cfid ,cf.f_channel_id as chid "
     			+ ",cf.f_user_info_id as cid from t_channel_follower cf inner join t_channel c  on c.f_id = "
-    			+ "cf.f_channel_id  where f_user_info_id = "+cid+" and "+wherekindandtype+") b on t.f_id = b.chid "
+    			+ "cf.f_channel_id  where f_user_info_id = "+getCurrentUserId()+" and "+wherekindandtype+") b on t.f_id = b.chid "
     			+" left join (select c.f_id as channelid ,count(1) as number from t_channel_follower cf inner"
     			+ " join t_channel c  on c.f_id = cf.f_channel_id  where  "+wherekindandtype
     			+ " group by  cf.f_channel_id) c on c.channelid  = t.f_id"
@@ -224,7 +225,7 @@ public class ChannelController extends BaseController
     	String sql="SELECT  t.* , b.* ,case when c.number >=10000  then  concat(cast(  convert(c.number/10000,decimal(10,1)) as char),'万' ) else cast(c.number  as char)  end as number "
     			+ "FROM  t_channel t  left  join (select cf.f_id as cfid ,cf.f_channel_id as chid ,cf.f_user_info_id "
     			+ "as cid from t_channel_follower cf inner join t_channel c  on c.f_id = cf.f_channel_id "
-    			+ "where f_user_info_id = "+cid+") b on t.f_id = b.chid "
+    			+ "where f_user_info_id = "+getCurrentUserId()+") b on t.f_id = b.chid "
     			+ "left join (select c.f_id as channelid ,count(1) as number from t_channel_follower cf inner join t_channel c  on c.f_id = cf.f_channel_id "
     			+ "where  c.f_id ="+id+" ) c on c.channelid  = t.f_id where t.f_id = " +id;
     	List channel = channelRepository.findMapByNativeSql(sql);

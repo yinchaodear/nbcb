@@ -239,7 +239,7 @@ public class NewsController extends BaseController
         if(type.equals("推荐")){
         	
         }else if(type.equals("关注")){
-        	wheresql+= " and f_channel_id  in  ( select f_channel_id from t_channel_follower where f_user_info_id ="+cid+" )";
+        	wheresql+= " and f_channel_id  in  ( select f_channel_id from t_channel_follower where f_user_info_id ="+getCurrentUserId()+" )";
         }else{
         	wheresql+= " and f_channel_id ="+id; 
         }
@@ -268,10 +268,10 @@ public class NewsController extends BaseController
     			+ " , case when b.agreecount  >=10000  then  concat(cast(  convert(b.agreecount/10000,decimal(10,1)) as char),'万' )"
     			+ " else cast(b.agreecount   as char)  end as agreecount FROM t_news  "
     			+ " t left join t_channel c on c.f_id = t.f_author_channel_id  left join t_channel_follower cf "
-    			+ " on t.f_author_channel_id = cf.f_channel_id  and cf.f_user_info_id =   "+cid
-    			+ " left join t_news_follower n on n.f_news_id = t.f_id and n.f_user_info_id = "+cid
+    			+ " on t.f_author_channel_id = cf.f_channel_id  and cf.f_user_info_id =   "+getCurrentUserId()
+    			+ " left join t_news_follower n on n.f_news_id = t.f_id and n.f_user_info_id = "+getCurrentUserId()
     			+ " left join (select  cm.f_id as cmid, cm.f_news_id as cmnewsid from t_comment "
-    			+ " cm where   cm.f_type ='点赞'  and cm.f_news_id = "+id+" and cm.f_user_info_id ="+cid+") a on a.cmnewsid = t.f_id"
+    			+ " cm where   cm.f_type ='点赞'  and cm.f_news_id = "+id+" and cm.f_user_info_id ="+getCurrentUserId()+") a on a.cmnewsid = t.f_id"
     			+ " left join  ( SELECT  cm1.f_news_id  as  cm1newsid, count(1) as agreecount FROM t_comment cm1"
     			+ " where f_type ='点赞'  and cm1.f_news_id = "+id+" group by  cm1.f_news_id ) b on b.cm1newsid =t.f_id"
     			+ " where t.f_id = " +id;
@@ -288,10 +288,10 @@ public class NewsController extends BaseController
     public Result AppNewsData(ModelAndView modelAndView,@RequestParam String kind,@RequestParam String type,@RequestParam String currentstatus,@RequestParam Long cid)
     {
     	
-    	System.out.println("NewsController.AppNewsData()"+kind +type+currentstatus+cid);
+    	System.out.println("NewsController.AppNewsData()"+kind +type+currentstatus+getCurrentUserId());
     	String wheresql ="";
     	if("已关注".equals(currentstatus)){
-    	  wheresql = "inner join t_channel_follower cf on cf.f_channel_id = t.f_channel_id and cf.f_user_info_id = "+cid;
+    	  wheresql = "inner join t_channel_follower cf on cf.f_channel_id = t.f_channel_id and cf.f_user_info_id = "+getCurrentUserId();
     	} 	
     	String sql ="SELECT t.*  ,c.f_kind as channelkind,c.f_type as channeltype, a.apprisecount as apprisecount ,c.f_title as channelname "
     			+ "FROM t_news t left join  ( SELECT  f_news_id  as id1,count(1) as apprisecount FROM t_comment cm1 "
@@ -361,14 +361,14 @@ public class NewsController extends BaseController
     @GetMapping("addselfcollect")
     public Result AddSelfCollect(ModelAndView modelAndView,@RequestParam Long nid,@RequestParam Long cid)
     {
-    	String sqlexist ="select  * from t_news_follower where f_news_id ="+nid +" and f_user_info_id ="+cid;
+    	String sqlexist ="select  * from t_news_follower where f_news_id ="+nid +" and f_user_info_id ="+getCurrentUserId();
     	List exist =newsFollowerRepository.findMapByNativeSql(sqlexist);
     	if(!exist.isEmpty()){
     		Map result =new HashMap<>();
         	result.put("msg","2");//这里表示已经添加过,正常不会走到这段，怕数据出错
             return success(result);
     	}
-        String sql = "insert into t_news_follower (f_news_id,f_user_info_id) values ("+nid+","+cid+")";
+        String sql = "insert into t_news_follower (f_news_id,f_user_info_id) values ("+nid+","+getCurrentUserId()+")";
         newsFollowerRepository.executeUpdateByNativeSql(sql, null);
     	Map result =new HashMap<>();
     	result.put("msg","1");
@@ -397,14 +397,14 @@ public class NewsController extends BaseController
     @GetMapping("addselfagree")
     public Result AddSelfAgree(ModelAndView modelAndView,@RequestParam Long nid,@RequestParam Long cid)
     {
-    	String sqlexist ="SELECT * FROM t_comment where f_news_id = "+nid+" and f_user_info_id = "+cid+" and  f_type ='点赞'";
+    	String sqlexist ="SELECT * FROM t_comment where f_news_id = "+nid+" and f_user_info_id = "+getCurrentUserId()+" and  f_type ='点赞'";
     	List exist =newsFollowerRepository.findMapByNativeSql(sqlexist);
     	if(!exist.isEmpty()){
     		Map result =new HashMap<>();
         	result.put("msg","2");//这里表示已经添加过,正常不会走到这段，怕数据出错
             return success(result);
     	}
-        String sql = "insert into t_comment (f_news_id,f_user_info_id,f_type) values ("+nid+","+cid+",'点赞')";
+        String sql = "insert into t_comment (f_news_id,f_user_info_id,f_type) values ("+nid+","+getCurrentUserId()+",'点赞')";
         newsFollowerRepository.executeUpdateByNativeSql(sql, null);
     	Map result =new HashMap<>();
     	result.put("msg","1");

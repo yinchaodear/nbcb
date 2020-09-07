@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang="en"  xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
 <head>
 <meta charset="UTF-8">
 <title>新增</title>
@@ -12,13 +12,29 @@
 		<div class="mainBox">
 			<div class="main-container">
 				<div class="main-container">
-																																				<div class="layui-form-item">
-								<label class="layui-form-label">标题</label>
-								<div class="layui-input-block">
-									<input type="text" name="title"  autocomplete="off" placeholder="请输入标题" class="layui-input">
-								</div>
-							</div>
-															</div>
+					<hql:queryForList hql="from Channel where status=0 and deltag=0 order by displayOrder" id="channellist" />
+					<div class="layui-form-item">
+						<label class="layui-form-label">所属频道</label>
+						<div class="layui-input-block">
+							<select name="channelId" lay-verify="required" lay-search>
+								<option></option>
+								<option th:each="c : ${channellist}" th:value="${c.id}" th:text="${c.title}"></option>
+							</select>
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">专题名称</label>
+						<div class="layui-input-block">
+							<input type="text" name="title" autocomplete="off" placeholder="请输入专题名称" class="layui-input" maxlength="50" lay-verify="required">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">描述</label>
+						<div class="layui-input-block">
+							<textarea name="remark" placeholder="请输入描述" class="layui-textarea" maxlength="500"></textarea>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="bottom">
@@ -40,10 +56,10 @@
 			let form = layui.form;
 			let $ = layui.jquery;
 			let MODULE_PATH = "/zsnews/topic/";
-			
+
 			form.on('submit(topic-save)', function(data) {
 				$.ajax({
-					url : MODULE_PATH+'save',
+					url : MODULE_PATH + 'save',
 					data : JSON.stringify(data.field),
 					dataType : 'json',
 					contentType : 'application/json',

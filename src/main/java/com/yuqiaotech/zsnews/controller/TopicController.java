@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,9 @@ import com.yuqiaotech.common.web.domain.dao.PaginationSupport;
 import com.yuqiaotech.common.web.domain.request.PageDomain;
 import com.yuqiaotech.common.web.domain.response.Result;
 import com.yuqiaotech.common.web.domain.response.ResultTable;
+import com.yuqiaotech.zsnews.NewsDicConstants;
+import com.yuqiaotech.zsnews.bean.TopicBean;
+import com.yuqiaotech.zsnews.model.Channel;
 import com.yuqiaotech.zsnews.model.Topic;
 
 @RestController
@@ -38,6 +43,9 @@ public class TopicController extends BaseController
     @Autowired
     private BaseRepository<Topic, Long> topicRepository;
     
+    @Autowired
+    private BaseRepository<Channel, Long> channelRepository;
+    
     @GetMapping("main")
     public ModelAndView main()
     {
@@ -48,6 +56,7 @@ public class TopicController extends BaseController
     public ResultTable data(Topic topic, PageDomain pageDomain)
     {
         DetachedCriteria dc = composeDetachedCriteria(topic);
+        dc.addOrder(Order.desc("created"));
         PaginationSupport ps = topicRepository.paginateByCriteria(dc, pageDomain.getPage(), pageDomain.getLimit());
         return pageTable(ps.getItems(), ps.getTotalCount());
     }
@@ -55,7 +64,40 @@ public class TopicController extends BaseController
     public DetachedCriteria composeDetachedCriteria(Topic topic)
     {
         DetachedCriteria dc = DetachedCriteria.forClass(Topic.class);
+        if (topic != null)
+        {
+            if (StringUtils.isNotEmpty(topic.getTitle()))
+            {
+                dc.add(Restrictions.or(Restrictions.ilike("title", topic.getTitle(), MatchMode.ANYWHERE),
+                    Restrictions.ilike("remark", topic.getTitle(), MatchMode.ANYWHERE)));
+            }
+            if (topic.getStatus() != null)
+            {
+                dc.add(Restrictions.eq("status", topic.getStatus()));
+            }
+        }
+        dc.add(Restrictions.eq("deltag", NewsDicConstants.ICommon.DELETE_NO));
         return dc;
+    }
+    
+    @GetMapping("status/{cid}")
+    public Result status(@PathVariable Long cid)
+    {
+        Topic topic = topicRepository.findUniqueBy("id", cid, Topic.class);
+        if (topic != null)
+        {
+            if (topic.getStatus() == null || topic.getStatus() == NewsDicConstants.ICommon.STATUS_DOWN)
+            {
+                topic.setStatus(NewsDicConstants.ICommon.STATUS_UP);
+            }
+            else
+            {
+                topic.setStatus(NewsDicConstants.ICommon.STATUS_DOWN);
+            }
+            
+            topicRepository.update(topic);
+        }
+        return success();
     }
     
     @GetMapping("add")
@@ -65,8 +107,18 @@ public class TopicController extends BaseController
     }
     
     @PostMapping("save")
-    public Result save(@RequestBody Topic topic)
+    public Result save(@RequestBody TopicBean topicBean)
     {
+        Topic topic = new Topic();
+        BeanUtils.copyProperties(topicBean, topic);
+        
+        if (topicBean.getChannelId() != null)
+        {
+            Channel channel = channelRepository.findUniqueBy("id", topicBean.getChannelId(), Channel.class);
+            topic.setChannel(channel);
+        }
+        topic.setStatus(NewsDicConstants.ICommon.STATUS_UP);//默认上架
+        topic.setDeltag(NewsDicConstants.ICommon.DELETE_NO);//默认未删除
         topicRepository.save(topic);
         return decide(true);
     }
@@ -80,10 +132,34 @@ public class TopicController extends BaseController
     }
     
     @PutMapping("update")
-    public Result update(@RequestBody Topic topic)
+    public Result update(@RequestBody TopicBean topicBean)
     {
-        Topic topicdb = topicRepository.findUniqueBy("id", topic.getId(), Topic.class);
-        BeanUtils.copyProperties(topic, topicdb, getNullPropertyNames(topic));
+        Topic topicdb = topicRepository.findUniqueBy("id", topicBean.getId(), Topic.class);
+        Channel channel = null;
+        if (topicBean.getChannelId() != null)
+        {
+            Channel channeldb = topicdb.getChannel();
+            if (channeldb == null || !channeldb.getId().equals(topicBean.getChannelId()))
+            {
+                //如果原来没有。或者新的修改了
+                channel = channelRepository.findUniqueBy("id", topicBean.getChannelId(), Channel.class);
+            }
+        }
+        BeanUtils.copyProperties(topicBean, topicdb, getNullPropertyNames(topicBean));
+        if (channel != null)
+        {
+            topicdb.setChannel(channel);
+        }
+        
+        if (topicdb.getDeltag() == null)
+        {
+            topicdb.setDeltag(NewsDicConstants.ICommon.DELETE_NO);
+        }
+        if (topicdb.getStatus() == null)
+        {
+            topicdb.setStatus(NewsDicConstants.ICommon.STATUS_UP);
+        }
+        
         topicRepository.update(topicdb);
         return decide(true);
     }
@@ -92,7 +168,11 @@ public class TopicController extends BaseController
     @Logging(title = "删除角色")
     public Result remove(@PathVariable Long id)
     {
-        topicRepository.remove(id, Topic.class);
+        //TODO:这里要看，有没有关联，如果有的话，不能删除
+        //FIXME:栏目删除为逻辑删除
+        Topic topicdb = topicRepository.findUniqueBy("id", id, Topic.class);
+        topicdb.setDeltag(NewsDicConstants.ICommon.DELETE_YES);
+        topicRepository.update(topicdb);
         return decide(true);
     }
     
@@ -107,7 +187,11 @@ public class TopicController extends BaseController
             DetachedCriteria dc = DetachedCriteria.forClass(Topic.class);
             dc.add(Restrictions.in("id", cdids));
             List<Topic> topicList = topicRepository.findByCriteria(dc);
-            topicList.forEach(topicRepository::delete);
+            for (Topic topicdb : topicList)
+            {
+                topicdb.setDeltag(NewsDicConstants.ICommon.DELETE_YES);
+                topicRepository.update(topicdb);
+            }
             return decide(true);
         }
         return decide(false);

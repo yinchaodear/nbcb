@@ -2,6 +2,7 @@
 package com.yuqiaotech.zsnews.controller;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -192,4 +194,15 @@ public class ColumnController extends BaseController
         }
         return decide(false);
     }
+    
+    @GetMapping("listcolumn")
+    public Result AppColum(ModelAndView modelAndView)
+    {
+    	String sql ="SELECT f_title as title,f_h5href as path,f_id FROM t_column order by f_display_order asc";
+    	List column = columnRepository.findMapByNativeSql(sql);	
+    	Map result =new HashMap<>();
+    	result.put("column", column);
+        return success(result);
+    }
+    
 }

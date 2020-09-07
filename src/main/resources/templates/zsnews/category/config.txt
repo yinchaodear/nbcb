@@ -1,0 +1,9 @@
+{
+	"id": "1012",
+	"title": "分类 可以是全局 也可以是局部管理",
+	"type": "1",
+	"openType": null,
+	"icon": "layui-icon layui-icon-vercode",
+	"href": "/zsnews/category/main",
+	"children": []
+}

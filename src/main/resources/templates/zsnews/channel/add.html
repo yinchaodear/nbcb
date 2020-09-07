@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang="en"  xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
 <head>
 <meta charset="UTF-8">
 <title>新增</title>
@@ -12,37 +12,41 @@
 		<div class="mainBox">
 			<div class="main-container">
 				<div class="main-container">
-																																				<div class="layui-form-item">
-								<label class="layui-form-label">标题</label>
-								<div class="layui-input-block">
-									<input type="text" name="title"  autocomplete="off" placeholder="请输入标题" class="layui-input">
-								</div>
-							</div>
-																															<div class="layui-form-item">
-								<label class="layui-form-label">类型</label>
-								<div class="layui-input-block">
-									<input type="text" name="type"  autocomplete="off" placeholder="请输入类型" class="layui-input">
-								</div>
-							</div>
-																															<div class="layui-form-item">
-								<label class="layui-form-label">logo</label>
-								<div class="layui-input-block">
-									<input type="text" name="logo"  autocomplete="off" placeholder="请输入logo" class="layui-input">
-								</div>
-							</div>
-																															<div class="layui-form-item">
-								<label class="layui-form-label">栏目</label>
-								<div class="layui-input-block">
-									<input type="text" name="column"  autocomplete="off" placeholder="请输入栏目" class="layui-input">
-								</div>
-							</div>
-																															<div class="layui-form-item">
-								<label class="layui-form-label">描述</label>
-								<div class="layui-input-block">
-									<input type="text" name="description"  autocomplete="off" placeholder="请输入描述" class="layui-input">
-								</div>
-							</div>
-															</div>
+					<hql:queryForList hql="from Column where status=0 and deltag=0 order by displayOrder" id="columnlist" />
+					<div class="layui-form-item">
+						<label class="layui-form-label">所属栏目</label>
+						<div class="layui-input-block">
+							<select name="columnid" lay-verify="required" lay-search>
+								<option></option>
+								<option th:each="c : ${columnlist}" th:value="${c.id}" th:text="${c.title}"></option>
+							</select>
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">频道名称</label>
+						<div class="layui-input-block">
+							<input type="text" name="title" autocomplete="off" placeholder="请输入标题" class="layui-input" maxlength="50" lay-verify="required">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">地址</label>
+						<div class="layui-input-block">
+							<input type="text" name="h5href" autocomplete="off" placeholder="请输入地址" class="layui-input" maxlength="200">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">顺序号</label>
+						<div class="layui-input-block">
+							<input type="text" name="displayOrder" autocomplete="off" placeholder="请输入顺序号" class="layui-input" th:value="${displayOrder}" maxlength="5" lay-verify="number">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">描述</label>
+						<div class="layui-input-block">
+							<textarea name="remark" placeholder="请输入描述" class="layui-textarea" maxlength="500"></textarea>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="bottom">
@@ -64,10 +68,10 @@
 			let form = layui.form;
 			let $ = layui.jquery;
 			let MODULE_PATH = "/zsnews/channel/";
-			
+
 			form.on('submit(channel-save)', function(data) {
 				$.ajax({
-					url : MODULE_PATH+'save',
+					url : MODULE_PATH + 'save',
 					data : JSON.stringify(data.field),
 					dataType : 'json',
 					contentType : 'application/json',

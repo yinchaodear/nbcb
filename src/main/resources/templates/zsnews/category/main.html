@@ -13,9 +13,9 @@
 			<form class="layui-form" action="">
 				<div class="layui-form-item">
 					<div class="layui-form-item layui-inline">
-						<label class="layui-form-label">频道</label>
+						<label class="layui-form-label">分类</label>
 						<div class="layui-input-inline">
-							<input type="text" name="title" placeholder="请输入频道名称或者描述" class="layui-input">
+							<input type="text" name="title" placeholder="请输入分类名称或者描述" class="layui-input">
 						</div>
 					</div>
 					<div class="layui-form-item layui-inline">
@@ -28,7 +28,7 @@
 							</select>
 						</div>
 					</div>
-					<button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="channel-query">
+					<button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="category-query">
 						<i class="layui-icon layui-icon-search"></i>
 						查询
 					</button>
@@ -42,12 +42,12 @@
 	</div>
 	<div class="layui-card">
 		<div class="layui-card-body">
-			<table id="channel-table" lay-filter="channel-table"></table>
+			<table id="category-table" lay-filter="category-table"></table>
 		</div>
 	</div>
 </body>
 
-<script type="text/html" id="channel-toolbar">
+<script type="text/html" id="category-toolbar">
     <button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">
         <i class="layui-icon layui-icon-add-1"></i>
         新增
@@ -58,7 +58,7 @@
     </button>
 </script>
 
-<script type="text/html" id="channel-bar">
+<script type="text/html" id="category-bar">
     <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i></button>
     <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i class="layui-icon layui-icon-delete"></i></button>
 </script>
@@ -74,7 +74,7 @@
 		let form = layui.form;
 		let $ = layui.jquery;
 
-		let MODULE_PATH = "/zsnews/channel/";
+		let MODULE_PATH = "/zsnews/category/";
 
 		let cols = [ [ {
 			type : 'checkbox'
@@ -84,23 +84,12 @@
 			align : 'center',
 			width : 80
 		}, {
-			title : '频道名称',
+			title : '分类名称',
 			field : 'title',
 			align : 'center',
 			width : 200
 		}, {
-			title : '所属栏目',
-			field : 'column',
-			align : 'center',
-			width : 200,
-			templet : function(d) {
-				if (d.column == null)
-					return '';
-				else
-					return '<div>' + d.column.title + '</div>';
-			}
-		}, {
-			title : '栏目描述',
+			title : '分类描述',
 			field : 'remark',
 			align : 'center',
 			width : 500
@@ -119,28 +108,28 @@
 			title : '创建时间',
 			field : 'created',
 			align : 'center',
-			width : 200,
+			width : 300,
 			templet : "<div>{{layui.util.toDateString(d.created, 'yyyy-MM-dd HH:mm:ss')}}</div>"
 		}, {
 			title : '操作',
-			toolbar : '#channel-bar',
+			toolbar : '#category-bar',
 			align : 'center'
 		} ] ]
 
 		table.render({
-			elem : '#channel-table',
+			elem : '#category-table',
 			url : MODULE_PATH + 'data',
 			page : true,
 			cols : cols,
 			skin : 'line',
-			toolbar : '#channel-toolbar',
+			toolbar : '#category-toolbar',
 			defaultToolbar : [ {
 				layEvent : 'refresh',
 				icon : 'layui-icon-refresh',
 			}, 'filter', 'print', 'exports' ]
 		});
 
-		table.on('tool(channel-table)', function(obj) {
+		table.on('tool(category-table)', function(obj) {
 			if (obj.event === 'remove') {
 				window.remove(obj);
 			} else if (obj.event === 'edit') {
@@ -150,7 +139,7 @@
 			}
 		});
 
-		table.on('toolbar(channel-table)', function(obj) {
+		table.on('toolbar(category-table)', function(obj) {
 			if (obj.event === 'add') {
 				window.add();
 			} else if (obj.event === 'refresh') {
@@ -160,8 +149,8 @@
 			}
 		});
 
-		form.on('submit(channel-query)', function(data) {
-			table.reload('channel-table', {
+		form.on('submit(category-query)', function(data) {
+			table.reload('category-table', {
 				where : data.field
 			})
 			return false;
@@ -279,7 +268,7 @@
 								icon : 1,
 								time : 1000
 							}, function() {
-								table.reload('channel-table');
+								table.reload('category-table');
 							});
 						} else {
 							layer.msg(result.msg, {
@@ -293,7 +282,7 @@
 		}
 
 		window.refresh = function() {
-			table.reload('channel-table');
+			table.reload('category-table');
 		}
 	})
 </script>

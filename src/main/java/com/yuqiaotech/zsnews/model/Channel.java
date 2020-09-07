@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.yuqiaotech.common.web.base.BaseModel;
 import com.yuqiaotech.sysadmin.model.User;
 
@@ -18,6 +19,8 @@ import com.yuqiaotech.sysadmin.model.User;
 @Entity
 public class Channel extends BaseModel
 {
+    private static final long serialVersionUID = -6158563579216142351L;
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,16 +35,17 @@ public class Channel extends BaseModel
     
     private String title;
     
+    @JsonIgnoreProperties(value = {"hibernateLazyInitializer"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "f_column_id")
     private Column column;
     
-    private String description;
-    
+    @JsonIgnoreProperties(value = {"hibernateLazyInitializer"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "f_user_id")
     private User user;//属于哪个运营人员
     
+    @JsonIgnoreProperties(value = {"hibernateLazyInitializer"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "f_userinfo_id")
     private UserInfo userinfo;//属于哪个app用户
@@ -49,6 +53,12 @@ public class Channel extends BaseModel
     private String remark;//频道的描述
     
     private Integer displayOrder;//
+    
+    private Integer status;//0：上架状态  1：下架状态
+    
+    private String h5href;//外部链接地址
+    
+    private Integer deltag;//删除标识
     
     public Long getId()
     {
@@ -116,20 +126,6 @@ public class Channel extends BaseModel
         this.column = column;
     }
     
-    /**
-     * 描述。
-     * @return
-     */
-    public String getDescription()
-    {
-        return description;
-    }
-    
-    public void setDescription(String description)
-    {
-        this.description = description;
-    }
-    
     public String getKind()
     {
         return kind;
@@ -194,4 +190,33 @@ public class Channel extends BaseModel
         this.displayOrder = displayOrder;
     }
     
+    public Integer getStatus()
+    {
+        return status;
+    }
+    
+    public void setStatus(Integer status)
+    {
+        this.status = status;
+    }
+    
+    public String getH5href()
+    {
+        return h5href;
+    }
+    
+    public void setH5href(String h5href)
+    {
+        this.h5href = h5href;
+    }
+    
+    public Integer getDeltag()
+    {
+        return deltag;
+    }
+    
+    public void setDeltag(Integer deltag)
+    {
+        this.deltag = deltag;
+    }
 }

@@ -19,15 +19,9 @@
 						</div>
 					</div>
 					<div class="layui-form-item">
-						<label class="layui-form-label">地址</label>
-						<div class="layui-input-block">
-							<input type="text" name="h5href" autocomplete="off" placeholder="请输入地址" class="layui-input" maxlength="200">
-						</div>
-					</div>
-					<div class="layui-form-item">
 						<label class="layui-form-label">顺序号</label>
 						<div class="layui-input-block">
-							<input type="text" name="displayOrder" autocomplete="off" placeholder="请输入顺序号" class="layui-input" th:value="${displayOrder}" maxlength="5" lay-verify="number">
+							<input type="text" name="displayOrder" autocomplete="off" placeholder="请输入顺序号" class="layui-input" maxlength="5" th:value="${displayOrder}" lay-verify="number">
 						</div>
 					</div>
 					<div class="layui-form-item">
@@ -41,7 +35,7 @@
 		</div>
 		<div class="bottom">
 			<div class="button-container">
-				<button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="column-save">
+				<button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="category-save">
 					<i class="layui-icon layui-icon-ok"></i>
 					提交
 				</button>
@@ -57,9 +51,9 @@
 		layui.use([ 'form', 'jquery' ], function() {
 			let form = layui.form;
 			let $ = layui.jquery;
-			let MODULE_PATH = "/zsnews/column/";
+			let MODULE_PATH = "/zsnews/category/";
 
-			form.on('submit(column-save)', function(data) {
+			form.on('submit(category-save)', function(data) {
 				$.ajax({
 					url : MODULE_PATH + 'save',
 					data : JSON.stringify(data.field),
@@ -73,7 +67,7 @@
 								time : 1000
 							}, function() {
 								parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
-								parent.layui.table.reload("column-table");
+								parent.layui.table.reload("category-table");
 							});
 						} else {
 							layer.msg(result.msg, {

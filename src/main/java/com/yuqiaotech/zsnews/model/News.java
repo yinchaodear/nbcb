@@ -53,6 +53,12 @@ public class News extends BaseModel
     @JoinColumn(name = "f_author_channel_id")
     private Channel authorChannel;
     
+    
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "f_column_id")
+    private Column column;
+    
     private String attaches;//附件
     
     private Integer displayOrder;//小的数字排在前面
@@ -238,6 +244,14 @@ public class News extends BaseModel
 
 	public void setCategory(String category) {
 		this.category = category;
+	}
+
+	public Column getColumn() {
+		return column;
+	}
+
+	public void setColumn(Column column) {
+		this.column = column;
 	}
     
     

@@ -12,6 +12,7 @@ import com.yuqiaotech.common.web.domain.response.ResultTable;
 import com.yuqiaotech.sysadmin.model.User;
 import com.yuqiaotech.zsnews.model.Channel;
 import com.yuqiaotech.zsnews.model.Column;
+import com.yuqiaotech.zsnews.model.HistorySearchRecord;
 import com.yuqiaotech.zsnews.model.News;
 import com.yuqiaotech.zsnews.model.NewsFollower;
 import org.apache.commons.lang3.StringUtils;
@@ -54,6 +55,8 @@ public class NewsService extends BaseController
     @Autowired
     private BaseRepository<Column, Long> columnRepository;
    
+    @Autowired
+    private BaseRepository<HistorySearchRecord, Long> historySearchRecordRepository;
     /*
      * 这里是首页进来的时候 判断的  推荐的目前就是所有的, 关注的就是自己关注的channel的 现在关注的 都是 authchannel  文章里面是
      */
@@ -346,6 +349,64 @@ public class NewsService extends BaseController
         return abstractImg(rtn, news);
     }
     
+    
+    
+    private void generateImage(String realStr, String filePath) {
+        BASE64Decoder decoder = new BASE64Decoder();
+        BufferedOutputStream bos = null;
+        try {
+            File f = new File(filePath);
+            if (!f.getParentFile().exists()) {
+                f.getParentFile().mkdirs();
+            }
+            byte[] data = decoder.decodeBuffer(realStr);
+            bos = new BufferedOutputStream(new FileOutputStream(filePath));
+            bos.write(data);
+            bos.flush();
+            bos.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        } finally {
+            if (bos != null){
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+    
+    
+   /*
+    * 搜索页面的内容   
+    */
+    @GetMapping("querynewsByKewords")
+    public Result AppNewsByKewords(@RequestParam String keyword)
+    {
+    	
+    	System.out.println("NewsService.AppNewsByKewords()"+keyword);
+    	String sqlquery ="SELECT * FROM t_history_search_record where f_user_info_id =  "+getCurrentUserId()+" and f_content ='"+keyword+"' ";
+    	List query = historySearchRecordRepository.findMapByNativeSql(sqlquery);
+    	if(query.isEmpty()){
+    		String sqlupdate ="insert into  t_history_search_record (f_user_info_id,f_content ) values ("+getCurrentUserId()+",'"+keyword+"')";
+    		historySearchRecordRepository.executeUpdateByNativeSql(sqlupdate, null);
+    	}
+    	String wheresql =" where t.f_title like '%"+keyword+"%'"+" or t.f_content like '%"+keyword+"%'"+"or c.f_title like '%"+keyword+"%'";
+    	String sql ="SELECT t.*  ,c.f_kind as channelkind,c.f_type as channeltype, b.apprisecount as  apprisecount ,b1.agreecount,"
+    			+ "c.f_title as channelname FROM t_news t "
+    			+" left join  ( SELECT f_news_id  as id2, count(1) "
+    			+ "as apprisecount FROM t_comment cm where cm.f_type ='回答' or cm.f_type ='评论' group by f_news_id ) b on b.id2 =t.f_id left join "
+    			+ "( SELECT f_news_id  as id3, count(1)  as agreecount FROM t_comment cm1 where cm1.f_type ='点赞' group by f_news_id ) "
+    			+ "b1 on b1.id3 =t.f_id"
+    			+ " left join t_channel  c on  c.f_id = t.f_channel_id "
+    			+ wheresql
+    			+ " order by f_display_order asc ";
+    	List news = newsRepository.findMapByNativeSql(sql);	
+    	Map result =new HashMap<>();
+    	result.put("news", news);
+        return success(result);
+    }
     
   
 }

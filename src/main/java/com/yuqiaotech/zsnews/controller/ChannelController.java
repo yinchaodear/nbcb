@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.yuqiaotech.zsnews.service.IChannelService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.DetachedCriteria;
@@ -14,15 +15,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.yuqiaotech.common.logging.annotation.Logging;
@@ -61,6 +54,10 @@ public class ChannelController extends BaseController
     
     @Autowired
     private BaseRepository<Column, Long> columnRepository;
+
+    @Autowired
+    private IChannelService iChannelService;
+
     
     @GetMapping("main")
     public ModelAndView main()
@@ -241,5 +238,16 @@ public class ChannelController extends BaseController
         }
         return decide(false);
     }
-    
+
+
+    @RequestMapping("/TeamChannels")
+    public Result selectNews(@RequestParam Map<String, Object> params) {
+        return success(iChannelService.selectTeamChannels(getCurrentUserId(), params));
+    }
+
+    @RequestMapping("/team/toggleJoin")
+    public Result toggleJoinTeam(@RequestParam Map<String, Object> params) {
+        return success(iChannelService.toogleJoinTeam(getCurrentUserId(), params));
+    }
+
 }

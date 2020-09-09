@@ -45,7 +45,7 @@ public class INewsServiceImpl implements INewsService {
 			String wheresql = "where 1 =1 and t.f_kind ='" + kind + "'";
 
 			String sql = " select ifnull(zanNum, 0) zanNum,ifnull(pinglunNum, 0) pinglunNum, ifnull(shoucangNum, 0) shoucangNum,  \n" +
-					" ifnull(uc.userTotalNum,0) userTotalNum,ui.f_username userName, t.f_title title, t.f_content content\n" +
+					" uc.userTotalNum,ui.f_username userName, t.f_title title, t.f_content content\n" +
 					"from t_news t\n" +
 					"left join t_channel c on t.f_author_channel_id = c.f_id \n" +
 					"left join t_user_info ui on c.f_userinfo_id = ui.f_id\n" +

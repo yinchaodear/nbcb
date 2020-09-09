@@ -62,7 +62,7 @@ public class News extends BaseModel
     private String attaches;//附件
     
     private Integer displayOrder;//小的数字排在前面
-    
+    private String displaytype;//展现形式，如果是1 就名称加三个图片 如果是2 就是左边是名称 右边一个图  如果是3 就是社区模式的显示  如果是4 就是表示是 图文类型的 ，进的详情页不一样
     public Long getId()
     {
         return id;
@@ -252,6 +252,14 @@ public class News extends BaseModel
 
 	public void setColumn(Column column) {
 		this.column = column;
+	}
+
+	public String getDisplaytype() {
+		return displaytype;
+	}
+
+	public void setDisplaytype(String displaytype) {
+		this.displaytype = displaytype;
 	}
     
     

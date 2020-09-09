@@ -1,7 +1,9 @@
 
 package com.yuqiaotech.zsnews.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -10,7 +12,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,19 +37,20 @@ import com.yuqiaotech.zsnews.NewsDicConstants;
 import com.yuqiaotech.zsnews.bean.ChannelBean;
 import com.yuqiaotech.zsnews.model.Category;
 import com.yuqiaotech.zsnews.model.Channel;
+import com.yuqiaotech.zsnews.model.ChannelCategoryMapping;
 import com.yuqiaotech.zsnews.model.ChannelFollower;
 import com.yuqiaotech.zsnews.model.Column;
 
 /**
- * 频道管理
+ * 浙商号管理
  *
  */
 @RestController
-@RequestMapping(value = {"zsnews/channel", "ws/channel"})
+@RequestMapping(value = {"zsnews/zshchannel"})
 @CrossOrigin(origins = "*", maxAge = 3600)
-public class ChannelController extends BaseController
+public class ZshChannelController extends BaseController
 {
-    private static String MODULE_PATH = "zsnews/channel/";
+    private static String MODULE_PATH = "zsnews/zshchannel/";
     
     @Autowired
     private BaseRepository<Channel, Long> channelRepository;
@@ -62,6 +64,9 @@ public class ChannelController extends BaseController
     @Autowired
     private BaseRepository<Column, Long> columnRepository;
     
+    @Autowired
+    private BaseRepository<ChannelCategoryMapping, Long> channelCategoryMappingRepository;
+    
     @GetMapping("main")
     public ModelAndView main()
     {
@@ -71,9 +76,26 @@ public class ChannelController extends BaseController
     @GetMapping("data")
     public ResultTable data(Channel channel, PageDomain pageDomain)
     {
-        DetachedCriteria dc = composeDetachedCriteria(channel);
-        dc.addOrder(Order.asc("displayOrder"));
-        PaginationSupport ps = channelRepository.paginateByCriteria(dc, pageDomain.getPage(), pageDomain.getLimit());
+        String querySql =
+            "SELECT c1.*,GROUP_CONCAT(c2.f_title) title2 FROM t_channel c1 LEFT JOIN t_channe_catego_mappin mapping ON c1.f_id=mapping.f_channel_id LEFT JOIN t_category c2 ON mapping.f_category_id=c2.f_id WHERE c1.f_deltag=0  AND c1.f_kind='"
+                + NewsDicConstants.IChannel.KIND.ZSH + "'";
+        if (StringUtils.isNotEmpty(channel.getTitle()))
+        {
+            querySql += " and (c1.f_title like '%" + channel.getTitle() + "%' or c1.f_remark like '%"
+                + channel.getTitle() + "%')";
+        }
+        if (channel.getStatus() != null)
+        {
+            querySql += " and c1.f_status =" + channel.getStatus();
+        }
+        if (StringUtils.isNotEmpty(channel.getType()))
+        {
+            querySql += " and c1.f_type ='" + channel.getType() + "'";
+        }
+        
+        querySql += " GROUP BY c1.f_id order by c1.f_display_order asc";
+        PaginationSupport ps =
+            channelRepository.paginateAsMapByNativeSql(querySql, null, pageDomain.getPage(), pageDomain.getLimit());
         return pageTable(ps.getItems(), ps.getTotalCount());
     }
     
@@ -113,7 +135,7 @@ public class ChannelController extends BaseController
             }
         }
         dc.add(Restrictions.eq("deltag", NewsDicConstants.ICommon.DELETE_NO));
-        dc.add(Restrictions.eq("kind", NewsDicConstants.IChannel.KIND.PD));
+        dc.add(Restrictions.eq("kind", NewsDicConstants.IChannel.KIND.ZSH));
         return dc;
     }
     
@@ -131,27 +153,46 @@ public class ChannelController extends BaseController
         Channel channel = new Channel();
         BeanUtils.copyProperties(channelBean, channel);
         
-        if (channelBean.getColumnid() != null)
+        List<Category> clist = new ArrayList<>();
+        if (StringUtils.isNotEmpty(channelBean.getCategoryids()))
         {
-            Column column = columnRepository.findUniqueBy("id", channelBean.getColumnid(), Column.class);
-            channel.setColumn(column);
+            String[] csarr = channelBean.getCategoryids().split(",");
+            for (int i = 0; i < csarr.length; i++)
+            {
+                if (StringUtils.isNotEmpty(csarr[i]))
+                {
+                    Category c = categoryRepository.findUniqueBy("id", Long.valueOf(csarr[i]), Category.class);
+                    if (c != null)
+                    {
+                        clist.add(c);
+                    }
+                }
+            }
         }
         channel.setStatus(NewsDicConstants.ICommon.STATUS_UP);//默认上架
         channel.setDeltag(NewsDicConstants.ICommon.DELETE_NO);//默认未删除
-        channel.setKind(NewsDicConstants.IChannel.KIND.PD);
+        channel.setKind(NewsDicConstants.IChannel.KIND.ZSH);
         channel.setUser(getCurrentUser());
         if (channel.getDisplayOrder() == null)
         {
             channel.setDisplayOrder(getNextDisplayOrder());
         }
-        channelRepository.save(channel);
+        channel = channelRepository.save(channel);
+        for (Category category : clist)
+        {
+            ChannelCategoryMapping ccm = new ChannelCategoryMapping();
+            ccm.setChannel(channel);
+            ccm.setCategory(category);
+            
+            channelCategoryMappingRepository.save(ccm);
+        }
         return decide(true);
     }
     
     private Integer getNextDisplayOrder()
     { //查当前最大的顺序号
         String sql =
-            "select ifnull(max(f_display_order),0) maxorder from t_channel where f_kind='频道'  and f_display_order is not null";
+            "select ifnull(max(f_display_order),0) maxorder from t_channel where f_kind='浙商号'    and f_display_order is not null";
         List<Map<String, Object>> rst = channelRepository.findMapByNativeSql(sql);
         Integer displayOrder = 1;
         if (CollectionUtils.isNotEmpty(rst) && rst.get(0) != null && !rst.get(0).isEmpty())
@@ -175,20 +216,23 @@ public class ChannelController extends BaseController
     {
         Channel channeldb = channelRepository.findUniqueBy("id", channelBean.getId(), Channel.class);
         Column column = null;
-        if (channelBean.getColumnid() != null)
+        List<Category> clist = new ArrayList<>();
+        if (StringUtils.isNotEmpty(channelBean.getCategoryids()))
         {
-            Column columndb = channeldb.getColumn();
-            if (columndb == null || !columndb.getId().equals(channelBean.getColumnid()))
+            String[] csarr = channelBean.getCategoryids().split(",");
+            for (int i = 0; i < csarr.length; i++)
             {
-                //如果原来没有。或者新的修改了
-                column = columnRepository.findUniqueBy("id", channelBean.getColumnid(), Column.class);
+                if (StringUtils.isNotEmpty(csarr[i]))
+                {
+                    Category c = categoryRepository.findUniqueBy("id", Long.valueOf(csarr[i]), Category.class);
+                    if (c != null)
+                    {
+                        clist.add(c);
+                    }
+                }
             }
         }
         BeanUtils.copyProperties(channelBean, channeldb, getNullPropertyNames(channelBean));
-        if (column != null)
-        {
-            channeldb.setColumn(column);
-        }
         
         if (channeldb.getDisplayOrder() == null)
         {
@@ -202,9 +246,21 @@ public class ChannelController extends BaseController
         {
             channeldb.setStatus(NewsDicConstants.ICommon.STATUS_UP);
         }
-        channeldb.setKind(NewsDicConstants.IChannel.KIND.PD);
+        channeldb.setKind(NewsDicConstants.IChannel.KIND.ZSH);
         channeldb.setUser(getCurrentUser());
         channelRepository.update(channeldb);
+        
+        channelCategoryMappingRepository
+            .executeUpdate("delete from ChannelCategoryMapping where channel.id=" + channeldb.getId(), new HashMap<>());
+        for (Category category : clist)
+        {
+            ChannelCategoryMapping ccm = new ChannelCategoryMapping();
+            ccm.setChannel(channeldb);
+            ccm.setCategory(category);
+            
+            channelCategoryMappingRepository.save(ccm);
+        }
+        
         return decide(true);
     }
     

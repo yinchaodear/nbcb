@@ -28,8 +28,20 @@ public class Comment extends BaseModel
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "f_news_id")
     private News news;
+
+    /**
+     * type 类型： 点赞|收藏|评论
+     */
+    private String type;
+
+    /**
+     * 对评论的回复
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "f_comment_id")
+    private Comment comment;
     
-    private String comment;
+    private String content;
     
     public Long getId()
     {
@@ -60,14 +72,28 @@ public class Comment extends BaseModel
     {
         this.news = news;
     }
-    
-    public String getComment()
-    {
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public Comment getComment() {
         return comment;
     }
-    
-    public void setComment(String comment)
-    {
+
+    public void setComment(Comment comment) {
         this.comment = comment;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

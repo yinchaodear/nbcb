@@ -13,6 +13,7 @@ import com.yuqiaotech.sysadmin.model.User;
 import com.yuqiaotech.zsnews.model.Channel;
 import com.yuqiaotech.zsnews.model.News;
 import com.yuqiaotech.zsnews.model.NewsFollower;
+import com.yuqiaotech.zsnews.service.INewsService;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
@@ -49,7 +50,9 @@ public class NewsController extends BaseController
 
     @Autowired
     private BaseRepository<NewsFollower, Long> newsFollowerRepository;
-    
+
+    @Autowired
+    private INewsService iNewsService;
     
     @GetMapping("main")
     public ModelAndView main()
@@ -228,12 +231,10 @@ public class NewsController extends BaseController
         }
         return decide(false);
     }
-    
-  
-    
-    
-  
- 
-    
-  
+
+
+    @RequestMapping("/selectNews/{kind}")
+    public Result selectNews(@PathVariable("kind") String kind,@RequestParam Map<String, Object> params) {
+        return success(iNewsService.selectNews(kind, getCurrentUserId(), params));
+    }
 }

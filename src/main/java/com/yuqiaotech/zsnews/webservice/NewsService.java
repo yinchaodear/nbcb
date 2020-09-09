@@ -95,7 +95,10 @@ public class NewsService extends BaseController
     	
     	String sql ="select t.* ,c.f_title as channeltitle , c.f_remark as channelremark,cf.f_id as cfid ,n.f_id as nfid , a.cmid "
     			+ " , case when b.agreecount  >=10000  then  concat(cast(  convert(b.agreecount/10000,decimal(10,1)) as char),'万' )"
-    			+ " else cast(b.agreecount   as char)  end as agreecount FROM t_news  "
+    			+ " else cast(b.agreecount   as char)  end as agreecount , "
+    			+ " case when g.number  >=10000  then  concat(cast(  convert( g.number/10000,decimal(10,1)) as char),'万' )"
+    			+ " else cast( g.number as char)  end as number"
+    			+ " FROM t_news  "
     			+ " t left join t_channel c on c.f_id = t.f_author_channel_id  left join t_channel_follower cf "
     			+ " on t.f_author_channel_id = cf.f_channel_id  and cf.f_user_info_id =   "+getCurrentUserId()
     			+ " left join t_news_follower n on n.f_news_id = t.f_id and n.f_user_info_id = "+getCurrentUserId()
@@ -103,7 +106,10 @@ public class NewsService extends BaseController
     			+ " cm where   cm.f_type ='点赞'  and cm.f_news_id = "+id+" and cm.f_user_info_id ="+getCurrentUserId()+") a on a.cmnewsid = t.f_id"
     			+ " left join  ( SELECT  cm1.f_news_id  as  cm1newsid, count(1) as agreecount FROM t_comment cm1"
     			+ " where f_type ='点赞'  and cm1.f_news_id = "+id+" group by  cm1.f_news_id ) b on b.cm1newsid =t.f_id"
+    			+ " left join (select cf.f_channel_id as channelid ,count(1) as number from t_channel_follower cf  group by cf.f_channel_id ) "
+    			+ " g on g.channelid = t.f_author_channel_id"
     			+ " where t.f_id = " +id;
+    	System.out.println(sql);
     	List<Map<String, Object>> news = newsRepository.findMapByNativeSql(sql);
     	Map result =new HashMap<>();
     	result.put("news", news);
@@ -402,6 +408,7 @@ public class NewsService extends BaseController
     			+ " left join t_channel  c on  c.f_id = t.f_channel_id "
     			+ wheresql
     			+ " order by f_display_order asc ";
+    	System.err.println(sql);
     	List news = newsRepository.findMapByNativeSql(sql);	
     	Map result =new HashMap<>();
     	result.put("news", news);

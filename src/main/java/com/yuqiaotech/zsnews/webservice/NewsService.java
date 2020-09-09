@@ -74,8 +74,9 @@ public class NewsService extends BaseController
         }
     	String sql =" SELECT  t.* ,d.f_title as channelname ,b.apprisecount as apprisecount FROM t_news t "
     			+" left join  ( SELECT f_news_id  as id2, count(1) "
-    			+ "as apprisecount FROM t_comment  where f_type ='评论' or f_type ='回答' group by f_news_id ) b on b.id2 =t.f_id "
-    			+ "inner join t_channel  c on  c.f_id = t.f_channel_id  inner join t_channel d on d.f_id =t.f_author_channel_id "+wheresql
+    			+ " as apprisecount FROM t_comment  where f_type ='评论' or f_type ='回答' group by f_news_id ) b on b.id2 =t.f_id "
+    			+ " inner join t_channel  c on  c.f_id = t.f_channel_id  inner join t_channel d on d.f_id =t.f_author_channel_id and"
+    			+ " c.f_status = 0  "+wheresql
     			+" order by f_display_order asc ";
     	List news = newsRepository.findMapByNativeSql(sql);	
     	Map result =new HashMap<>();
@@ -132,9 +133,9 @@ public class NewsService extends BaseController
     			+ "FROM t_news t left join  ( SELECT  f_news_id  as id1,count(1) as apprisecount FROM t_comment cm1 "
     			+ "where cm1.f_type ='评论' or cm1.f_type='回答' group by f_news_id ) a on a.id1 =t.f_id "
     			+ "inner join t_channel  c on  c.f_id = t.f_channel_id "
-    			+ wheresql
+    			+  wheresql
     			+" where c.f_kind ='"+kind+"' and c.f_type ='"+type+"'"
-    			+ " order by f_display_order asc ";
+    			+ " and c.f_status = 0  order by f_display_order asc ";
     	List news = newsRepository.findMapByNativeSql(sql);	
     	Map result =new HashMap<>();
     	result.put("news", news);

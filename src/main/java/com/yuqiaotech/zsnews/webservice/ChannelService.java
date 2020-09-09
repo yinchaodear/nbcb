@@ -53,12 +53,12 @@ public class ChannelService extends BaseController
     {
         System.out.println("ChannelService.AppChannelData()" + getCurrentUserId());
         String sql = "SELECT t.f_title, t1.f_id as cfid,t.f_id as f_id FROM t_channel_follower  "
-            + "t1 inner join t_channel t on t1.f_channel_id = t.f_id  where t.f_kind='频道' and f_user_info_id ="
+            + "t1 inner join t_channel t on t1.f_channel_id = t.f_id  where t.f_kind='频道' and t.f_status= 0 and f_user_info_id ="
             + getCurrentUserId();
         List mymenu = channelRepository.findMapByNativeSql(sql);
         String sqlleft = " select f_title,f_id from t_channel  t  where f_id not in"
             + "   (SELECT  f_channel_id  FROM t_channel_follower where f_user_info_id =" + getCurrentUserId()
-            + ") and f_kind='频道' ";
+            + ") and f_kind='频道' and t.f_status= 0 ";
         List moremenu = channelRepository.findMapByNativeSql(sqlleft);
         Map result = new HashMap<>();
         result.put("mymenu", mymenu);
@@ -116,22 +116,25 @@ public class ChannelService extends BaseController
         String wheresql = "";
         if (!StringUtils.isEmpty(category) && !"所有".equals(category))
         {
-            wheresql = " and t.f_category = '" + category + "'";
+            wheresql = " and cate.f_title = '" + category + "'";
         }
         String wherekindandtype = " c.f_type ='" + type + "' and c.f_kind ='" + kind + "'";
-        String sql = "SELECT f_category FROM t_channel where f_kind ='" + kind + "' and f_type ='" + type
-            + "'  group by f_category";
+        String sql = "SELECT  c.f_title as f_category  FROM t_channe_catego_mappin m inner join t_channel t "
+        		+ " on t.f_id =m.f_channel_id inner join t_category c on c.f_id =m.f_category_id  "
+        		+ " where t.f_kind = '"+kind+"' and t.f_type ='"+type+"' group by c.f_title";
         List categorygroup = channelRepository.findMapByNativeSql(sql);
-        String sqlgroup =
-            "SELECT t.* , b.* , case when c.number >=10000  then  concat(cast(  convert(c.number/10000,decimal(10,1)) as char),'万' )"
+        String sqlgroup = "SELECT t.* , b.* , case when c.number >=10000  then  concat(cast(  convert(c.number/10000,decimal(10,1)) as char),'万' )"
                 + " else cast(c.number  as char)  end as number  FROM  t_channel t  left  join (select cf.f_id as cfid ,cf.f_channel_id as chid "
                 + ",cf.f_user_info_id as cid from t_channel_follower cf inner join t_channel c  on c.f_id = "
                 + "cf.f_channel_id  where f_user_info_id = " + getCurrentUserId() + " and " + wherekindandtype
                 + ") b on t.f_id = b.chid "
                 + " left join (select c.f_id as channelid ,count(1) as number from t_channel_follower cf inner"
                 + " join t_channel c  on c.f_id = cf.f_channel_id  where  " + wherekindandtype
-                + " group by  cf.f_channel_id) c on c.channelid  = t.f_id" + " where t.f_type ='" + type
-                + "' and t.f_kind ='" + kind + "'" + wheresql;
+                + " group by  cf.f_channel_id) c on c.channelid  = t.f_id "
+                + "inner join  t_channe_catego_mappin tcm on t.f_id =tcm.f_channel_id inner join t_category cate "
+                + " on  cate.f_id =tcm.f_category_id  "
+                + " where t.f_status= 0 and  t.f_type ='" + type
+                + "' and t.f_kind ='" + kind + "'" + wheresql +" group by t.f_id";
         List group = channelRepository.findMapByNativeSql(sqlgroup);
         Map result = new HashMap<>();
         result.put("category", categorygroup);

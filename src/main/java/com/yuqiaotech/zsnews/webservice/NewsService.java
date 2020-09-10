@@ -72,8 +72,11 @@ public class NewsService extends BaseController
         }else{
         	wheresql+= " and f_channel_id ="+id; 
         }
-    	String sql =" SELECT  t.* ,d.f_title as channelname ,b.apprisecount as apprisecount FROM t_news t "
-    			+" left join  ( SELECT f_news_id  as id2, count(1) "
+    	String sql =" SELECT  t.* ,d.f_title as channelname ,"
+    			+ " case when b.apprisecount >=10000  then  "
+    			+ " concat(cast(  convert(b.apprisecount/10000,decimal(10,1)) as char),'万' ) else cast(b.apprisecount  as char)  end as apprisecount "
+    			+ " FROM t_news t "
+    			+"  left join  ( SELECT f_news_id  as id2, count(1) "
     			+ " as apprisecount FROM t_comment  where f_type ='评论' or f_type ='回答' group by f_news_id ) b on b.id2 =t.f_id "
     			+ " inner join t_channel  c on  c.f_id = t.f_channel_id  inner join t_channel d on d.f_id =t.f_author_channel_id and"
     			+ " c.f_status = 0  "+wheresql
@@ -129,9 +132,12 @@ public class NewsService extends BaseController
     	if("已关注".equals(currentstatus)){
     	  wheresql = "inner join t_channel_follower cf on cf.f_channel_id = t.f_author_channel_id and cf.f_user_info_id = "+getCurrentUserId();
     	} 	
-    	String sql ="SELECT t.*  ,c.f_kind as channelkind,c.f_type as channeltype, a.apprisecount as apprisecount ,c.f_title as channelname "
+    	String sql ="SELECT t.*  ,c.f_kind as channelkind,c.f_type as channeltype,"
+    			+ " case when b.apprisecount >=10000  then  "
+    			+ " concat(cast(  convert(b.apprisecount/10000,decimal(10,1)) as char),'万' ) else cast(b.apprisecount  as char)  end as apprisecount " 
+    			+ ",c.f_title as channelname "
     			+ "FROM t_news t left join  ( SELECT  f_news_id  as id1,count(1) as apprisecount FROM t_comment cm1 "
-    			+ "where cm1.f_type ='评论' or cm1.f_type='回答' group by f_news_id ) a on a.id1 =t.f_id "
+    			+ "where cm1.f_type ='评论' or cm1.f_type='回答' group by f_news_id ) b on b.id1 =t.f_id "
     			+ "inner join t_channel  c on  c.f_id = t.f_author_channel_id "
     			+  wheresql
     			+" where c.f_kind ='"+kind+"' and c.f_type ='"+type+"'"

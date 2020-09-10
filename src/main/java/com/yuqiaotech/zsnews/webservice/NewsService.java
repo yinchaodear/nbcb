@@ -161,9 +161,9 @@ public class NewsService extends BaseController
     	
     	System.out.println("NewsController.AppNewsDataChannel()"+category+id);
     	String wheresql ="";
-    	if(!"综合".equals(category)){
-    	  wheresql = " and t.f_category like '%"+category+"%'";
-    	} 	
+//    	if(!"综合".equals(category)){ 这里暂时不需要
+//    	  wheresql = " and t.f_category like '%"+category+"%'";
+//    	} 	
     	String sql ="SELECT  t.* ,d.f_title as channelname ,b.apprisecount as apprisecount FROM t_news t "
     			+" left join  ( SELECT f_news_id  as id2, count(1) "
     			+ "as apprisecount FROM t_comment  where f_type ='评论' or f_type ='回答' group by f_news_id ) b on b.id2 =t.f_id "

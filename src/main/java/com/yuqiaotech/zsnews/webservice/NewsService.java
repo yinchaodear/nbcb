@@ -278,7 +278,7 @@ public class NewsService extends BaseController
         System.out.println("NewsService.save()");
         Long userId = getCurrentUserId();
 		String userType = getCurrentUserType();
-		Long columnId =((Number) params.get("columnId")).longValue();
+		Long columnId = params.get("columnId") != null ? Long.valueOf((String) params.get("columnId")):null;
 		String title =(String) params.get("title");
 		String content =(String) params.get("content");
 		String type =(String) params.get("type");

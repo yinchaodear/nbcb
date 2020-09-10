@@ -30,9 +30,14 @@ public class Comment extends BaseModel
     private News news;
 
     /**
-     * type 类型： 点赞|收藏|评论
+     * type 类型： 点赞|收藏|评论|回复（针对评论，回复）
+     *  回复 评论回复的情况下 记录评论以及回复的用户 用answerUserInfo记录
      */
     private String type;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "f_answer_user_id")
+    private UserInfo answerUser;
 
     /**
      * 对评论的回复
@@ -95,5 +100,13 @@ public class Comment extends BaseModel
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public UserInfo getAnswerUser() {
+        return answerUser;
+    }
+
+    public void setAnswerUser(UserInfo answerUser) {
+        this.answerUser = answerUser;
     }
 }

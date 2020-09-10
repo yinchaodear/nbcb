@@ -233,8 +233,65 @@ public class NewsController extends BaseController
     }
 
 
+    /**
+     * 社区文章查询
+     * @param kind
+     * @param params
+     * @return
+     */
     @RequestMapping("/selectNews/{kind}")
     public Result selectNews(@PathVariable("kind") String kind,@RequestParam Map<String, Object> params) {
         return success(iNewsService.selectNews(kind, getCurrentUserId(), params));
+    }
+
+    /**
+     * 社区文章详情
+     * @param params
+     * @return
+     */
+    @RequestMapping("/community/newsDetail")
+    public Result getNewsDetail(@RequestParam Map<String, Object> params) {
+        return success(iNewsService.getNewsDetail(getCurrentUserId(), params));
+    }
+
+    /**
+     * 社区文章点赞收藏
+     * @param params
+     * @return
+     */
+    @RequestMapping("/community/toggleCollectOrAgree")
+    public Result toggleCollect(@RequestParam Map<String, Object> params) {
+        return success(iNewsService.toggleCollectOrAgree(getCurrentUserId(), params));
+    }
+
+    /**
+     * 文章评论|回复评论|对回复对回复
+     * @param params
+     * @return
+     */
+    @RequestMapping("/makeComment")
+    public Result makeComment(@RequestBody Map<String, Object> params) {
+        return success(iNewsService.makeComment(getCurrentUserId(),params));
+    }
+
+    /**
+     * 文章评论|回复
+     * @param params
+     * @return
+     */
+    @RequestMapping("/comments")
+    public Result selectComments(@RequestParam Map<String, Object> params) {
+        return success(iNewsService.selectComments(getCurrentUserId(),params));
+    }
+
+
+    /**
+     * 社区文章评论（回复）点赞
+     * @param params
+     * @return
+     */
+    @RequestMapping("/toggleCommentAgree")
+    public Result toggleCommentAgree(@RequestParam Map<String, Object> params) {
+        return success(iNewsService.toggleCommentAgree(getCurrentUserId(), params));
     }
 }

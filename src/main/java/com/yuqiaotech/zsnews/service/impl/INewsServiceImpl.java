@@ -1,18 +1,16 @@
 package com.yuqiaotech.zsnews.service.impl;
 
 import com.yuqiaotech.common.web.base.BaseRepository;
-import com.yuqiaotech.zsnews.model.News;
+import com.yuqiaotech.zsnews.model.*;
 import com.yuqiaotech.zsnews.service.INewsService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.yuqiaotech.common.tools.servlet.ServletUtil.getCurrentUserId;
 
 /**
  * Created on 2020/9/9 10:28 上午.
@@ -24,6 +22,12 @@ import static com.yuqiaotech.common.tools.servlet.ServletUtil.getCurrentUserId;
 public class INewsServiceImpl implements INewsService {
 	@Autowired
 	private BaseRepository<News, Long> newsRepository;
+
+	@Autowired
+	private BaseRepository<UserInfo, Long> userInfoRepository;
+
+	@Autowired
+	private BaseRepository<Comment, Long> commentRepository;
 
 	@Override
 	public List selectNews(String kind, Long userInfoId, Map<String, Object> params) {
@@ -44,7 +48,7 @@ public class INewsServiceImpl implements INewsService {
 			String type = params.get("type") != null ? (String) params.get("type") : "";
 			String wheresql = "where 1 =1 and t.f_kind ='" + kind + "'";
 
-			String sql = " select ifnull(zanNum, 0) zanNum,ifnull(pinglunNum, 0) pinglunNum, ifnull(shoucangNum, 0) shoucangNum,  \n" +
+			String sql = " select concat(t.f_id,'') newsId, ifnull(zanNum, 0) zanNum,ifnull(pinglunNum, 0) pinglunNum, ifnull(shoucangNum, 0) shoucangNum,  \n" +
 					" ifnull(uc.userTotalNum, 0) userTotalNum,ui.f_username userName, t.f_title title, t.f_content content\n" +
 					"from t_news t\n" +
 					"left join t_channel c on t.f_author_channel_id = c.f_id \n" +
@@ -65,6 +69,246 @@ public class INewsServiceImpl implements INewsService {
 			e.printStackTrace();
 		} finally {
 			return news;
+		}
+	}
+
+	@Override
+	public Map getNewsDetail(Long userInfoId, Map<String, Object> params) {
+		Map map = null;
+		try {
+			Long newsId = params.get("newsId") != null ? Long.valueOf((String) params.get("newsId")) : null;
+			if (newsId != null) {
+				String sql = " select case when (select 1 from t_comment com where com.f_type='点赞' and f_news_id = t.f_id and f_user_info_id = " + userInfoId + ") then 1 else 0 end as agreeFlag,\n" +
+						"case when (select 1 from t_comment com where com.f_type='收藏' and f_news_id = t.f_id and f_user_info_id = " + userInfoId + ") then 1 else 0 end as collectFlag,\n" +
+						"concat(t.f_id,'') newsId, ifnull(zanNum, 0) zanNum,ifnull(pinglunNum, 0) pinglunNum, ifnull(shoucangNum, 0) shoucangNum,  \n" +
+						" ifnull(uc.userTotalNum, 0) userTotalNum,c.f_title authorChannelName,ui.f_username userName, t.f_title title, t.f_content content\n" +
+						"from t_news t\n" +
+						"left join t_channel c on t.f_author_channel_id = c.f_id \n" +
+						"left join t_user_info ui on c.f_userinfo_id = ui.f_id\n" +
+						"left join (\n" +
+						"	select f_user_info_id userInfoId, sum(case when f_type = '点赞' then 1 else 0 end) userTotalNum\n" +
+						"	from t_comment\n" +
+						"	group by f_user_info_id) uc on uc.userInfoId = ui.f_id\n" +
+						"left join (\n" +
+						"	select f_news_id newsId,sum(case when f_type = '点赞' then 1 else 0 end) zanNum, sum(case when f_type = '评论' then 1 else 0 end) pinglunNum, sum(case when f_type = '收藏' then 1 else 0 end) shoucangNum\n" +
+						"	from t_comment\n" +
+						"	group by f_news_id) ni on ni.newsId = t.f_id \n" +
+						" where t.f_id = " + newsId;
+				List<Map<String, Object>> news = newsRepository.findMapByNativeSql(sql);
+				if (news != null && news.size() > 0) {
+					map = news.get(0);
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			return map;
+		}
+	}
+
+
+	@Transactional
+	@Override
+	public Map toggleCollectOrAgree(Long userInfoId, Map<String, Object> params) {
+		HashMap<String, Object> map = new HashMap<>();
+		map.put("flag", true);
+		try {
+			Long newsId = params.get("newsId") != null ? Long.valueOf((String) params.get("newsId")) : null;
+			String type = (String) params.get("type");
+
+			if (newsId != null && !StringUtils.isEmpty(type)) {
+				String sql = "select  * from t_comment where f_type = '" + type + "' and f_news_id =" + newsId + " and f_user_info_id ="
+						+ userInfoId;
+				List<Map<String, Object>> cfs = newsRepository.findMapByNativeSql(sql);
+				if (cfs != null && cfs.size() > 0) {
+					newsRepository.executeUpdateByNativeSql("delete from t_comment where  f_type = '" + type + "' and f_news_id =" + newsId + " and f_user_info_id =" + userInfoId, null);
+				} else {
+					UserInfo userInfo = userInfoRepository.get(userInfoId, UserInfo.class);
+					News news = newsRepository.get(newsId, News.class);
+					if (userInfo != null && news != null) {
+						Comment comment = new Comment();
+						comment.setType(type);
+						comment.setUserInfo(userInfo);
+						comment.setNews(news);
+						commentRepository.save(comment);
+					}
+				}
+			} else {
+				throw new RuntimeException("newsId 或者 type 参数缺失");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			map.put("flag", false);
+		} finally {
+			return map;
+		}
+	}
+
+	@Transactional
+	@Override
+	public Map makeComment(Long userInfoId, Map<String, Object> params) {
+		HashMap<String, Object> map = new HashMap<>();
+		map.put("flag", true);
+		try {
+			//评论|回复
+			String type = (String) params.get("type");
+			Long newsId = params.get("newsId") != null ? Long.valueOf(String.valueOf((Number) params.get("newsId"))) : null;
+
+			if (newsId == null) {
+				throw new RuntimeException("评论 newsId 为空，请确认!");
+			}
+
+			if (!StringUtils.isEmpty(type)) {
+				Comment comment = new Comment();
+				String content = (String) params.get("content");
+				if (StringUtils.isEmpty(content)) {
+					throw new RuntimeException("评论|回复 的内容为空");
+				}
+
+				comment.setContent(content);
+				//评论|回复对应的news
+				News news = newsRepository.get(newsId, News.class);
+				comment.setNews(news);
+
+				//type 评论|回复
+				comment.setType(type);
+				UserInfo userInfo = userInfoRepository.get(userInfoId, UserInfo.class);
+				comment.setUserInfo(userInfo);
+
+				if (type.equals("回复")) {
+					//对评论的回复 | 对回复的回复（commentId, answerUserId-要处理的回复或者评论的发表者）
+					Long commentId = params.get("commentId") != null ? Long.valueOf(String.valueOf((Number) params.get("commentId"))) : null;
+					Comment targetComment = commentRepository.get(commentId, Comment.class);
+					comment.setComment(targetComment);
+
+					//回复对应的发表者
+					Long answerUserId = params.get("answerUserId") != null ? Long.valueOf(String.valueOf((Number) params.get("answerUserId"))) : null;
+					UserInfo answerUserInfo = userInfoRepository.get(answerUserId, UserInfo.class);
+					comment.setAnswerUser(answerUserInfo);
+				}
+
+				commentRepository.save(comment);
+			} else {
+				throw new RuntimeException("type 为空，请确认!");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			map.put("flag", false);
+		} finally {
+			return map;
+		}
+	}
+
+	@Override
+	public Map selectComments(Long userInfoId, Map<String, Object> params) {
+		HashMap<Object, Object> result = new HashMap<>();
+		List<Map<String, Object>> comments = null;
+		int totalComments = 0;
+		try {
+			Integer pageNo = 0;
+			Integer pageSize = 10;
+			if (!StringUtils.isEmpty((String) params.get("pageNo"))) {
+				pageNo = Integer.parseInt((String) params.get("pageNo"));
+			}
+
+			if (!StringUtils.isEmpty((String) params.get("pageSize"))) {
+				pageSize = Integer.parseInt((String) params.get("pageSize"));
+			}
+
+			Long newsId = params.get("newsId") != null ? Long.valueOf((String) params.get("newsId")) : null;
+
+			String limitStr = "limit " + pageNo * pageSize + "," + pageSize;
+			String wheresql = "where 1 =1 and c.f_type = '评论'";
+			if (newsId != null) {
+				wheresql += " and c.f_news_id = " + newsId;
+				String sql = " select case when (select 1 from t_comment com where com.f_type='点赞' and f_comment_id = c.f_id and f_user_info_id = " + userInfoId + ") then 1 else 0 end as agreeFlag, date_format(c.f_created, '%m-%d') createdDate,c.f_id commentId,ifnull(t.agreeNum, 0) agreeNum, c.f_type commentType,c.f_news_id newsId, c.f_content content, c.f_user_info_id userInfoId, ui.f_username userName\n" +
+						"from t_comment c\n" +
+						"left join (\n" +
+						"	select f_comment_id commentId, count(*) agreeNum\n" +
+						"	from t_comment \n" +
+						"	where f_type = '点赞' and f_comment_id is not null \n" +
+						"	group by f_comment_id\n" +
+						") t on t.commentId = c.f_id \n"+
+						"left join t_news n on c.f_news_id = n.f_id\n" +
+						"left join t_user_info ui on ui.f_id = c.f_user_info_id\n" +
+						"left join t_user_info aui on aui.f_id = c.f_answer_user_id\n" +
+						wheresql + "\n" +
+						"order by c.f_id desc \n" +
+						limitStr;
+				comments = commentRepository.findMapByNativeSql(sql);
+
+				List<Map<String, Object>> subComments = null;
+				if (comments != null && comments.size() > 0) {
+					totalComments += comments.size();
+					String subSql = "";
+					for (Map comment : comments) {
+						Long commentId = ((Number) comment.get("commentId")).longValue();
+						subSql = "select date_format(c.f_created, '%m-%d') createdDate,c.f_id commentId,ifnull(t.agreeNum, 0) agreeNum,case when (select 1 from t_comment com where com.f_type='点赞' and f_comment_id = c.f_id and f_user_info_id = " + userInfoId + ") then 1 else 0 end as agreeFlag, c.f_comment_id targetCommentId, c.f_type commentType,c.f_news_id newsId, c.f_content content, c.f_user_info_id userInfoId, ui.f_username userName, c.f_answer_user_id answerUserId, aui.f_username answerUserName\n" +
+								"from t_comment c\n" +
+								"left join (\n" +
+								"	select f_comment_id commentId, count(*) agreeNum\n" +
+								"	from t_comment \n" +
+								"	where f_type = '点赞' and f_comment_id is not null \n" +
+								"	group by f_comment_id\n" +
+								") t on t.commentId = c.f_id \n"+
+								"left join t_news n on c.f_news_id = n.f_id\n" +
+								"left join t_user_info ui on ui.f_id = c.f_user_info_id\n" +
+								"left join t_user_info aui on aui.f_id = c.f_answer_user_id \n" +
+								"where c.f_type = '回复' and c.f_comment_id = " + commentId;
+						subComments = commentRepository.findMapByNativeSql(subSql);
+						if (subComments != null && subComments.size() > 0) {
+							totalComments += subComments.size();
+							comment.put("subComments", subComments);
+						}
+					}
+				}
+			} else {
+				throw new RuntimeException("newsId 为空，请确认!");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			totalComments = 0;
+			comments = null;
+		} finally {
+			result.put("totalComments", totalComments);
+			result.put("comments", comments);
+			return result;
+		}
+	}
+
+	@Override
+	public Map toggleCommentAgree(Long userInfoId, Map<String, Object> params) {
+		HashMap<String, Object> map = new HashMap<>();
+		map.put("flag", true);
+		try {
+			Long commentId = params.get("commentId") != null ? Long.valueOf((String) params.get("commentId")) : null;
+
+			if (commentId != null) {
+				String sql = "select  * from t_comment where f_comment_id =" + commentId + " and f_user_info_id ="
+						+ userInfoId;
+				List<Map<String, Object>> cfs = commentRepository.findMapByNativeSql(sql);
+				if (cfs != null && cfs.size() > 0) {
+					newsRepository.executeUpdateByNativeSql("delete from t_comment where f_comment_id =" + commentId + " and f_user_info_id =" + userInfoId, null);
+				} else {
+					UserInfo userInfo = userInfoRepository.get(userInfoId, UserInfo.class);
+					Comment agreeComment = commentRepository.get(commentId, Comment.class);
+					if (userInfo != null && agreeComment != null) {
+						Comment comment = new Comment();
+						comment.setType("点赞");
+						comment.setUserInfo(userInfo);
+						comment.setComment(agreeComment);
+						commentRepository.save(comment);
+					}
+				}
+			} else {
+				throw new RuntimeException("commentId参数缺失");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			map.put("flag", false);
+		} finally {
+			return map;
 		}
 	}
 }

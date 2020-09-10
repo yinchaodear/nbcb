@@ -18,6 +18,12 @@ public interface IChannelService {
 	 */
 	Map selectTeamChannels(Long userInfoId, Map<String, Object> params);
 
+	/**
+	 * 加入/取消加入 小组
+	 * @param userInfoId
+	 * @param params
+	 * @return
+	 */
 	Map toogleJoinTeam(Long userInfoId, Map<String, Object> params);
 
 }

@@ -124,6 +124,15 @@ public class MaterialController extends BaseController
     @PostMapping("save")
     public Result save(@RequestBody MaterialBean materialBean)
     {
+        //这里增加一个逻辑：同一个资源位，只能有一个上架的素材存在
+        String checkOne = "from Material where column.id=" + materialBean.getColumnId() + " and channel.id="
+            + materialBean.getChannelId() + " and type=" + NewsDicConstants.IMaterial.Type.BANNER + " and status="
+            + NewsDicConstants.ICommon.STATUS_UP + " and deltag=" + NewsDicConstants.ICommon.DELETE_NO;
+        List<Material> dblist = materialRepository.findByHql(checkOne);
+        if (CollectionUtils.isNotEmpty(dblist))
+        {
+            return failure("当前资源位已经存在上架资源，不可重复添加");
+        }
         Material material = new Material();
         BeanUtils.copyProperties(materialBean, material);
         
@@ -374,10 +383,16 @@ public class MaterialController extends BaseController
     }
     
     @DeleteMapping("remove/{id}")
-    @Logging(title = "删除角色")
+    @Logging(title = "删除素材")
     public Result remove(@PathVariable Long id)
     {
-        materialRepository.remove(id, Material.class);
+        Material materialdb = materialRepository.findUniqueBy("id", id, Material.class);
+        if (materialdb.getStatus() == NewsDicConstants.ICommon.STATUS_UP)
+        {
+            return decide(false, null, "上架状态，不可删除");
+        }
+        materialdb.setDeltag(NewsDicConstants.ICommon.DELETE_YES);
+        materialRepository.update(materialdb);
         return decide(true);
     }
     
@@ -392,7 +407,11 @@ public class MaterialController extends BaseController
             DetachedCriteria dc = DetachedCriteria.forClass(Material.class);
             dc.add(Restrictions.in("id", cdids));
             List<Material> materialList = materialRepository.findByCriteria(dc);
-            materialList.forEach(materialRepository::delete);
+            for (Material material : materialList)
+            {
+                material.setDeltag(NewsDicConstants.ICommon.DELETE_YES);
+                materialRepository.update(material);
+            }
             return decide(true);
         }
         return decide(false);

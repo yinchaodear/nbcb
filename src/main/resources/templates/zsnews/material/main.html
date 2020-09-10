@@ -201,7 +201,7 @@
 					} else {
 						layer.msg('状态更新失败', {
 							icon : 2,
-							time : 1000
+							time : 5000
 						});
 					}
 				}
@@ -244,14 +244,14 @@
 						if (result.success) {
 							layer.msg(result.msg, {
 								icon : 1,
-								time : 1000
+								time : 5000
 							}, function() {
 								obj.del();
 							});
 						} else {
 							layer.msg(result.msg, {
 								icon : 2,
-								time : 1000
+								time : 5000
 							});
 						}
 					}
@@ -288,14 +288,14 @@
 						if (result.success) {
 							layer.msg(result.msg, {
 								icon : 1,
-								time : 1000
+								time : 5000
 							}, function() {
 								table.reload('material-table');
 							});
 						} else {
 							layer.msg(result.msg, {
 								icon : 2,
-								time : 1000
+								time : 5000
 							});
 						}
 					}

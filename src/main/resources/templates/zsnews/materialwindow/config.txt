@@ -1,0 +1,9 @@
+{
+	"id": "1012",
+	"title": "素材 既是频道和管理",
+	"type": "1",
+	"openType": null,
+	"icon": "layui-icon layui-icon-vercode",
+	"href": "/zsnews/material/main",
+	"children": []
+}

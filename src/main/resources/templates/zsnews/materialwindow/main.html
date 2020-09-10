@@ -12,8 +12,8 @@
 		<div class="layui-card-body">
 			<div class="layui-tab layui-tab-brief" lay-filter="component-tabs-brief">
 				<ul class="layui-tab-title">
-					<li class="layui-this">BANNER</li>
-					<li onclick="redicttosp()">闪屏</li>
+					<li onclick="redicttobanner()">BANNER</li>
+					<li class="layui-this" >闪屏</li>
 				</ul>
 			</div>
 		</div>
@@ -84,7 +84,7 @@
 		let form = layui.form;
 		let $ = layui.jquery;
 
-		let MODULE_PATH = "/zsnews/material/";
+		let MODULE_PATH = "/zsnews/materialwindow/";
 
 		let cols = [ [ {
 			type : 'checkbox'
@@ -109,18 +109,7 @@
 				else
 					return '<div>' + d.column.title + '</div>';
 			}
-		}, {
-			title : '展示位',
-			field : 'channel',
-			align : 'center',
-			width : 300,
-			templet : function(d) {
-				if (d.channel == null)
-					return '';
-				else
-					return '<div>' + d.channel.title + '</div>';
-			}
-		}, {
+		},  {
 			title : '状态',
 			field : 'status',
 			align : 'center',
@@ -314,8 +303,8 @@
 		}
 	})
 
-	function redicttosp() {
-		window.location.href = "/zsnews/materialwindow/main";
+	function redicttobanner() {
+		window.location.href = "/zsnews/material/main";
 	}
 </script>
 </html>

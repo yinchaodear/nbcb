@@ -1,0 +1,183 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
+<head>
+<meta charset="UTF-8">
+<title>新增</title>
+<link rel="stylesheet" href="../../admin/css/pearCommon.css" />
+<link rel="stylesheet" href="../../component/layui/css/layui.css" />
+<link rel="stylesheet" href="../../admin/css/pear-icon/iconfont.css" />
+<style>
+.delbtn {
+	font-size: 15px;
+	color: red;
+	font-weight: bold;
+	cursor: pointer;
+	border: 1px solid red;
+	border-radius: 50%;
+}
+
+.hrefdiv {
+	width: 60%;
+	margin-left: 20px;
+	margin-bottom: 0px;
+	margin-right: 0px;
+}
+</style>
+</head>
+<body>
+	<form class="layui-form" action="">
+		<input type="hidden" name="objectId" id="objectId" />
+		<input type="hidden" name="objectType" id="objectType" value="material" />
+		<div class="mainBox">
+			<div class="main-container">
+				<div class="main-container">
+					<div class="layui-form-item">
+						<label class="layui-form-label">素材名称</label>
+						<div class="layui-input-block">
+							<input type="text" name="title" autocomplete="off" placeholder="请输入素材名称" class="layui-input" maxlength="50" lay-verify="required">
+						</div>
+					</div>
+					<hql:queryForList hql="from Column where status=0 and deltag=0 order by displayOrder" id="columnlist"></hql:queryForList>
+					<div class="layui-form-item">
+						<label class="layui-form-label">展示栏目</label>
+						<div class="layui-input-block">
+							<select name="columnId" lay-verify="required" lay-search >
+								<option></option>
+								<option th:each="c : ${columnlist}" th:value="${c.id}" th:text="${c.title}"></option>
+							</select>
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">描述</label>
+						<div class="layui-input-block">
+							<textarea name="remark" placeholder="请输入描述" class="layui-textarea" maxlength="500"></textarea>
+						</div>
+					</div>
+					
+					<div class="layui-form-item" th:id="'sucaibegindiv'+${i}" th:each="i:${#numbers.sequence(1, 5)}">
+						<input type="hidden" th:name="'picname'+${i}" th:id="'picname'+${i}"/>
+						<label class="layui-form-label" th:text="${i==1?'素材图':''}"> 素材图 </label>
+						<div class="layui-input-block">
+							<div class="layui-inline" style="width: 100%;">
+								<img class="layui-upload-img" th:id="'previewImg'+${i}">
+								<span class="icon pear-icon delbtn" title="删除素材"  th:onclick="delsucai([[${i}]])" th:id="'delbtn'+${i}" style="display: none;">&#xe66e;</span>
+							</div>
+							<div class="layui-upload-drag" th:id="'upload-drag'+${i}" th:attr="idx=${i}">
+								<span class="icon pear-icon" style="font-size: 32px; color: #333;">&#xe669;</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="bottom">
+			<div class="button-container">
+				<button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="material-save" id="submitbtn">
+					<i class="layui-icon layui-icon-ok"></i>
+					提交
+				</button>
+				<button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">
+					<i class="layui-icon layui-icon-refresh"></i>
+					重置
+				</button>
+			</div>
+		</div>
+	</form>
+	<script src="../../component/layui/layui.js"></script>
+	<script th:inline="javascript">
+		var material_tid = '[[${material_tid}]]';
+		if (material_tid == null || material_tid == '') {
+			material_tid = new Date();
+		}
+		var form;
+		var $;
+		var upload;
+		layui.use([ 'form', 'jquery', 'upload' ], function() {
+			form = layui.form;
+			$ = layui.jquery;
+			upload = layui.upload;
+			let MODULE_PATH = "/zsnews/materialwindow/";
+
+			$("#objectId").val(material_tid);
+
+			form.on('submit(material-save)', function(data) {
+				var DISABLED = 'layui-btn-disabled';
+				$('#submitbtn').addClass(DISABLED);
+				$('#submitbtn').attr('disabled', 'disabled');
+				$.ajax({
+					url : MODULE_PATH + 'save',
+					data : JSON.stringify(data.field),
+					dataType : 'json',
+					contentType : 'application/json',
+					type : 'post',
+					success : function(result) {
+						if (result.success) {
+							layer.msg(result.msg, {
+								icon : 1,
+								time : 5000
+							}, function() {
+								$('#submitbtn').removeClass(DISABLED);
+								$('#submitbtn').removeAttr('disabled');
+								parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+								parent.layui.table.reload("material-table");
+							});
+						} else {
+							layer.msg(result.msg, {
+								icon : 2,
+								time : 5000
+							}, function() {
+								$('#submitbtn').removeClass(DISABLED);
+								$('#submitbtn').removeAttr('disabled');
+							});
+						}
+					},
+					error : function(XMLHttpRequest, textStatus, errorThrown) {
+						$('#submitbtn').removeClass(DISABLED);
+						$('#submitbtn').removeAttr('disabled');
+					}
+				})
+				return false;
+			});
+
+			upload.render({
+				elem : '.layui-upload-drag',
+				url : '/attachment/uploadFile',
+				method : 'POST',
+				before : function(obj) {
+					this.data.objectId = material_tid;
+					this.data.objectType = "material";
+				},
+				done : function(res) {
+					var currentidx = $(this.item[0]).attr('idx');
+					var imgsrc = '/attachment/showImage?objectId=' + material_tid + "&objectType=material&fileName=" + res.msg;
+					$('#previewImg' + currentidx).css('width', '30%');
+					$('#previewImg' + currentidx).css('height', '100%');
+					$('#previewImg' + currentidx).attr('src', imgsrc);
+					$("#upload-drag" + currentidx).css("display", "none");
+					$("#delbtn" + currentidx).css("display", "");
+					$("#picname"+currentidx).val(res.msg);
+				}
+			});
+		})
+
+		function delsucai(idx) {
+			var fileName = $("#picname"+idx).val();
+			$.ajax({
+				url : '/attachment/deleteFile?objectId='+material_tid+"&objectType=material&fileName=" + fileName,
+				dataType : 'json',
+				async : true,
+				success : function(result) {
+					console.log(result);
+					$("#previewImg"+idx).attr("style","");
+					$("#previewImg"+idx).attr("src","");
+					$("#upload-drag" + idx).css("display", "");
+					$("#delbtn" + idx).css("display", "none");
+					$("#picname"+idx).val('');
+					$("#href" + idx).val('');
+				}
+			});
+		}
+	</script>
+</body>
+</html>

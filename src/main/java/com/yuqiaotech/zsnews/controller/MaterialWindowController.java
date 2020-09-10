@@ -41,11 +41,14 @@ import com.yuqiaotech.zsnews.model.Column;
 import com.yuqiaotech.zsnews.model.Material;
 import com.yuqiaotech.zsnews.model.PicMapping;
 
+/**
+ * 开屏素材
+ */
 @RestController
-@RequestMapping("zsnews/material")
-public class MaterialController extends BaseController
+@RequestMapping("zsnews/materialwindow")
+public class MaterialWindowController extends BaseController
 {
-    private static String MODULE_PATH = "zsnews/material/";
+    private static String MODULE_PATH = "zsnews/materialwindow/";
     
     @Autowired
     private BaseRepository<Material, Long> materialRepository;
@@ -89,7 +92,7 @@ public class MaterialController extends BaseController
             }
         }
         dc.add(Restrictions.eq("deltag", NewsDicConstants.ICommon.DELETE_NO));
-        dc.add(Restrictions.eq("type", NewsDicConstants.IMaterial.Type.BANNER));//只查banner类型
+        dc.add(Restrictions.eq("type", NewsDicConstants.IMaterial.Type.WINDOW));
         return dc;
     }
     
@@ -103,10 +106,9 @@ public class MaterialController extends BaseController
             if (material.getStatus() == null || material.getStatus() == NewsDicConstants.ICommon.STATUS_DOWN)
             {
                 //如果是从下架变上架，要看同一个资源位有无已经上架的素材
-                String checkOne = "from Material where column.id=" + material.getColumn().getId() + " and channel.id="
-                    + material.getChannel().getId() + " and type=" + NewsDicConstants.IMaterial.Type.BANNER
-                    + " and status=" + NewsDicConstants.ICommon.STATUS_UP + " and deltag="
-                    + NewsDicConstants.ICommon.DELETE_NO + " and id != " + mid;
+                String checkOne = "from Material where column.id=" + material.getColumn().getId() + " and type="
+                    + NewsDicConstants.IMaterial.Type.WINDOW + " and status=" + NewsDicConstants.ICommon.STATUS_UP
+                    + " and deltag=" + NewsDicConstants.ICommon.DELETE_NO + " and id != " + mid;
                 List<Material> dblist = materialRepository.findByHql(checkOne);
                 if (CollectionUtils.isNotEmpty(dblist))
                 {
@@ -139,9 +141,9 @@ public class MaterialController extends BaseController
     public Result save(@RequestBody MaterialBean materialBean)
     {
         //这里增加一个逻辑：同一个资源位，只能有一个上架的素材存在
-        String checkOne = "from Material where column.id=" + materialBean.getColumnId() + " and channel.id="
-            + materialBean.getChannelId() + " and type=" + NewsDicConstants.IMaterial.Type.BANNER + " and status="
-            + NewsDicConstants.ICommon.STATUS_UP + " and deltag=" + NewsDicConstants.ICommon.DELETE_NO;
+        String checkOne = "from Material where column.id=" + materialBean.getColumnId() + " and type="
+            + NewsDicConstants.IMaterial.Type.WINDOW + " and status=" + NewsDicConstants.ICommon.STATUS_UP
+            + " and deltag=" + NewsDicConstants.ICommon.DELETE_NO;
         List<Material> dblist = materialRepository.findByHql(checkOne);
         if (CollectionUtils.isNotEmpty(dblist))
         {
@@ -156,14 +158,9 @@ public class MaterialController extends BaseController
             material.setColumn(column);
         }
         
-        if (materialBean.getChannelId() != null)
-        {
-            Channel channel = channelRepository.findUniqueBy("id", materialBean.getChannelId(), Channel.class);
-            material.setChannel(channel);
-        }
         material.setStatus(NewsDicConstants.ICommon.STATUS_UP);//默认上架
         material.setDeltag(NewsDicConstants.ICommon.DELETE_NO);//默认未删除
-        material.setType(NewsDicConstants.IMaterial.Type.BANNER);
+        material.setType(NewsDicConstants.IMaterial.Type.WINDOW);
         material.setUser(getCurrentUser());
         material = materialRepository.save(material);
         
@@ -176,7 +173,6 @@ public class MaterialController extends BaseController
             pm.setMaterial(material);
             pm.setDisplayOrder(1);
             pm.setPicpath(materialBean.getPicname1());
-            pm.setH5href(materialBean.getHref1());
             picmappinglist.add(pm);
         }
         if (StringUtils.isNotEmpty(materialBean.getPicname2()))
@@ -185,7 +181,6 @@ public class MaterialController extends BaseController
             pm.setMaterial(material);
             pm.setDisplayOrder(2);
             pm.setPicpath(materialBean.getPicname2());
-            pm.setH5href(materialBean.getHref2());
             picmappinglist.add(pm);
         }
         if (StringUtils.isNotEmpty(materialBean.getPicname3()))
@@ -194,7 +189,6 @@ public class MaterialController extends BaseController
             pm.setMaterial(material);
             pm.setDisplayOrder(3);
             pm.setPicpath(materialBean.getPicname3());
-            pm.setH5href(materialBean.getHref3());
             picmappinglist.add(pm);
         }
         if (StringUtils.isNotEmpty(materialBean.getPicname4()))
@@ -203,7 +197,6 @@ public class MaterialController extends BaseController
             pm.setMaterial(material);
             pm.setDisplayOrder(4);
             pm.setPicpath(materialBean.getPicname4());
-            pm.setH5href(materialBean.getHref4());
             picmappinglist.add(pm);
         }
         if (StringUtils.isNotEmpty(materialBean.getPicname5()))
@@ -212,7 +205,6 @@ public class MaterialController extends BaseController
             pm.setMaterial(material);
             pm.setDisplayOrder(5);
             pm.setPicpath(materialBean.getPicname5());
-            pm.setH5href(materialBean.getHref5());
             picmappinglist.add(pm);
         }
         
@@ -258,23 +250,18 @@ public class MaterialController extends BaseController
             {
                 case 1:
                     materialBean.setPicname1(picMapping.getPicpath());
-                    materialBean.setHref1(picMapping.getH5href());
                     break;
                 case 2:
                     materialBean.setPicname2(picMapping.getPicpath());
-                    materialBean.setHref2(picMapping.getH5href());
                     break;
                 case 3:
                     materialBean.setPicname3(picMapping.getPicpath());
-                    materialBean.setHref3(picMapping.getH5href());
                     break;
                 case 4:
                     materialBean.setPicname4(picMapping.getPicpath());
-                    materialBean.setHref4(picMapping.getH5href());
                     break;
                 case 5:
                     materialBean.setPicname5(picMapping.getPicpath());
-                    materialBean.setHref5(picMapping.getH5href());
                     break;
                 default:
                     break;
@@ -301,25 +288,10 @@ public class MaterialController extends BaseController
                 column = columnRepository.findUniqueBy("id", materialBean.getColumnId(), Column.class);
             }
         }
-        
-        Channel channel = null;
-        if (materialBean.getChannelId() != null)
-        {
-            Channel channeldb = materialdb.getChannel();
-            if (channeldb == null || !channeldb.getId().equals(materialBean.getChannelId()))
-            {
-                //如果原来没有。或者新的修改了
-                channel = channelRepository.findUniqueBy("id", materialBean.getChannelId(), Channel.class);
-            }
-        }
         BeanUtils.copyProperties(materialBean, materialdb, getNullPropertyNames(materialBean));
         if (column != null)
         {
             materialdb.setColumn(column);
-        }
-        if (channel != null)
-        {
-            materialdb.setChannel(channel);
         }
         
         if (materialdb.getDeltag() == null)
@@ -331,7 +303,7 @@ public class MaterialController extends BaseController
             materialdb.setStatus(NewsDicConstants.ICommon.STATUS_UP);
         }
         
-        materialdb.setType(NewsDicConstants.IMaterial.Type.BANNER);
+        materialdb.setType(NewsDicConstants.IMaterial.Type.WINDOW);
         materialdb.setUser(getCurrentUser());
         
         materialRepository.update(materialdb);
@@ -345,7 +317,6 @@ public class MaterialController extends BaseController
             pm.setMaterial(materialdb);
             pm.setDisplayOrder(1);
             pm.setPicpath(materialBean.getPicname1());
-            pm.setH5href(materialBean.getHref1());
             picmappinglist.add(pm);
         }
         if (StringUtils.isNotEmpty(materialBean.getPicname2()))
@@ -354,7 +325,6 @@ public class MaterialController extends BaseController
             pm.setMaterial(materialdb);
             pm.setDisplayOrder(2);
             pm.setPicpath(materialBean.getPicname2());
-            pm.setH5href(materialBean.getHref2());
             picmappinglist.add(pm);
         }
         if (StringUtils.isNotEmpty(materialBean.getPicname3()))
@@ -363,7 +333,6 @@ public class MaterialController extends BaseController
             pm.setMaterial(materialdb);
             pm.setDisplayOrder(3);
             pm.setPicpath(materialBean.getPicname3());
-            pm.setH5href(materialBean.getHref3());
             picmappinglist.add(pm);
         }
         if (StringUtils.isNotEmpty(materialBean.getPicname4()))
@@ -372,7 +341,6 @@ public class MaterialController extends BaseController
             pm.setMaterial(materialdb);
             pm.setDisplayOrder(4);
             pm.setPicpath(materialBean.getPicname4());
-            pm.setH5href(materialBean.getHref4());
             picmappinglist.add(pm);
         }
         if (StringUtils.isNotEmpty(materialBean.getPicname5()))
@@ -381,7 +349,6 @@ public class MaterialController extends BaseController
             pm.setMaterial(materialdb);
             pm.setDisplayOrder(5);
             pm.setPicpath(materialBean.getPicname5());
-            pm.setH5href(materialBean.getHref5());
             picmappinglist.add(pm);
         }
         picMappingRepository.executeUpdate("delete from PicMapping where material.id=" + materialdb.getId(),

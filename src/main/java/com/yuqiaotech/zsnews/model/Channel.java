@@ -31,7 +31,8 @@ public class Channel extends BaseModel
     
     private String category;//小组 专用的字段  属于 科技，还是教育
     
-    private String logo;
+    @javax.persistence.Column(columnDefinition = "text")
+    private String logo;//如果是浙商号，需要logo，个人也是有logo的
     
     private String title;
     

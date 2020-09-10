@@ -114,6 +114,19 @@ public class ChannelController extends BaseController
         return dc;
     }
     
+    @GetMapping("channelListByColumnId/{cid}")
+    public ResultTable channelListByColumnId(@PathVariable Long cid)
+    {
+        DetachedCriteria dc = DetachedCriteria.forClass(Channel.class);
+        dc.add(Restrictions.eq("column.id", cid));
+        dc.add(Restrictions.eq("deltag", NewsDicConstants.ICommon.DELETE_NO));
+        dc.add(Restrictions.eq("status", NewsDicConstants.ICommon.STATUS_UP));
+        dc.addOrder(Order.asc("displayOrder"));
+        
+        List<Channel> channelList = channelRepository.findByCriteria(dc);
+        return dataTable(channelList);
+    }
+    
     @GetMapping("add")
     public ModelAndView add(ModelAndView modelAndView)
     {

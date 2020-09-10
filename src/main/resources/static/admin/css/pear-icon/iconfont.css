@@ -222,4 +222,7 @@
 .pear-iconshangchuan:before {
   content: "\e66f";
 }
+.pear-icon-add:before {
+    content: "\e67e";
+}
 

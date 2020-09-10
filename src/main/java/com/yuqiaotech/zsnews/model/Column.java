@@ -20,6 +20,9 @@ public class Column extends BaseModel
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    @javax.persistence.Column(columnDefinition = "text")
+    private String logo;
+    
     private String title;
     
     private String remark;
@@ -104,5 +107,15 @@ public class Column extends BaseModel
     public void setDisplayOrder(Integer displayOrder)
     {
         this.displayOrder = displayOrder;
+    }
+    
+    public String getLogo()
+    {
+        return logo;
+    }
+    
+    public void setLogo(String logo)
+    {
+        this.logo = logo;
     }
 }

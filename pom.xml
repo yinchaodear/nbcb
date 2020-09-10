@@ -86,7 +86,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!--引入JWT依赖-->
+		<!--引入JWT依赖 -->
 		<dependency>
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
@@ -133,6 +133,11 @@
 			<artifactId>commons-lang3</artifactId>
 			<version>${commons.lang3.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.7</version>
+		</dependency>
 		<!-- 分 页 组 件 -->
 		<dependency>
 			<groupId>com.github.pagehelper</groupId>
@@ -170,7 +175,7 @@
 			<version>4.12</version>
 		</dependency>
 	</dependencies>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -182,8 +187,8 @@
 			</plugin>
 		</plugins>
 	</build>
-	
-	
+
+
 	<!-- 阿里云maven仓库 -->
 	<repositories>
 		<repository>

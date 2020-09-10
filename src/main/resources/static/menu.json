@@ -45,11 +45,11 @@
 			},
 			{
 				"id": "1015",
-				"title": "素材管理——TODO",
+				"title": "素材管理",
 				"type": "1",
 				"openType": null,
 				"icon": "layui-icon layui-icon-vercode",
-				"href": "",
+				"href": "/zsnews/material/main",
 				"children": []
 			},
 			{

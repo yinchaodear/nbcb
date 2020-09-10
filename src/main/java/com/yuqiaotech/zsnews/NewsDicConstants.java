@@ -57,35 +57,6 @@ public interface NewsDicConstants
              */
             String GR = "个人";
         }
-        
-        interface TYPE
-        {
-            /**
-             * 浙商号
-             */
-            interface ZSH
-            {
-                /**
-                 * 商会号
-                 */
-                String SHH = "商会号";
-                
-                /**
-                 * 企业号
-                 */
-                String QYH = "企业号";
-                
-                /**
-                 * 媒体号
-                 */
-                String MTH = "媒体号";
-                
-                /**
-                 * 个人号
-                 */
-                String GRH = "个人号";
-            }
-        }
     }
     
     interface ICategory
@@ -95,6 +66,22 @@ public interface NewsDicConstants
             String QUANJU = "全局";
             
             String JUBU = "局部";
+        }
+    }
+    
+    interface IMaterial
+    {
+        interface Type
+        {
+            /**
+             * BANNER
+             */
+            Integer BANNER = 1;
+            
+            /**
+                                 * 闪屏
+             */
+            Integer WINDOW = 2;
         }
     }
 }

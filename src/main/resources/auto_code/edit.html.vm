@@ -42,7 +42,7 @@
 		</div>
 		<div class="bottom">
 			<div class="button-container">
-				<button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="${varEntityClassName}-save">
+				<button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="${varEntityClassName}-save" id="submitbtn">
 					<i class="layui-icon layui-icon-ok"></i>
 					提交
 				</button>
@@ -61,6 +61,9 @@
 			let MODULE_PATH = "${requestmapping}";
 			
 			form.on('submit(${varEntityClassName}-save)', function(data) {
+				var DISABLED = 'layui-btn-disabled';
+				$('#submitbtn').addClass(DISABLED);
+				$('#submitbtn').attr('disabled', 'disabled');
 				$.ajax({
 					url : MODULE_PATH+'update',
 					data : JSON.stringify(data.field),
@@ -73,6 +76,8 @@
 								icon : 1,
 								time : 1000
 							}, function() {
+								$('#submitbtn').removeClass(DISABLED);
+		                        $('#submitbtn').removeAttr('disabled');
 								parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
 								parent.layui.table.reload("${varEntityClassName}-table");
 							});
@@ -80,8 +85,15 @@
 							layer.msg(result.msg, {
 								icon : 2,
 								time : 1000
+							}, function() {
+								$('#submitbtn').removeClass(DISABLED);
+		                        $('#submitbtn').removeAttr('disabled');
 							});
 						}
+					},
+					error : function(XMLHttpRequest, textStatus, errorThrown){
+						$('#submitbtn').removeClass(DISABLED);
+		               	$('#submitbtn').removeAttr('disabled');
 					}
 				})
 				return false;

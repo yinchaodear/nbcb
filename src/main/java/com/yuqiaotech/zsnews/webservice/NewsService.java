@@ -68,7 +68,7 @@ public class NewsService extends BaseController
         if(type.equals("推荐")){
         	
         }else if(type.equals("关注")){
-        	wheresql+= " and f_channel_id  in  ( select f_channel_id from t_channel_follower where f_user_info_id ="+getCurrentUserId()+" )";
+        	wheresql+= " and t.f_author_channel_id  in  ( select f_channel_id from t_channel_follower where f_user_info_id ="+getCurrentUserId()+" )";
         }else{
         	wheresql+= " and f_channel_id ="+id; 
         }
@@ -127,12 +127,12 @@ public class NewsService extends BaseController
     	System.out.println("NewsController.AppNewsData()"+kind +type+currentstatus+getCurrentUserId());
     	String wheresql ="";
     	if("已关注".equals(currentstatus)){
-    	  wheresql = "inner join t_channel_follower cf on cf.f_channel_id = t.f_channel_id and cf.f_user_info_id = "+getCurrentUserId();
+    	  wheresql = "inner join t_channel_follower cf on cf.f_channel_id = t.f_author_channel_id and cf.f_user_info_id = "+getCurrentUserId();
     	} 	
     	String sql ="SELECT t.*  ,c.f_kind as channelkind,c.f_type as channeltype, a.apprisecount as apprisecount ,c.f_title as channelname "
     			+ "FROM t_news t left join  ( SELECT  f_news_id  as id1,count(1) as apprisecount FROM t_comment cm1 "
     			+ "where cm1.f_type ='评论' or cm1.f_type='回答' group by f_news_id ) a on a.id1 =t.f_id "
-    			+ "inner join t_channel  c on  c.f_id = t.f_channel_id "
+    			+ "inner join t_channel  c on  c.f_id = t.f_author_channel_id "
     			+  wheresql
     			+" where c.f_kind ='"+kind+"' and c.f_type ='"+type+"'"
     			+ " and c.f_status = 0  order by f_display_order asc ";

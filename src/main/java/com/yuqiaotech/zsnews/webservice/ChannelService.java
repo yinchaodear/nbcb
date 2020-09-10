@@ -159,8 +159,8 @@ public class ChannelService extends BaseController
                 + "left join (select c.f_id as channelid ,count(1) as number from t_channel_follower cf inner join t_channel c  on c.f_id = cf.f_channel_id "
                 + "where  c.f_id =" + id + " ) c on c.channelid  = t.f_id where t.f_id = " + id;
         List channel = channelRepository.findMapByNativeSql(sql);
-        String sqlcategory =
-            "SELECT * FROM t_category where f_channel_id = " + id + " and f_type ='局部' and f_show ='显示'";
+        String sqlcategory = "SELECT c.* FROM t_channe_catego_mappin cm inner join t_category "
+        		+ "c on c.f_id =cm.f_category_id where cm.f_channel_id =  "+id+" and c.f_status = 0";          
         List category = categoryRepository.findMapByNativeSql(sqlcategory);
         Map result = new HashMap<>();
         result.put("channel", channel);

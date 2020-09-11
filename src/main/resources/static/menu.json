@@ -63,11 +63,11 @@
 			},
 			{
 				"id": "1017",
-				"title": "消息推送——TODO",
+				"title": "消息推送",
 				"type": "1",
 				"openType": null,
 				"icon": "layui-icon layui-icon-vercode",
-				"href": "",
+				"href": "/zsnews/sysnotice/main",
 				"children": []
 			}
 		]

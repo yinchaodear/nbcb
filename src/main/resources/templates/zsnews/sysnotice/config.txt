@@ -1,0 +1,9 @@
+{
+	"id": "1012",
+	"title": "系统消息表管理",
+	"type": "1",
+	"openType": null,
+	"icon": "layui-icon layui-icon-vercode",
+	"href": "/zsnews/sysnotice/main",
+	"children": []
+}

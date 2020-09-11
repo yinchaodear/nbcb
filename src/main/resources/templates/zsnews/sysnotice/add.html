@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
+<head>
+<meta charset="UTF-8">
+<title>新增</title>
+<link rel="stylesheet" href="../../admin/css/pearCommon.css" />
+<link rel="stylesheet" href="../../component/layui/css/layui.css" />
+</head>
+<body>
+	<form class="layui-form" action="">
+		<div class="mainBox">
+			<div class="main-container">
+				<div class="main-container">
+					<div class="layui-form-item">
+						<label class="layui-form-label">标题</label>
+						<div class="layui-input-block">
+							<input type="text" name="title" autocomplete="off" placeholder="请输入标题" class="layui-input" maxlength="50" lay-verify="required">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">内容</label>
+						<div class="layui-input-block">
+							<textarea name="content" placeholder="请输入内容" class="layui-textarea" maxlength="500" autocomplete="off"></textarea>
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">推送形式</label>
+						<div class="layui-input-block">
+							<input type="radio" name="way" value="1" title="短信消息" checked>
+							<input type="radio" name="way" value="2" title="PUSH消息" >
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="bottom">
+			<div class="button-container">
+				<button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="sysNotice-save" id="submitbtn">
+					<i class="layui-icon layui-icon-ok"></i>
+					提交
+				</button>
+				<button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">
+					<i class="layui-icon layui-icon-refresh"></i>
+					重置
+				</button>
+			</div>
+		</div>
+	</form>
+	<script src="../../component/layui/layui.js"></script>
+	<script>
+		layui.use([ 'form', 'jquery' ], function() {
+			let form = layui.form;
+			let $ = layui.jquery;
+			let MODULE_PATH = "/zsnews/sysnotice/";
+
+			form.on('submit(sysNotice-save)', function(data) {
+				var DISABLED = 'layui-btn-disabled';
+				$('#submitbtn').addClass(DISABLED);
+				$('#submitbtn').attr('disabled', 'disabled');
+				$.ajax({
+					url : MODULE_PATH + 'save',
+					data : JSON.stringify(data.field),
+					dataType : 'json',
+					contentType : 'application/json',
+					type : 'post',
+					success : function(result) {
+						if (result.success) {
+							layer.msg(result.msg, {
+								icon : 1,
+								time : 5000
+							}, function() {
+								$('#submitbtn').removeClass(DISABLED);
+								$('#submitbtn').removeAttr('disabled');
+								parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+								parent.layui.table.reload("sysNotice-table");
+							});
+						} else {
+							layer.msg(result.msg, {
+								icon : 2,
+								time : 5000
+							}, function() {
+								$('#submitbtn').removeClass(DISABLED);
+								$('#submitbtn').removeAttr('disabled');
+							});
+						}
+					},
+					error : function(XMLHttpRequest, textStatus, errorThrown) {
+						$('#submitbtn').removeClass(DISABLED);
+						$('#submitbtn').removeAttr('disabled');
+					}
+				})
+				return false;
+			});
+		})
+	</script>
+</body>
+</html>

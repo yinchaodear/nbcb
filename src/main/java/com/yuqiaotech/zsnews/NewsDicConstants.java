@@ -59,6 +59,9 @@ public interface NewsDicConstants
         }
     }
     
+    /**
+     * 分类
+     */
     interface ICategory
     {
         interface Type
@@ -69,8 +72,14 @@ public interface NewsDicConstants
         }
     }
     
+    /**
+     * 素材
+     */
     interface IMaterial
     {
+        /**
+         * 类型
+         */
         interface Type
         {
             /**
@@ -82,6 +91,95 @@ public interface NewsDicConstants
                                  * 闪屏
              */
             Integer WINDOW = 2;
+        }
+    }
+    
+    /**
+     * 新闻
+     *
+     */
+    interface INews
+    {
+        interface Status
+        {
+            /**
+             * 已上架
+             */
+            Integer UP = 0;
+            
+            /**
+             * 下架状态
+             */
+            Integer DOWN = 1;
+            
+            /**
+             * 处理中
+             */
+            Integer DOING = 2;
+            
+            /**
+             * 审核中
+             */
+            Integer CHECKING = 3;
+            
+            /**
+             * 已失败
+             */
+            Integer FAIL = 4;
+            
+        }
+    }
+    
+    /**
+     * 系统消息
+     *
+     */
+    interface INotice
+    {
+        /**
+         * 消息类型
+         */
+        interface Type
+        {
+            /**
+             * 系统消息
+             */
+            Integer SYS = 1;
+            
+            Integer OTHER = 2;
+        }
+        
+        /**
+         * 
+         * 推送形式
+         */
+        interface Way
+        {
+            /**
+             * 短信
+             */
+            Integer SMS = 1;
+            
+            /**
+             * PUSH
+             */
+            Integer PUSH = 2;
+        }
+        
+        /**
+         * 消息状态
+         */
+        interface Status
+        {
+            /**
+             * 处理中
+             */
+            Integer DOING = 1;
+            
+            /**
+             * 已完成
+             */
+            Integer END = 2;
         }
     }
 }

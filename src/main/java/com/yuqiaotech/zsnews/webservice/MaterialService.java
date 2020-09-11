@@ -31,7 +31,7 @@ public class MaterialService extends BaseController
     {
         System.out.println("MaterialService.MaterialSwiper()"+columid+channelid);
         String sql ="SELECT  t.f_id  ,f_picpath FROM t_pic_mapping  m inner join t_material t on  m.f_material_id = t.f_id  "
-        		+ "inner join t_channel c on t.f_channel_id = c.f_id where t.f_channel_id = "+channelid+" and t.f_column_id  = "+columid;
+        		+ "inner join t_channel c on t.f_channel_id = c.f_id where t.f_type =1 and t.f_channel_id = "+channelid+" and  t.f_status=0 and t.f_column_id  = "+columid;
         List pic = materialRepository.findMapByNativeSql(sql);
         Map result = new HashMap<>();
         result.put("pic",pic);
@@ -49,7 +49,23 @@ public class MaterialService extends BaseController
     {
         System.out.println("MaterialService.MaterialSwiperMerchant()");
         String sql ="SELECT  t.f_id  ,f_picpath FROM t_pic_mapping m inner join t_material t on "
-        		+ "m.f_material_id = t.f_id  where  t.f_column_id  = "+columid+" and t.f_title = '"+type+"'  and t.f_status=0";
+        		+ "m.f_material_id = t.f_id  where  t.f_type =1 and  t.f_column_id  = "+columid+" and t.f_title = '"+type+"'  and t.f_status=0";
+        List pic = materialRepository.findMapByNativeSql(sql);
+        Map result = new HashMap<>();
+        result.put("pic",pic);
+        return success(result);
+    }
+    
+    
+	/*
+	 * 只针对每个栏目的闪屏的
+	 */	
+    @GetMapping("materialswipercolumn")
+    public Result MaterialSwipercolumn(@RequestParam Long columid)
+    {
+        System.out.println("MaterialService.MaterialSwiper()"+columid);
+        String sql ="SELECT  t.f_id  ,f_picpath FROM t_pic_mapping  m inner join t_material t on  m.f_material_id = t.f_id  "
+        		+ " where t.f_type =2  and t.f_column_id  = "+columid +" and t.f_status=0";
         List pic = materialRepository.findMapByNativeSql(sql);
         Map result = new HashMap<>();
         result.put("pic",pic);

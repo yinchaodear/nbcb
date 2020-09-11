@@ -7,6 +7,8 @@ import javax.persistence.Id;
 
 import com.yuqiaotech.common.web.base.BaseModel;
 
+import java.util.Date;
+
 /**
  * APP用户。
  * User是登录后台的用户。
@@ -28,7 +30,7 @@ public class UserInfo extends BaseModel
     
     private String gender;
     
-    private String avatar;
+    private String avatar;//头像base64
     
     private String remark;//个人的一些详细说明
     
@@ -37,7 +39,27 @@ public class UserInfo extends BaseModel
     private Long usedIntegral;//用掉的积分
     
     private Long currentIntegral;//当前剩余积分
-    
+
+    private Date birthday;
+
+    private String region;//省市区
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
     public Long getId()
     {
         return id;

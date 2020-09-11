@@ -46,11 +46,14 @@ public class INewsServiceImpl implements INewsService {
 			String limitStr = "limit " + pageNo * pageSize + "," + pageSize;
 
 			String type = params.get("type") != null ? (String) params.get("type") : "";
-			String wheresql = "where 1 =1 and t.f_kind ='" + kind + "'";
+			//调整为查询channel
+//			String wheresql = "where 1 =1 and t.f_kind ='" + kind + "'";
+			String wheresql = "where 1 =1 and nc.f_id is not null";
 
 			String sql = " select concat(t.f_id,'') newsId, ifnull(zanNum, 0) zanNum,ifnull(pinglunNum, 0) pinglunNum, ifnull(shoucangNum, 0) shoucangNum,  \n" +
 					" ifnull(uc.userTotalNum, 0) userTotalNum,ui.f_username userName, t.f_title title, t.f_content content\n" +
 					"from t_news t\n" +
+					"left join t_channel nc on t.f_channel_id = nc.f_id and nc.f_kind = '小组' \n" +
 					"left join t_channel c on t.f_author_channel_id = c.f_id \n" +
 					"left join t_user_info ui on c.f_userinfo_id = ui.f_id\n" +
 					"left join (\n" +
@@ -153,7 +156,7 @@ public class INewsServiceImpl implements INewsService {
 		try {
 			//评论|回复
 			String type = (String) params.get("type");
-			Long newsId = params.get("newsId") != null ? Long.valueOf(String.valueOf((Number) params.get("newsId"))) : null;
+			Long newsId = params.get("newsId") != null ? Long.valueOf((String) params.get("newsId")) : null;
 
 			if (newsId == null) {
 				throw new RuntimeException("评论 newsId 为空，请确认!");
@@ -178,12 +181,12 @@ public class INewsServiceImpl implements INewsService {
 
 				if (type.equals("回复")) {
 					//对评论的回复 | 对回复的回复（commentId, answerUserId-要处理的回复或者评论的发表者）
-					Long commentId = params.get("commentId") != null ? Long.valueOf(String.valueOf((Number) params.get("commentId"))) : null;
+					Long commentId = params.get("commentId") != null ? ((Number) params.get("commentId")).longValue() : null;
 					Comment targetComment = commentRepository.get(commentId, Comment.class);
 					comment.setComment(targetComment);
 
 					//回复对应的发表者
-					Long answerUserId = params.get("answerUserId") != null ? Long.valueOf(String.valueOf((Number) params.get("answerUserId"))) : null;
+					Long answerUserId = params.get("answerUserId") != null ? ((Number) params.get("answerUserId")).longValue() : null;
 					UserInfo answerUserInfo = userInfoRepository.get(answerUserId, UserInfo.class);
 					comment.setAnswerUser(answerUserInfo);
 				}
@@ -229,7 +232,7 @@ public class INewsServiceImpl implements INewsService {
 						"	from t_comment \n" +
 						"	where f_type = '点赞' and f_comment_id is not null \n" +
 						"	group by f_comment_id\n" +
-						") t on t.commentId = c.f_id \n"+
+						") t on t.commentId = c.f_id \n" +
 						"left join t_news n on c.f_news_id = n.f_id\n" +
 						"left join t_user_info ui on ui.f_id = c.f_user_info_id\n" +
 						"left join t_user_info aui on aui.f_id = c.f_answer_user_id\n" +
@@ -251,7 +254,7 @@ public class INewsServiceImpl implements INewsService {
 								"	from t_comment \n" +
 								"	where f_type = '点赞' and f_comment_id is not null \n" +
 								"	group by f_comment_id\n" +
-								") t on t.commentId = c.f_id \n"+
+								") t on t.commentId = c.f_id \n" +
 								"left join t_news n on c.f_news_id = n.f_id\n" +
 								"left join t_user_info ui on ui.f_id = c.f_user_info_id\n" +
 								"left join t_user_info aui on aui.f_id = c.f_answer_user_id \n" +

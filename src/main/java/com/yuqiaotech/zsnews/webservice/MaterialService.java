@@ -40,12 +40,12 @@ public class MaterialService extends BaseController
     
     
 	/*
-	 * 只针对首页的
+	 * 只针对首页的推荐的
 	 */	
     @GetMapping("materialswiperrecommod")
     public Result MaterialSwiperRecommod(@RequestParam Long columid,@RequestParam String type)
     {
-        System.out.println("MaterialService.MaterialSwiper()"+columid+type);
+        System.out.println("MaterialService.MaterialSwiperRecommod()");
         Long channelid =null;
         if("推荐".equals(type)){    
         	Material r = materialRepository.findUniqueBy("title", "推荐", Material.class);
@@ -55,6 +55,23 @@ public class MaterialService extends BaseController
         }
         String sql ="SELECT  t.f_id  ,f_picpath FROM t_pic_mapping  m inner join t_material t on  m.f_material_id = t.f_id  "
         		+ "inner join t_channel c on t.f_channel_id = c.f_id where t.f_channel_id = "+channelid+" and t.f_column_id  = "+columid;
+        List pic = materialRepository.findMapByNativeSql(sql);
+        Map result = new HashMap<>();
+        result.put("pic",pic);
+        return success(result);
+    }
+    
+    
+    
+	/*
+	 * 只针对浙商号的
+	 */	
+    @GetMapping("materialswipermerchant")
+    public Result MaterialSwiperMerchant(@RequestParam Long columid,@RequestParam String type)
+    {
+        System.out.println("MaterialService.MaterialSwiperMerchant()");
+        String sql ="SELECT  t.f_id  ,f_picpath FROM t_pic_mapping m inner join t_material t on "
+        		+ "m.f_material_id = t.f_id  where  t.f_column_id  = "+columid+" and t.f_title = '"+type+"'";
         List pic = materialRepository.findMapByNativeSql(sql);
         Map result = new HashMap<>();
         result.put("pic",pic);

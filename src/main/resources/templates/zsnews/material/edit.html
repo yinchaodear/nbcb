@@ -60,7 +60,7 @@
 					<div class="layui-form-item">
 						<label class="layui-form-label">展示位</label>
 						<div class="layui-input-block">
-							<select name="channelId" id="channelId" lay-filter="channelfilter" lay-verify="required">
+							<select name="channelId" id="channelId" lay-filter="channelfilter" >
 								<option>请选择展示位</option>
 								<option th:each="c : ${channellist}" th:value="${c.id}" th:text="${c.title}" th:selected="${material.channel!=null && material.channel.id eq c.id}"></option>
 							</select>

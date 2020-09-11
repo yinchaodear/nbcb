@@ -1,0 +1,21 @@
+服务器部署在何老师机器上
+http://139.224.9.182:9292/index
+admin
+8888
+
+修改配置文件：[application.yml]
+上传路径：attachmentRoot: /mnt/zs/attach
+修改配置文件：[application.yml]
+数据库地址，改为：172.19.165.193
+
+jar：
+jar服务器路径：/mnt/zs/yuqiao-admin-springboot-hibernate-0.0.1-SNAPSHOT.jar
+启动脚本：/mnt/zs/startboot.sh
+ 
+本地打jar命令：
+mvn install 
+
+nohup java -Xms4096m -Xmx5120m -XX:MaxNewSize=5120m -XX:MaxPermSize=5120m -jar /mnt/zs/yuqiao-admin-springboot-hibernate-0.0.1-SNAPSHOT.jar &
+nohup java -Xms1024m -Xmx2048m -XX:MaxNewSize=512m -XX:MaxPermSize=1024m -jar /usr/local/apps/gonghuiyun_server/springboot/target/yuqiao-admin-springboot-hibernate-0.0.1-SNAPSHOT.jar &
+nohup java -Xms4096m -Xmx5120m -XX:MaxNewSize=5120m -XX:MaxPermSize=5120m -jar /mnt/apps/yuqinglinkcrawler-0.0.1-SNAPSHOT.jar &
+

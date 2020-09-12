@@ -168,7 +168,7 @@
 				"type": "1",
 				"openType": null,
 				"icon": "layui-icon layui-icon-vercode",
-				"href": "/zsnews/news/main",
+				"href": "/zsnews/userinfocheck/main",
 				"children": []
 			}
 		]

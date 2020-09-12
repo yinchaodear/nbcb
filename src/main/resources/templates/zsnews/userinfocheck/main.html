@@ -1,0 +1,349 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
+<head>
+<meta charset="UTF-8">
+<title>Title</title>
+<link rel="stylesheet" href="../../admin/css/pearCommon.css" />
+<link rel="stylesheet" href="../../component/layui/css/layui.css" />
+</head>
+<body class="pear-container">
+	<div class="layui-card">
+		<div class="layui-card-body">
+			<form class="layui-form" action="">
+				<div class="layui-form-item">
+					<div class="layui-form-item layui-inline">
+						<label class="layui-form-label">用户</label>
+						<div class="layui-input-inline">
+							<input type="text" name="username" placeholder="请输入用户名称或者简介" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item layui-inline">
+						<label class="layui-form-label">状态</label>
+						<div class="layui-input-inline">
+							<select name="status">
+								<option value=""></option>
+								<option value="0">已上架</option>
+								<option value="1">审核中</option>
+								<option value="3">审核不通过</option>
+							</select>
+						</div>
+					</div>
+
+					<button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="category-query">
+						<i class="layui-icon layui-icon-search"></i>
+						查询
+					</button>
+					<button type="reset" class="pear-btn pear-btn-md">
+						<i class="layui-icon layui-icon-refresh"></i>
+						重置
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="layui-card">
+		<div class="layui-card-body">
+			<table id="category-table" lay-filter="category-table"></table>
+		</div>
+	</div>
+</body>
+
+<script type="text/html" id="userinfocheck-bar">
+{{#  if(d.status === 1){ }}
+	<a href="javascript:void(0);" onclick="check({{d.id}},2)">通过</a>
+	<a href="javascript:void(0);" onclick="check({{d.id}},3)">不通过</a>
+{{#  } }}
+</script>
+
+<script type="text/html" id="avatarbar">
+{{#  if(d.newAvatar === ''){ }}
+	{{#  if(d.avatar && d.avatar != '' && d.avatar != 'null' ){ }}
+		<div ><img src="{{ d.avatar }}" style="width: 30px; height: 30px;"></div>
+	{{#  } }}
+{{#  } else { }}
+	{{#  if(d.newAvatar && d.newAvatar != 'null' && d.newAvatar != '' ){ }}
+		<div style="color:red;"><img src="{{ d.newAvatar }}" style="width: 30px; height: 30px;"></div>
+	{{#  } }}
+{{#  } }}
+</script>
+
+<script src="../../component/layui/layui.js"></script>
+<script>
+	var $;
+	let MODULE_PATH = "/zsnews/userinfocheck/";
+	var table;
+	layui.use([ 'table', 'form', 'jquery' ], function() {
+		table = layui.table;
+		let form = layui.form;
+		$ = layui.jquery;
+
+		let cols = [ [ {
+			type : 'checkbox'
+		}, {
+			title : '序号',
+			type : 'numbers',
+			align : 'center',
+			width : 80
+		}, {
+			title : '头像',
+			field : 'newAvatar',
+			align : 'center',
+			width : 200,
+			templet : "#avatarbar"
+		}, {
+			title : '用户名称',
+			field : 'newUsername',
+			align : 'center',
+			width : 300,
+			templet : function(d) {
+				if (d.newUsername && d.newUsername != '' && d.newUsername != 'null')
+					return '<div style="color:red;">' + d.newUsername + '</div>';
+				else
+					return '<div>' + d.username + '</div>';
+			}
+		}, {
+			title : '简介',
+			field : 'newRemark',
+			align : 'center',
+			width : 300,
+			templet : function(d) {
+				if (d.newRemark && d.newRemark != '' && d.newRemark != 'null')
+					return '<div style="color:red;">' + d.newRemark + '</div>';
+				else
+					return '<div>' + d.remark + '</div>';
+			}
+		}, {
+			title : '状态',
+			field : 'status',
+			align : 'center',
+			width : 150,
+			templet : function(d) {
+				if (d.status == 0 || d.status == 2)
+					return '<div>已上架</div>';
+				else if (d.status == 1)
+					return '<div>审核中</div>';
+				else
+					return '<div>审核不通过</div>';
+			}
+		}, {
+			title : '创建时间',
+			field : 'created',
+			align : 'center',
+			width : 300,
+			templet : "<div>{{layui.util.toDateString(d.created, 'yyyy-MM-dd HH:mm:ss')}}</div>"
+		}, {
+			title : '操作',
+			toolbar : '#userinfocheck-bar',
+			align : 'center'
+		} ] ]
+
+		table.render({
+			elem : '#category-table',
+			url : MODULE_PATH + 'data',
+			page : true,
+			cols : cols,
+			skin : 'line',
+			toolbar : '#category-toolbar',
+			defaultToolbar : [ {
+				layEvent : 'refresh',
+				icon : 'layui-icon-refresh',
+			}, 'filter', 'print', 'exports' ]
+		});
+
+		table.on('tool(category-table)', function(obj) {
+			if (obj.event === 'remove') {
+				window.remove(obj);
+			} else if (obj.event === 'edit') {
+				window.edit(obj);
+			} else if (obj.event === 'power') {
+				window.power(obj);
+			}
+		});
+
+		table.on('toolbar(category-table)', function(obj) {
+			if (obj.event === 'add') {
+				window.add();
+			} else if (obj.event === 'refresh') {
+				window.refresh();
+			} else if (obj.event === 'batchRemove') {
+				window.batchRemove(obj);
+			}
+		});
+
+		form.on('submit(category-query)', function(data) {
+			table.reload('category-table', {
+				where : data.field
+			})
+			return false;
+		});
+
+		form.on('switch(status-enable)', function(obj) {
+			let loading = layer.load();
+			$.ajax({
+				url : MODULE_PATH + "status/" + this.value,
+				dataType : 'json',
+				type : 'get',
+				success : function(result) {
+					layer.close(loading);
+					if (result.success) {
+						if (obj.elem.checked) {
+							layer.msg('启用成功', {
+								icon : 1,
+								time : 5000
+							});
+						} else {
+							layer.msg('停用成功', {
+								icon : 1,
+								time : 5000
+							});
+						}
+					} else {
+						layer.msg('状态更新失败', {
+							icon : 2,
+							time : 1000
+						});
+					}
+				}
+			})
+		});
+
+		window.add = function() {
+			layer.open({
+				type : 2,
+				title : '新增',
+				shade : 0.1,
+				area : [ '800px', '80%' ],
+				content : MODULE_PATH + 'add'
+			});
+		}
+
+		window.edit = function(obj) {
+			layer.open({
+				type : 2,
+				title : '修改',
+				shade : 0.1,
+				area : [ '800px', '80%' ],
+				content : MODULE_PATH + 'edit?id=' + obj.data['id']
+			});
+		}
+
+		window.remove = function(obj) {
+			layer.confirm('确定要删除', {
+				icon : 3,
+				title : '提示'
+			}, function(index) {
+				layer.close(index);
+				let loading = layer.load();
+				$.ajax({
+					url : MODULE_PATH + "remove/" + obj.data['id'],
+					dataType : 'json',
+					type : 'delete',
+					success : function(result) {
+						layer.close(loading);
+						if (result.success) {
+							layer.msg(result.msg, {
+								icon : 1,
+								time : 1000
+							}, function() {
+								obj.del();
+							});
+						} else {
+							layer.msg(result.msg, {
+								icon : 2,
+								time : 1000
+							});
+						}
+					}
+				})
+			});
+		}
+
+		window.batchRemove = function(obj) {
+			let data = table.checkStatus(obj.config.id).data;
+			if (data.length === 0) {
+				layer.msg("未选中数据", {
+					icon : 3,
+					time : 1000
+				});
+				return false;
+			}
+			let ids = "";
+			for (let i = 0; i < data.length; i++) {
+				ids += data[i].id + ",";
+			}
+			ids = ids.substr(0, ids.length - 1);
+			layer.confirm('确定要删除', {
+				icon : 3,
+				title : '提示'
+			}, function(index) {
+				layer.close(index);
+				let loading = layer.load();
+				$.ajax({
+					url : MODULE_PATH + "batchRemove/" + ids,
+					dataType : 'json',
+					type : 'delete',
+					success : function(result) {
+						layer.close(loading);
+						if (result.success) {
+							layer.msg(result.msg, {
+								icon : 1,
+								time : 1000
+							}, function() {
+								table.reload('category-table');
+							});
+						} else {
+							layer.msg(result.msg, {
+								icon : 2,
+								time : 1000
+							});
+						}
+					}
+				})
+			});
+		}
+
+		window.refresh = function() {
+			table.reload('category-table');
+		}
+
+		window.check = function(uid, status) {
+			if (status == 2) {
+				//审核通过
+				checktmp(uid, status, '');
+			} else {
+				layer.prompt({
+					title : '审核意见',
+					formType : 2
+				}, function(text, index) {
+					layer.close(index);
+					checktmp(uid, status, text);
+				});
+			}
+		}
+
+		window.checktmp = function(uid, status, msg) {
+			$.ajax({
+				url : MODULE_PATH + "check/" + uid + "?status=" + status + "&msg=" + msg,
+				dataType : 'json',
+				type : 'get',
+				success : function(result) {
+					if (result.success) {
+						layer.msg('审核完成', {
+							icon : 1,
+							time : 5000
+						}, function() {
+							table.reload('category-table');
+						});
+					} else {
+						layer.msg('审核失败', {
+							icon : 2,
+							time : 5000
+						});
+					}
+				}
+			})
+		}
+	})
+</script>
+</html>

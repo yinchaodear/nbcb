@@ -1,5 +1,7 @@
 package com.yuqiaotech.zsnews.model;
 
+import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -7,11 +9,11 @@ import javax.persistence.Id;
 
 import com.yuqiaotech.common.web.base.BaseModel;
 
-import java.util.Date;
-
 /**
  * APP用户。
  * User是登录后台的用户。
+ * app用户表的用户名、简介、头像，需要通过后台审核，用户注册上来以后，有默认的头像、用户名、简介，对应的是avatar,username,remark，如果用户提交了这三个字段的修改，把新的字段存在new开头的字段里，并且把状态位置为审核中。
+ * 同时，前台控制下，状态为审核中的不可以再修改
  */
 @Entity
 public class UserInfo extends BaseModel
@@ -24,6 +26,8 @@ public class UserInfo extends BaseModel
     
     private String username;
     
+    private String newUsername;//新用户名
+    
     private String pwd;
     
     private String mobile;
@@ -32,34 +36,46 @@ public class UserInfo extends BaseModel
     
     private String avatar;//头像base64
     
+    private String newAvatar;//新头像
+    
     private String remark;//个人的一些详细说明
+    
+    private String newRemark;//新的用户简介
     
     private Long totalIntegral;//总积分
     
     private Long usedIntegral;//用掉的积分
     
     private Long currentIntegral;//当前剩余积分
-
+    
     private Date birthday;
-
+    
     private String region;//省市区
-
-    public String getRegion() {
+    
+    private Integer status;//状态，用户的头像和用户名需要审核，存在状态位：审核中，通过，不通过，未提交审核
+    
+    private Integer deltag;//删除标识
+    
+    public String getRegion()
+    {
         return region;
     }
-
-    public void setRegion(String region) {
+    
+    public void setRegion(String region)
+    {
         this.region = region;
     }
-
-    public Date getBirthday() {
+    
+    public Date getBirthday()
+    {
         return birthday;
     }
-
-    public void setBirthday(Date birthday) {
+    
+    public void setBirthday(Date birthday)
+    {
         this.birthday = birthday;
     }
-
+    
     public Long getId()
     {
         return id;
@@ -193,5 +209,55 @@ public class UserInfo extends BaseModel
     public void setCurrentIntegral(Long currentIntegral)
     {
         this.currentIntegral = currentIntegral;
+    }
+    
+    public Integer getStatus()
+    {
+        return status;
+    }
+    
+    public void setStatus(Integer status)
+    {
+        this.status = status;
+    }
+    
+    public String getNewUsername()
+    {
+        return newUsername;
+    }
+    
+    public void setNewUsername(String newUsername)
+    {
+        this.newUsername = newUsername;
+    }
+    
+    public String getNewAvatar()
+    {
+        return newAvatar;
+    }
+    
+    public void setNewAvatar(String newAvatar)
+    {
+        this.newAvatar = newAvatar;
+    }
+    
+    public String getNewRemark()
+    {
+        return newRemark;
+    }
+    
+    public void setNewRemark(String newRemark)
+    {
+        this.newRemark = newRemark;
+    }
+    
+    public Integer getDeltag()
+    {
+        return deltag;
+    }
+    
+    public void setDeltag(Integer deltag)
+    {
+        this.deltag = deltag;
     }
 }

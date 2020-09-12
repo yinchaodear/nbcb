@@ -1,0 +1,110 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
+<head>
+<meta charset="UTF-8">
+<title>编辑</title>
+<link rel="stylesheet" href="../../admin/css/pearCommon.css" />
+<link rel="stylesheet" href="../../component/layui/css/layui.css" />
+</head>
+<body>
+	<form class="layui-form" action="">
+		<div class="mainBox">
+			<div class="main-container">
+				<div class="main-container">
+					<div class="layui-form-item layui-hide">
+						<label class="layui-form-label">id</label>
+						<div class="layui-input-block">
+							<input type="text" name="id" th:value="${ feedback.id }" autocomplete="off" placeholder="请输入id" class="layui-input">
+						</div>
+					</div>
+
+					<div class="layui-form-item">
+						<label class="layui-form-label">反馈内容</label>
+						<div class="layui-input-block">
+							<textarea class="layui-textarea" maxlength="500" th:text="${ feedback.content}" readonly></textarea>
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">反馈人</label>
+						<div class="layui-input-block">
+							<input type="text" th:value="${ feedback.userInfo.username }" autocomplete="off" class="layui-input" readonly>
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">反馈时间</label>
+						<div class="layui-input-block">
+							<input type="text" th:value="${#dates.format(feedback.feedbackTime, 'yyyy-MM-dd HH:mm:ss')}" autocomplete="off" class="layui-input" readonly>
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">回复内容</label>
+						<div class="layui-input-block">
+							<textarea class="layui-textarea" name="replyContent" maxlength="500" th:text="${ feedback.replyContent}" th:readonly="${ feedback.status eq 1}" placeholder="请输入回复内容"></textarea>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="bottom">
+			<div class="button-container">
+				<button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="feedback-save" id="submitbtn">
+					<i class="layui-icon layui-icon-ok"></i>
+					提交
+				</button>
+				<button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">
+					<i class="layui-icon layui-icon-refresh"></i>
+					重置
+				</button>
+			</div>
+		</div>
+	</form>
+	<script src="../../component/layui/layui.js"></script>
+	<script>
+		layui.use([ 'form', 'jquery' ], function() {
+			let form = layui.form;
+			let $ = layui.jquery;
+			let MODULE_PATH = "/zsnews/feedback/";
+
+			form.on('submit(feedback-save)', function(data) {
+				var DISABLED = 'layui-btn-disabled';
+				$('#submitbtn').addClass(DISABLED);
+				$('#submitbtn').attr('disabled', 'disabled');
+				$.ajax({
+					url : MODULE_PATH + 'update',
+					data : JSON.stringify(data.field),
+					dataType : 'json',
+					contentType : 'application/json',
+					type : 'put',
+					success : function(result) {
+						if (result.success) {
+							layer.msg(result.msg, {
+								icon : 1,
+								time : 1000
+							}, function() {
+								$('#submitbtn').removeClass(DISABLED);
+								$('#submitbtn').removeAttr('disabled');
+								parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+								parent.layui.table.reload("feedback-table");
+							});
+						} else {
+							layer.msg(result.msg, {
+								icon : 2,
+								time : 1000
+							}, function() {
+								$('#submitbtn').removeClass(DISABLED);
+								$('#submitbtn').removeAttr('disabled');
+							});
+						}
+					},
+					error : function(XMLHttpRequest, textStatus, errorThrown) {
+						$('#submitbtn').removeClass(DISABLED);
+						$('#submitbtn').removeAttr('disabled');
+					}
+				})
+				return false;
+			});
+		})
+	</script>
+</body>
+</html>

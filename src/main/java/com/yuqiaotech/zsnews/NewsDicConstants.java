@@ -128,6 +128,23 @@ public interface NewsDicConstants
             Integer FAIL = 4;
             
         }
+        
+        /**
+         * 置顶
+         *
+         */
+        interface Top
+        {
+            /**
+             * 置顶显示
+             */
+            Integer YES = 1;
+            
+            /**
+             * 不置顶，默认
+             */
+            Integer NO = 0;
+        }
     }
     
     /**
@@ -182,4 +199,63 @@ public interface NewsDicConstants
             Integer END = 2;
         }
     }
+    
+    /**
+     * 用户反馈
+     *
+     */
+    interface IFeedback
+    {
+        /**
+         * 状态
+         *
+         */
+        interface Status
+        {
+            /**
+             * 处理中
+             */
+            Integer DOING = 0;
+            
+            /**
+             * 已完成
+             */
+            Integer END = 1;
+        }
+    }
+    
+    /**
+     * APP用户信息
+     *
+     */
+    interface IUserInfo
+    {
+        /**
+         * 状态
+         *
+         */
+        interface Status
+        {
+            /**
+             * 默认，未提交审核
+             */
+            Integer DEFAULT = 0;
+            
+            /**
+             * 审核中
+             */
+            Integer CHECKING = 1;
+            
+            /**
+             * 审核通过
+             */
+            Integer SUCCESS = 2;
+            
+            /**
+             * 审核不通过
+             */
+            Integer FAIL = 3;
+        }
+    }
+    
 }

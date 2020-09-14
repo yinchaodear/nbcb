@@ -63,12 +63,12 @@ public class NewsService extends BaseController
     @GetMapping("appListdata")
     public Result AppNewsData(ModelAndView modelAndView,@RequestParam Long id,@RequestParam String type,@RequestParam Long cid)
     {
-    	System.out.println("NewsService.AppNewsData()"+getCurrentUserId());
+    	System.out.println("NewsService.AppNewsData()"+getCurrentUserInfoId());
     	String wheresql ="where 1 =1 and c.f_kind ='频道'";
         if(type.equals("推荐")){
         	
         }else if(type.equals("关注")){
-        	wheresql+= " and t.f_author_channel_id  in  ( select f_channel_id from t_channel_follower where f_user_info_id ="+getCurrentUserId()+" )";
+        	wheresql+= " and t.f_author_channel_id  in  ( select f_channel_id from t_channel_follower where f_user_info_id ="+getCurrentUserInfoId()+" )";
         }else{
         	wheresql+= " and f_channel_id ="+id; 
         }
@@ -104,10 +104,10 @@ public class NewsService extends BaseController
     			+ " else cast( g.number as char)  end as number"
     			+ " FROM t_news  "
     			+ " t left join t_channel c on c.f_id = t.f_author_channel_id  left join t_channel_follower cf "
-    			+ " on t.f_author_channel_id = cf.f_channel_id  and cf.f_user_info_id =   "+getCurrentUserId()
-    			+ " left join t_news_follower n on n.f_news_id = t.f_id and n.f_user_info_id = "+getCurrentUserId()
+    			+ " on t.f_author_channel_id = cf.f_channel_id  and cf.f_user_info_id =   "+getCurrentUserInfoId()
+    			+ " left join t_news_follower n on n.f_news_id = t.f_id and n.f_user_info_id = "+getCurrentUserInfoId()
     			+ " left join (select  cm.f_id as cmid, cm.f_news_id as cmnewsid from t_comment "
-    			+ " cm where   cm.f_type ='点赞'  and cm.f_news_id = "+id+" and cm.f_user_info_id ="+getCurrentUserId()+") a on a.cmnewsid = t.f_id"
+    			+ " cm where   cm.f_type ='点赞'  and cm.f_news_id = "+id+" and cm.f_user_info_id ="+getCurrentUserInfoId()+") a on a.cmnewsid = t.f_id"
     			+ " left join  ( SELECT  cm1.f_news_id  as  cm1newsid, count(1) as agreecount FROM t_comment cm1"
     			+ " where f_type ='点赞'  and cm1.f_news_id = "+id+" group by  cm1.f_news_id ) b on b.cm1newsid =t.f_id"
     			+ " left join (select cf.f_channel_id as channelid ,count(1) as number from t_channel_follower cf  group by cf.f_channel_id ) "
@@ -127,10 +127,10 @@ public class NewsService extends BaseController
     public Result AppNewsData(ModelAndView modelAndView,@RequestParam String kind,@RequestParam String type,@RequestParam String currentstatus,@RequestParam Long cid)
     {
     	
-    	System.out.println("NewsController.AppNewsData()"+kind +type+currentstatus+getCurrentUserId());
+    	System.out.println("NewsController.AppNewsData()"+kind +type+currentstatus+getCurrentUserInfoId());
     	String wheresql ="";
     	if("已关注".equals(currentstatus)){
-    	  wheresql = "inner join t_channel_follower cf on cf.f_channel_id = t.f_author_channel_id and cf.f_user_info_id = "+getCurrentUserId();
+    	  wheresql = "inner join t_channel_follower cf on cf.f_channel_id = t.f_author_channel_id and cf.f_user_info_id = "+getCurrentUserInfoId();
     	} 	
     	String sql ="SELECT t.*  ,c.f_kind as channelkind,c.f_type as channeltype,"
     			+ " case when b.apprisecount >=10000  then  "
@@ -203,14 +203,14 @@ public class NewsService extends BaseController
     @GetMapping("addselfcollect")
     public Result AddSelfCollect(ModelAndView modelAndView,@RequestParam Long nid,@RequestParam Long cid)
     {
-    	String sqlexist ="select  * from t_news_follower where f_news_id ="+nid +" and f_user_info_id ="+getCurrentUserId();
+    	String sqlexist ="select  * from t_news_follower where f_news_id ="+nid +" and f_user_info_id ="+getCurrentUserInfoId();
     	List exist =newsFollowerRepository.findMapByNativeSql(sqlexist);
     	if(!exist.isEmpty()){
     		Map result =new HashMap<>();
         	result.put("msg","2");//这里表示已经添加过,正常不会走到这段，怕数据出错
             return success(result);
     	}
-        String sql = "insert into t_news_follower (f_news_id,f_user_info_id) values ("+nid+","+getCurrentUserId()+")";
+        String sql = "insert into t_news_follower (f_news_id,f_user_info_id) values ("+nid+","+getCurrentUserInfoId()+")";
         newsFollowerRepository.executeUpdateByNativeSql(sql, null);
     	Map result =new HashMap<>();
     	result.put("msg","1");
@@ -239,14 +239,14 @@ public class NewsService extends BaseController
     @GetMapping("addselfagree")
     public Result AddSelfAgree(ModelAndView modelAndView,@RequestParam Long nid,@RequestParam Long cid)
     {
-    	String sqlexist ="SELECT * FROM t_comment where f_news_id = "+nid+" and f_user_info_id = "+getCurrentUserId()+" and  f_type ='点赞'";
+    	String sqlexist ="SELECT * FROM t_comment where f_news_id = "+nid+" and f_user_info_id = "+getCurrentUserInfoId()+" and  f_type ='点赞'";
     	List exist =newsFollowerRepository.findMapByNativeSql(sqlexist);
     	if(!exist.isEmpty()){
     		Map result =new HashMap<>();
         	result.put("msg","2");//这里表示已经添加过,正常不会走到这段，怕数据出错
             return success(result);
     	}
-        String sql = "insert into t_comment (f_news_id,f_user_info_id,f_type) values ("+nid+","+getCurrentUserId()+",'点赞')";
+        String sql = "insert into t_comment (f_news_id,f_user_info_id,f_type) values ("+nid+","+getCurrentUserInfoId()+",'点赞')";
         newsFollowerRepository.executeUpdateByNativeSql(sql, null);
     	Map result =new HashMap<>();
     	result.put("msg","1");
@@ -276,7 +276,7 @@ public class NewsService extends BaseController
     public Result saveapp(@RequestBody Map<String, Object> params)
     {
         System.out.println("NewsService.save()");
-        Long userId = getCurrentUserId();
+        Long userId = getCurrentUserInfoId();
 		String userType = getCurrentUserType();
 		Long columnId = params.get("columnId") != null ? Long.valueOf((String) params.get("columnId")):null;
 		String title =(String) params.get("title");
@@ -409,10 +409,10 @@ public class NewsService extends BaseController
     {
     	
     	System.out.println("NewsService.AppNewsByKewords()"+keyword);
-    	String sqlquery ="SELECT * FROM t_history_search_record where f_user_info_id =  "+getCurrentUserId()+" and f_content ='"+keyword+"' ";
+    	String sqlquery ="SELECT * FROM t_history_search_record where f_user_info_id =  "+getCurrentUserInfoId()+" and f_content ='"+keyword+"' ";
     	List query = historySearchRecordRepository.findMapByNativeSql(sqlquery);
     	if(query.isEmpty()){
-    		String sqlupdate ="insert into  t_history_search_record (f_user_info_id,f_content ) values ("+getCurrentUserId()+",'"+keyword+"')";
+    		String sqlupdate ="insert into  t_history_search_record (f_user_info_id,f_content ) values ("+getCurrentUserInfoId()+",'"+keyword+"')";
     		historySearchRecordRepository.executeUpdateByNativeSql(sqlupdate, null);
     	}
     	String wheresql =" where t.f_title like '%"+keyword+"%'"+" or t.f_content like '%"+keyword+"%'"+"or c.f_title like '%"+keyword+"%'";

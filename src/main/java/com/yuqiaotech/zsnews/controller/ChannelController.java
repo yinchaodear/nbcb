@@ -270,5 +270,15 @@ public class ChannelController extends BaseController
     {
         return success(iChannelService.toogleJoinTeam(getCurrentUserId(), params));
     }
+
+    /**
+     * channel 小组详情
+     * @param params
+     * @return
+     */
+    @RequestMapping("/community/teamDetail")
+    public Result getTeamDetail(@RequestParam Map<String, Object> params) {
+        return success(iChannelService.getTeamDetail(getCurrentUserId(), params));
+    }
     
 }

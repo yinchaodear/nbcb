@@ -48,7 +48,18 @@ public class INewsServiceImpl implements INewsService {
 			String type = params.get("type") != null ? (String) params.get("type") : "";
 			//调整为查询channel
 //			String wheresql = "where 1 =1 and t.f_kind ='" + kind + "'";
-			String wheresql = "where 1 =1 and nc.f_id is not null";
+			String wheresql = "where 1 =1 ";
+
+			if (!StringUtils.isEmpty(kind)) {
+				wheresql += " and (t.f_kind = '" + kind + "' or nc.f_id is not null)";
+			} else {
+				wheresql += " and nc.f_id is not null";
+			}
+
+			Long teamId = params.get("teamId") != null ? Long.valueOf((String) params.get("teamId")) : null;
+			if (teamId != null) {
+				wheresql += " and t.f_channel_id = " + teamId;
+			}
 
 			String sql = " select concat(t.f_id,'') newsId, ifnull(zanNum, 0) zanNum,ifnull(pinglunNum, 0) pinglunNum, ifnull(shoucangNum, 0) shoucangNum,  \n" +
 					" ifnull(uc.userTotalNum, 0) userTotalNum,ui.f_username userName, t.f_title title, t.f_content content\n" +

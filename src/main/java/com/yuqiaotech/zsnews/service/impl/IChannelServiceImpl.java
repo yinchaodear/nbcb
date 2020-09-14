@@ -35,7 +35,7 @@ public class IChannelServiceImpl implements IChannelService {
 		List<Map<String, Object>> channels = null;
 		HashMap<String, Object> map = new HashMap<>();
 		try {
-			String sql = " select concat(f_id, '') channelId, f_title title, f_type type, f_kind kind, case when t.f_channel_id is null then 1 else 0 end joinFlag\n" +
+			String sql = " select concat(f_id, '') channelId, f_title title, f_type type, f_kind kind, case when t.f_channel_id is not null then 1 else 0 end joinFlag\n" +
 					"from t_channel c\n" +
 					"left join (\n" +
 					"	select f_channel_id\n" +
@@ -79,7 +79,7 @@ public class IChannelServiceImpl implements IChannelService {
 				String sql = "select  * from t_channel_follower where f_channel_id =" + channelId + " and f_user_info_id ="
 						+ userInfoId;
 				List<Map<String, Object>> cfs = channelRepository.findMapByNativeSql(sql);
-				if (cfs != null) {
+				if (cfs != null && cfs.size() > 0) {
 					channelFollowerRepository.executeUpdateByNativeSql("delete from t_channel_follower where f_channel_id =" + channelId + " and f_user_info_id =" + userInfoId, null);
 				} else {
 					UserInfo userInfo = userInfoRepository.get(userInfoId, UserInfo.class);
@@ -95,6 +95,41 @@ public class IChannelServiceImpl implements IChannelService {
 		} catch (Exception e) {
 			e.printStackTrace();
 			map.put("flag", false);
+		} finally {
+			return map;
+		}
+	}
+
+	@Override
+	public Map getTeamDetail(Long userInfoId, Map<String, Object> params) {
+		Map map = null;
+		try {
+			Long teamId = params.get("teamId") != null ? Long.valueOf((String) params.get("teamId")) : null;
+			if (teamId != null) {
+				String sql = " select ifnull(t.joinNum, 0) joinNum,ifnull(nt.questionNum,0) questionNum,c.f_title title,\n" +
+						"case when (select 1 from t_channel_follower cf where cf.f_channel_id = c.f_id and cf.f_user_info_id = " + userInfoId + ") then 1 else 0 end as joinFlag\n" +
+						"from t_channel c\n" +
+						"left join (\n" +
+						"	select f_channel_id channelId, count(*) joinNum\n" +
+						"	from t_channel_follower\n" +
+						"	group by f_channel_id\n" +
+						") t on t.channelId = c.f_id \n" +
+						"left join (\n" +
+						"	select f_channel_id channelId, count(*) questionNum\n" +
+						"	from t_news\n" +
+						"	where f_type = '发问'\n" +
+						"	group by f_channel_id\n" +
+						") nt on nt.channelId = c.f_id \n" +
+						"where c.f_id = " + teamId + "\n" +
+						"order by f_id desc;";
+				List<Map<String, Object>> news = channelRepository.findMapByNativeSql(sql);
+				if (news != null && news.size() > 0) {
+					map = news.get(0);
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		} finally {
 			return map;
 		}

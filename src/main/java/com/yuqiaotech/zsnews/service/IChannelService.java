@@ -26,4 +26,12 @@ public interface IChannelService {
 	 */
 	Map toogleJoinTeam(Long userInfoId, Map<String, Object> params);
 
+
+	/**
+	 * 查询channel 小组
+	 *
+	 * @param
+	 * @return 参数配置信息
+	 */
+	Map getTeamDetail(Long userInfoId, Map<String, Object> params);
 }

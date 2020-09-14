@@ -10,6 +10,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.yuqiaotech.common.SysConstants;
+import com.yuqiaotech.zsnews.model.UserInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,10 +39,26 @@ public class BaseController
     
     @Resource
     private BaseRepository<User, Long> userRepository;
-    
+    @Resource
+    private BaseRepository<UserInfo, Long> userInfoRepository;
+
+    /** 后台用户ID */
+    public Long getCurrentUserId()
+    {
+        if(SysConstants.SECURITY_USERTYPE_ADMIN.equals(ServletUtil.getCurrentUserType())){
+            return (Long)ServletUtil.getSessionAttr(SysConstants.SECURITY_USERID_KEY);
+        }else{
+            return null;
+        }
+    }
+    /** 后台用户 */
     public User getCurrentUser()
     {
-        return userRepository.findUniqueBy("id", getCurrentUserId(), User.class);
+        Long userId = getCurrentUserId();
+        if(userId!=null)
+            return userRepository.findUniqueBy("id", userId, User.class);
+        else
+            return null ;
     }
     
     public String getCurrentUsername()
@@ -51,10 +70,24 @@ public class BaseController
     {
         return ServletUtil.getCurrentUserType();
     }
-    
-    public Long getCurrentUserId()
+
+    /** app用户*/
+    public Long getCurrentUserInfoId()
     {
-        return ServletUtil.getCurrentUserId();
+        if(SysConstants.SECURITY_USERTYPE_FRONT.equals(ServletUtil.getCurrentUserType())){
+            return (Long)ServletUtil.getSessionAttr(SysConstants.SECURITY_USERID_KEY);
+        }else{
+            return null;
+        }
+    }
+    /** app用户*/
+    public UserInfo getCurrentUserInfo()
+    {
+        Long userInfoId = getCurrentUserInfoId();
+        if(userInfoId!=null)
+            return userInfoRepository.findUniqueBy("id", userInfoId, UserInfo.class);
+        else
+            return null ;
     }
     
     public HttpSession getSession()

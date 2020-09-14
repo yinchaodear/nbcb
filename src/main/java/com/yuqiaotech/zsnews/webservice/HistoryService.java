@@ -30,8 +30,8 @@ public class HistoryService extends BaseController
     @GetMapping("historyList")
     public Result AppHistoryData()
     {
-        System.out.println("HistoryService.AppHistoryData()"+getCurrentUserId());
-        String sql ="SELECT f_content FROM t_history_search_record where f_user_info_id = "+getCurrentUserId();
+        System.out.println("HistoryService.AppHistoryData()"+getCurrentUserInfoId());
+        String sql ="SELECT f_content FROM t_history_search_record where f_user_info_id = "+getCurrentUserInfoId();
         List history = historySearchRecordRepository.findMapByNativeSql(sql);
         Map result = new HashMap<>();
         result.put("history",history);
@@ -46,7 +46,7 @@ public class HistoryService extends BaseController
     public Result deleteHistory()
     {
         System.out.println("HistoryService.deleteHistory()");
-        String sql ="delete FROM t_history_search_record where f_user_info_id = "+getCurrentUserId();
+        String sql ="delete FROM t_history_search_record where f_user_info_id = "+getCurrentUserInfoId();
         historySearchRecordRepository.executeUpdateByNativeSql(sql, null);
         Map result = new HashMap<>();
         result.put("msg", 1);

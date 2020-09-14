@@ -1,17 +1,27 @@
 package com.yuqiaotech.zsnews.model;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.yuqiaotech.common.web.base.BaseModel;
 import com.yuqiaotech.sysadmin.model.User;
 
 /**
  * 新闻。
  * 新闻，投稿，提问。
+ * 
  */
 @Entity
 public class News extends BaseModel
 {
+    private static final long serialVersionUID = -7738195350953534074L;
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,13 +30,15 @@ public class News extends BaseModel
     /**
      * 发布者
      */
+    @JsonIgnoreProperties(value = {"hibernateLazyInitializer"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "f_user_id")
     private User user;
     
+    @JsonIgnoreProperties(value = {"hibernateLazyInitializer"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "f_userinfo_id")
-    private UserInfo userinfo;
+    private UserInfo userinfo;//前台APP的发布者
     
     private String from; //文章发布方(平台/个人)，如果是平台 取User的信息， 如果是个人app发布 就是取UserInfo的
     
@@ -34,35 +46,32 @@ public class News extends BaseModel
     
     private String kind;//属于  政务 /社区/浙商
     
-    private String category;//文章所属分类 ,科学,还是教育,根据Category表来，可以多选
-    
     private String mediaType;//图片、文章(文章1,文章2)、链接、视频
     
     private String title;
-
+    
     @Lob
     private String content;
     
-    private String link;
+    private String link;//资源链接
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "f_channel_id")
-    private Channel channel;
-    
+    @JsonIgnoreProperties(value = {"hibernateLazyInitializer"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "f_author_channel_id")
-    private Channel authorChannel;
-    
-    
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "f_column_id")
-    private Column column;
+    private Channel authorChannel;//发布在哪个浙商号下，如果为空，默认世界浙商网
     
     private String attaches;//附件
     
     private Integer displayOrder;//小的数字排在前面
-    private String displaytype;//展现形式，如果是1 就名称加三个图片 如果是2 就是左边是名称 右边一个图  如果是3 就是社区模式的显示  如果是4 就是表示是 图文类型的 ，进的详情页不一样
+    
+    private String displaytype;//展现形式，如果是1 就名称加三个图片 如果是2 就是左边是名称 右边一个图  如果是3 就是社区模式的显示  如果是4 就是表示是 图文类型的 ，进的详情页不一样,如果没有图片，存5
+    
+    private Integer istop;//是否置顶 0：不置顶，1：置顶
+    
+    private Integer deltag;//删除标识
+    
+    private Integer status;//
+    
     public Long getId()
     {
         return id;
@@ -154,20 +163,6 @@ public class News extends BaseModel
     }
     
     /**
-     * 频道。
-     * @return
-     */
-    public Channel getChannel()
-    {
-        return channel;
-    }
-    
-    public void setChannel(Channel channel)
-    {
-        this.channel = channel;
-    }
-    
-    /**
      * 附件路径。
      */
     public String getAttaches()
@@ -237,31 +232,44 @@ public class News extends BaseModel
     {
         this.authorChannel = authorChannel;
     }
-
-	public String getCategory() {
-		return category;
-	}
-
-	public void setCategory(String category) {
-		this.category = category;
-	}
-
-	public Column getColumn() {
-		return column;
-	}
-
-	public void setColumn(Column column) {
-		this.column = column;
-	}
-
-	public String getDisplaytype() {
-		return displaytype;
-	}
-
-	public void setDisplaytype(String displaytype) {
-		this.displaytype = displaytype;
-	}
     
+    public String getDisplaytype()
+    {
+        return displaytype;
+    }
     
+    public void setDisplaytype(String displaytype)
+    {
+        this.displaytype = displaytype;
+    }
     
+    public Integer getIstop()
+    {
+        return istop;
+    }
+    
+    public void setIstop(Integer istop)
+    {
+        this.istop = istop;
+    }
+    
+    public Integer getDeltag()
+    {
+        return deltag;
+    }
+    
+    public void setDeltag(Integer deltag)
+    {
+        this.deltag = deltag;
+    }
+    
+    public Integer getStatus()
+    {
+        return status;
+    }
+    
+    public void setStatus(Integer status)
+    {
+        this.status = status;
+    }
 }

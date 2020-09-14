@@ -56,6 +56,15 @@ public class ServletUtil
             (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
         return servletRequestAttributes.getRequest().getSession();
     }
+
+    /**
+     * 获取httpSession里属性
+     * @return
+     */
+    public static Object getSessionAttr(String attrKey)
+    {
+        return getSession().getAttribute(attrKey);
+    }
     
     /**
      * 当前用户名

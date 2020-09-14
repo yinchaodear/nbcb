@@ -13,7 +13,6 @@ import javax.persistence.ManyToOne;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.yuqiaotech.sysadmin.model.User;
-import com.yuqiaotech.zsnews.NewsDicConstants;
 
 /**
  * 用户反馈
@@ -45,9 +44,9 @@ public class Feedback implements Serializable
     @JoinColumn(name = "f_user_id")
     private User user;
     
-    private Integer deltag = NewsDicConstants.ICommon.DELETE_NO;//删除标识
+    private Integer deltag;//删除标识
     
-    private Integer status = NewsDicConstants.IFeedback.Status.DOING;
+    private Integer status;
     
     /**
      * id

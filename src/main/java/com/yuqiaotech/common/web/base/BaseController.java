@@ -46,7 +46,7 @@ public class BaseController
     public Long getCurrentUserId()
     {
         if(SysConstants.SECURITY_USERTYPE_ADMIN.equals(ServletUtil.getCurrentUserType())){
-            return (Long)ServletUtil.getSessionAttr(SysConstants.SECURITY_USERID_KEY);
+            return ServletUtil.getCurrentUserId();
         }else{
             return null;
         }
@@ -75,7 +75,7 @@ public class BaseController
     public Long getCurrentUserInfoId()
     {
         if(SysConstants.SECURITY_USERTYPE_FRONT.equals(ServletUtil.getCurrentUserType())){
-            return (Long)ServletUtil.getSessionAttr(SysConstants.SECURITY_USERID_KEY);
+            return ServletUtil.getCurrentUserId();
         }else{
             return null;
         }

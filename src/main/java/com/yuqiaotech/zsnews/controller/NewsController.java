@@ -424,7 +424,7 @@ public class NewsController extends BaseController
             if (news.getContent().contains("objectId=" + objectId))
             {
                 news.setContent(news.getContent().replace("objectId=" + objectId, "objectId=" + news.getId()));
-                newsRepository.save(news);
+                newsRepository.update(news);
             }
         }
         

@@ -1,12 +1,15 @@
+#附件根目录
+attachmentRoot: /mnt/zs/attach
+
 # 数据源配置
 spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
     druid:
-      # 主库数据源
+      # 主库数据源，内网ip
       master:
-        url: jdbc:mysql://101.132.102.164:3306/zsapp?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+        url: jdbc:mysql://172.19.165.193:3306/zsapp?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
         username: yuqiao
         password: yuqiao123
       # 从库数据源

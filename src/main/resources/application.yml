@@ -5,8 +5,8 @@ server:
 spring:
   # Druid Pool 运行环境
   profiles:
-    # 运 行 环 境
-    active: druid
+    # 运 行 环 境，【修改这里】prod=生产，dev=开发
+    active: prod
         # 服务模块
   devtools:
     restart:
@@ -37,8 +37,6 @@ logging:
   level:
     # 日 志 包 配 置
     com.yuqiao.*: DEBUG
-
-attachmentRoot: /Users/fanchuanbin/tmp/erp/localhost
 
 
 

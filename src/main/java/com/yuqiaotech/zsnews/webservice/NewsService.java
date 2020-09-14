@@ -282,8 +282,18 @@ public class NewsService extends BaseController
 		String title =(String) params.get("title");
 		String content =(String) params.get("content");
 		String type =(String) params.get("type");
-		if("文章".equals(type)){
+
+		String kind =(String) params.get("kind");
+
+//		if("文章".equals(type)){
+//			此处不知道原先的匹配type文章，暂放开
+		if (true) {
 			News news =new News();
+			news.setType(type);
+			if (!StringUtils.isEmpty(kind)) {
+				news.setKind(kind);
+			}
+
 			Channel channel = null;
 			if (!StringUtils.isEmpty(userType) && userType.equals(SysConstants.SECURITY_USERTYPE_FRONT)) {
 				channel =  channelRepository.queryUniqueResult("from Channel where userinfo.id = " + userId, null);

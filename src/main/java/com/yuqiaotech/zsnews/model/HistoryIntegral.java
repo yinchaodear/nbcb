@@ -32,6 +32,8 @@ public class HistoryIntegral implements Serializable
     
     private Date occurTime;//发生时间
     
+    private Integer signDays;//连续签到的天数
+    
     private Long originalintegral;//变更前积分
     
     private Long persentintergral;//变更后积分
@@ -127,6 +129,16 @@ public class HistoryIntegral implements Serializable
     public void setOccurTime(Date occurTime)
     {
         this.occurTime = occurTime;
+    }
+    
+    public Integer getSignDays()
+    {
+        return signDays;
+    }
+    
+    public void setSignDays(Integer signDays)
+    {
+        this.signDays = signDays;
     }
     
 }

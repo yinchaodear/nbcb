@@ -4,13 +4,12 @@ admin
 8888
 
 修改配置文件：[application.yml]
-上传路径：attachmentRoot: /mnt/zs/attach
-修改配置文件：[application.yml]
-数据库地址，改为：172.19.165.193
+active: prod
+active: dev
 
 jar：
 jar服务器路径：/mnt/zs/yuqiao-admin-springboot-hibernate-0.0.1-SNAPSHOT.jar
-启动脚本：/mnt/zs/startboot.sh
+启动脚本（会先kill原来的进程，再重新启动jar）：/mnt/zs/killAndRestart.sh
  
 本地打jar命令：
 mvn install 

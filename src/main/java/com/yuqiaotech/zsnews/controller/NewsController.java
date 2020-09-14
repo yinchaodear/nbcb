@@ -421,9 +421,9 @@ public class NewsController extends BaseController
         //考虑文章中的图片路径
         if (StringUtils.isNotEmpty(news.getContent()))
         {
-            if (news.getContent().contains("/" + objectId + "/"))
+            if (news.getContent().contains("objectId=" + objectId))
             {
-                news.setContent(news.getContent().replace("/" + objectId + "/", "/" + news.getId() + "/"));
+                news.setContent(news.getContent().replace("objectId=" + objectId, "objectId=" + news.getId()));
                 newsRepository.save(news);
             }
         }
@@ -623,7 +623,35 @@ public class NewsController extends BaseController
     @GetMapping("edit")
     public ModelAndView edit(ModelAndView modelAndView, Long id)
     {
-        modelAndView.addObject("news", newsRepository.get(id, News.class));
+        News news = newsRepository.get(id, News.class);
+        NewsBean newsBean = new NewsBean();
+        BeanUtils.copyProperties(news, newsBean);
+        List<PicMapping> picMappingList =
+            picMappingRepository.findByHql("from PicMapping where news.id=" + id + " order by displayOrder asc");
+        if (CollectionUtils.isNotEmpty(picMappingList))
+        {
+            for (int i = 0; i < picMappingList.size(); i++)
+            {
+                if (i == 0)
+                {
+                    newsBean.setPicname1(picMappingList.get(i).getPicpath());
+                }
+                else if (i == 1)
+                {
+                    newsBean.setPicname2(picMappingList.get(i).getPicpath());
+                }
+                else if (i == 2)
+                {
+                    newsBean.setPicname3(picMappingList.get(i).getPicpath());
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+        
+        modelAndView.addObject("news", newsBean);
         modelAndView.setViewName(MODULE_PATH + "edit");
         return modelAndView;
     }

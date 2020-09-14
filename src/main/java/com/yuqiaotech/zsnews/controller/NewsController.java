@@ -84,14 +84,13 @@ public class NewsController extends BaseController
     public Result save(@RequestBody News news)
     {
         System.out.println(attachmentRoot);
-        Long userId = getCurrentUserId();
 		String userType = getCurrentUserType();
 		Channel channel = null;
 		if (!StringUtils.isEmpty(userType) && userType.equals(SysConstants.SECURITY_USERTYPE_FRONT)) {
-			channel =  channelRepository.queryUniqueResult("from Channel where userinfo.id = " + userId, null);
+			channel =  channelRepository.queryUniqueResult("from Channel where userinfo.id = " + getCurrentUserInfoId(), null);
 
 		}else {
-			channel = channelRepository.queryUniqueResult("from Channel where user.id = " + userId, null);
+			channel = channelRepository.queryUniqueResult("from Channel where user.id = " + getCurrentUserId(), null);
 		}
 
 		if(channel != null) {
@@ -241,7 +240,7 @@ public class NewsController extends BaseController
      */
     @RequestMapping("/selectNews/{kind}")
     public Result selectNews(@PathVariable("kind") String kind,@RequestParam Map<String, Object> params) {
-        return success(iNewsService.selectNews(kind, getCurrentUserId(), params));
+        return success(iNewsService.selectNews(kind, getCurrentUserInfoId(), params));
     }
 
     /**
@@ -251,7 +250,7 @@ public class NewsController extends BaseController
      */
     @RequestMapping("/community/newsDetail")
     public Result getNewsDetail(@RequestParam Map<String, Object> params) {
-        return success(iNewsService.getNewsDetail(getCurrentUserId(), params));
+        return success(iNewsService.getNewsDetail(getCurrentUserInfoId(), params));
     }
 
     /**
@@ -261,7 +260,7 @@ public class NewsController extends BaseController
      */
     @RequestMapping("/community/toggleCollectOrAgree")
     public Result toggleCollect(@RequestParam Map<String, Object> params) {
-        return success(iNewsService.toggleCollectOrAgree(getCurrentUserId(), params));
+        return success(iNewsService.toggleCollectOrAgree(getCurrentUserInfoId(), params));
     }
 
     /**
@@ -271,7 +270,7 @@ public class NewsController extends BaseController
      */
     @RequestMapping("/makeComment")
     public Result makeComment(@RequestBody Map<String, Object> params) {
-        return success(iNewsService.makeComment(getCurrentUserId(),params));
+        return success(iNewsService.makeComment(getCurrentUserInfoId(),params));
     }
 
     /**
@@ -281,7 +280,7 @@ public class NewsController extends BaseController
      */
     @RequestMapping("/comments")
     public Result selectComments(@RequestParam Map<String, Object> params) {
-        return success(iNewsService.selectComments(getCurrentUserId(),params));
+        return success(iNewsService.selectComments(getCurrentUserInfoId(),params));
     }
 
 
@@ -292,6 +291,6 @@ public class NewsController extends BaseController
      */
     @RequestMapping("/toggleCommentAgree")
     public Result toggleCommentAgree(@RequestParam Map<String, Object> params) {
-        return success(iNewsService.toggleCommentAgree(getCurrentUserId(), params));
+        return success(iNewsService.toggleCommentAgree(getCurrentUserInfoId(), params));
     }
 }

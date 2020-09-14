@@ -262,13 +262,13 @@ public class ChannelController extends BaseController
     @RequestMapping("/TeamChannels")
     public Result selectNews(@RequestParam Map<String, Object> params)
     {
-        return success(iChannelService.selectTeamChannels(getCurrentUserId(), params));
+        return success(iChannelService.selectTeamChannels(getCurrentUserInfoId(), params));
     }
     
     @RequestMapping("/team/toggleJoin")
     public Result toggleJoinTeam(@RequestParam Map<String, Object> params)
     {
-        return success(iChannelService.toogleJoinTeam(getCurrentUserId(), params));
+        return success(iChannelService.toogleJoinTeam(getCurrentUserInfoId(), params));
     }
 
     /**
@@ -278,7 +278,7 @@ public class ChannelController extends BaseController
      */
     @RequestMapping("/community/teamDetail")
     public Result getTeamDetail(@RequestParam Map<String, Object> params) {
-        return success(iChannelService.getTeamDetail(getCurrentUserId(), params));
+        return success(iChannelService.getTeamDetail(getCurrentUserInfoId(), params));
     }
     
 }

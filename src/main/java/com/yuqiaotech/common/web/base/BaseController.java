@@ -45,12 +45,11 @@ public class BaseController
     /** 后台用户ID */
     public Long getCurrentUserId()
     {
-        return ServletUtil.getCurrentUserId();
-//        if(SysConstants.SECURITY_USERTYPE_ADMIN.equals(ServletUtil.getCurrentUserType())){
-//            return (Long)ServletUtil.getSessionAttr(SysConstants.SECURITY_USERID_KEY);
-//        }else{
-//            return null;
-//        }
+        if(SysConstants.SECURITY_USERTYPE_ADMIN.equals(ServletUtil.getCurrentUserType())){
+            return (Long)ServletUtil.getSessionAttr(SysConstants.SECURITY_USERID_KEY);
+        }else{
+            return null;
+        }
     }
     /** 后台用户 */
     public User getCurrentUser()

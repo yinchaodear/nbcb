@@ -128,7 +128,7 @@ public class IChannelServiceImpl implements IChannelService {
 						"left join (\n" +
 						"	select f_channel_id channelId, count(*) questionNum\n" +
 						"	from t_news\n" +
-						"	where f_type = '发问'\n" +
+						"	where f_type = '提问'\n" +
 						"	group by f_channel_id\n" +
 						") nt on nt.channelId = c.f_id \n" +
 						"where c.f_id = " + teamId + "\n" +

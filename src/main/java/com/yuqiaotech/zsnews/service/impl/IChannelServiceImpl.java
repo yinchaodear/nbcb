@@ -35,7 +35,7 @@ public class IChannelServiceImpl implements IChannelService {
 		List<Map<String, Object>> channels = null;
 		HashMap<String, Object> map = new HashMap<>();
 		try {
-			String sql = " select concat(f_id, '') channelId, f_title title, f_type type, f_kind kind, case when t.f_channel_id is not null then 1 else 0 end joinFlag\n" +
+			String sql = " select concat(f_id, '') channelId, f_title title, f_type type, f_kind kind, case when t.f_channel_id is not null then 1 else 0 end joinFlag,ifnull(tf.joinNum, 0) joinNum,ifnull(cn.questionNum,0) questionNum\n" +
 					"from t_channel c\n" +
 					"left join (\n" +
 					"	select f_channel_id\n" +
@@ -43,6 +43,17 @@ public class IChannelServiceImpl implements IChannelService {
 					"	where f_user_info_id = " + userInfoId + "\n" +
 					"	group by f_channel_id\n" +
 					"	) t on t.f_channel_id = c.f_id \n" +
+					"left join (\n" +
+					"	select f_channel_id, count(*) joinNum\n" +
+					"   from t_channel_follower \n" +
+					"   group by f_channel_id\n" +
+					") tf on c.f_id = tf.f_channel_id\n" +
+					"left join (\n" +
+					"	select f_channel_id ,count(*) questionNum\n" +
+					"   from t_news \n" +
+					" 	where f_type = '提问'\n" +
+					"   group by f_channel_id\n" +
+					") cn on c.f_id = cn.f_channel_id \n" +
 					"where c.f_kind = '小组'\n" +
 					"order by f_type desc";
 			channels = channelRepository.findMapByNativeSql(sql);
@@ -117,7 +128,7 @@ public class IChannelServiceImpl implements IChannelService {
 						"left join (\n" +
 						"	select f_channel_id channelId, count(*) questionNum\n" +
 						"	from t_news\n" +
-						"	where f_type = '发问'\n" +
+						"	where f_type = '提问'\n" +
 						"	group by f_channel_id\n" +
 						") nt on nt.channelId = c.f_id \n" +
 						"where c.f_id = " + teamId + "\n" +

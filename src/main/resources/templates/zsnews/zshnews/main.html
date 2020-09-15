@@ -10,6 +10,16 @@
 <body class="pear-container">
 	<div class="layui-card">
 		<div class="layui-card-body">
+			<div class="layui-tab layui-tab-brief" lay-filter="component-tabs-brief">
+				<ul class="layui-tab-title">
+					<li  onclick="redicttozsh()">浙商号管理</li>
+					<li class="layui-this">浙商号内容管理</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="layui-card">
+		<div class="layui-card-body">
 			<form class="layui-form" action="">
 
 				<div class="layui-form-item">
@@ -42,25 +52,13 @@
 							</select>
 						</div>
 					</div>
-					<hql:queryForList hql="from Channel where status=0 and deltag=0 and kind='频道'  order by displayOrder" id="channellist" />
+					<hql:queryForList hql="from Category where status=0 and deltag=0  order by displayOrder" id="categorylist" />
 					<div class="layui-form-item layui-inline">
-						<label class="layui-form-label">发布频道</label>
+						<label class="layui-form-label">发布分类</label>
 						<div class="layui-input-inline">
-							<select name="channelid" lay-search>
+							<select name="categoryid" lay-search>
 								<option value=""></option>
-								<option th:each="c : ${channellist}" th:value="${c.id}" th:text="${c.title}"></option>
-							</select>
-						</div>
-					</div>
-					<div class="layui-form-item layui-inline">
-						<label class="layui-form-label">资源类型</label>
-						<div class="layui-input-inline">
-							<select name="mediaType">
-								<option value=""></option>
-								<option value="文章">文章</option>
-								<option value="链接">链接</option>
-								<option value="图片">图片</option>
-								<option value="视频">视频</option>
+								<option th:each="c : ${categorylist}" th:value="${c.id}" th:text="${c.title}"></option>
 							</select>
 						</div>
 					</div>
@@ -100,7 +98,7 @@
 {{#  if(d.status === 0){ }}
 	<button class="pear-btn  pear-btn-sm" title="下架"  onclick="updown({{d.id}},1)" ><i class="layui-icon layui-icon-pause"></i></button>
 {{#  } }}
-{{#  if(d.status === 1 && (d.columns && d.columns!='' && d.columns!='null' && d.channels && d.channels!='' && d.channels!='null')){ }}
+{{#  if(d.status === 1 && (d.categorys && d.categorys!='' && d.categorys!='null' )){ }}
 	<button class="pear-btn  pear-btn-sm" title="上架"  onclick="updown({{d.id}},0)" ><i class="layui-icon layui-icon-play"></i></button>
 {{#  } }}
 </script>
@@ -112,7 +110,7 @@
 		let form = layui.form;
 		let $ = layui.jquery;
 
-		let MODULE_PATH = "/zsnews/news/";
+		let MODULE_PATH = "/zsnews/zshnews/";
 
 		let cols = [ [ {
 			type : 'checkbox'
@@ -122,13 +120,14 @@
 			align : 'center',
 			width : 80
 		}, {
-			title : '展示栏目',
-			field : 'columns',
+			title : '浙商号名称',
+			field : 'authorChannel',
 			align : 'center',
-			width : 200
+			width : 200,
+			templet : "<div>{{d.authorChannel.title}}</div>"
 		}, {
-			title : '所属频道',
-			field : 'channels',
+			title : '展示分类',
+			field : 'categorys',
 			align : 'center',
 			width : 200
 		}, {
@@ -137,11 +136,11 @@
 			align : 'center',
 			width : 200
 		}, {
-			title : '资源链接',
-			field : 'link',
+			title : '内容',
+			field : 'content',
 			align : 'center',
-			width : 250
-		}, {
+			width : 400
+		},  {
 			title : '状态',
 			field : 'status',
 			align : 'center',
@@ -314,21 +313,21 @@
 		window.refresh = function() {
 			table.reload('news-table');
 		}
-		
+
 		window.updown = function(uid, status) {
-			if(status == 1){
+			if (status == 1) {
 				layer.confirm('确定要下架该资源', {
 					icon : 3,
 					title : '提示'
 				}, function(index) {
 					layer.close(index);
-					updowntmp(uid,status);
+					updowntmp(uid, status);
 				});
-			}else{
-				updowntmp(uid,status);
+			} else {
+				updowntmp(uid, status);
 			}
 		}
-		
+
 		window.updowntmp = function(uid, status) {
 			$.ajax({
 				url : MODULE_PATH + "updown/" + uid + "?status=" + status,
@@ -355,10 +354,6 @@
 
 	function redicttozsh() {
 		window.location.href = '/zsnews/zshchannel/main';
-	}
-
-	function redicttozshnr() {
-		window.location.href = '/zsnews/news/main';
 	}
 </script>
 </html>

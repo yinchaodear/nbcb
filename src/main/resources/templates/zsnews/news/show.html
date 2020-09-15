@@ -44,7 +44,7 @@
 						<div class="layui-col-md3">
 							<label class="layui-form-label">资源类型</label>
 							<div class="layui-input-block">
-								<select lay-filter="changemediatype" name="mediaType" readonly>
+								<select lay-filter="changemediatype" name="mediaType" disabled="disabled">
 									<option value="文章" th:selected="${news.mediaType eq '文章'}">文章</option>
 									<option value="链接" th:selected="${news.mediaType eq '链接'}">链接</option>
 									<option value="图片" th:selected="${news.mediaType eq '图片'}">图片</option>
@@ -55,33 +55,33 @@
 						<div class="layui-col-md6">
 							<label class="layui-form-label">标题</label>
 							<div class="layui-input-block">
-								<input type="text" name="title" autocomplete="off" placeholder="请输入标题" th:value="${ news.title }" class="layui-input" maxlength="50" lay-verify="required">
+								<input type="text" name="title" autocomplete="off" placeholder="请输入标题" th:value="${ news.title }" class="layui-input" maxlength="50" lay-verify="required" readonly>
 							</div>
 						</div>
 
 						<div class="layui-col-md3">
-							<input type="checkbox" id="topcheck" name="topcheck" title="置顶" lay-skin="primary" th:checked="${news.istop == 1}">
+							<input type="checkbox" id="topcheck" name="topcheck" title="置顶" lay-skin="primary" th:checked="${news.istop == 1}" disabled="disabled">
 						</div>
 					</div>
 
 					<div class="layui-form-item" id="contentdiv" th:style="'display:' + @{(${news.mediaType eq '链接'} ? 'none' : '')} + ''">
 						<label class="layui-form-label">内容</label>
 						<div class="layui-input-block">
-							<textarea name="content2" id="content2" placeholder="请输入内容" class="layui-textarea" maxlength="500" th:text="${ news.content}"></textarea>
+							<textarea name="content2" id="content2" placeholder="请输入内容" class="layui-textarea" maxlength="500" th:text="${ news.content}" readonly></textarea>
 						</div>
 					</div>
 
 					<div class="layui-form-item" id="hrefdiv" th:style="'display:' + @{(${news.mediaType eq '链接'} ? '' : 'none')} + ''">
 						<label class="layui-form-label">链接地址</label>
 						<div class="layui-input-block">
-							<input type="text" name="link" th:value="${ news.link }" autocomplete="off" placeholder="请输入链接地址" class="layui-input" maxlength="200">
+							<input type="text" name="link" th:value="${ news.link }" autocomplete="off" placeholder="请输入链接地址" class="layui-input" maxlength="200" readonly>
 						</div>
 					</div>
 					<hql:queryForList hql="from Channel where status=0 and deltag=0 and kind='浙商号'  order by displayOrder" id="channellist" />
 					<div class="layui-form-item ">
 						<label class="layui-form-label">浙商号</label>
 						<div class="layui-input-block">
-							<select name="channelid" id="channelid" lay-search lay-filter="channelfilter">
+							<select name="channelid" id="channelid" lay-search lay-filter="channelfilter" disabled="disabled">
 								<option value="" th:selected="${news.authorChannel==null}">首页频道</option>
 								<option th:each="c : ${channellist}" th:value="${c.id}" th:text="${c.title}" th:selected="${news.authorChannel!=null && news.authorChannel.id eq c.id}"></option>
 							</select>
@@ -100,26 +100,10 @@
 						<div class="layui-input-block">
 							<div class="layui-inline" style="width: 100%;">
 								<img class="layui-upload-img" th:id="'previewImg'+${i}">
-								<span class="icon pear-icon delbtn" title="删除素材" th:onclick="delsucai([[${i}]])" th:id="'delbtn'+${i}" style="display: none;">&#xe66e;</span>
-							</div>
-							<div class="layui-upload-drag" th:id="'upload-drag'+${i}" th:attr="idx=${i}">
-								<span class="icon pear-icon" style="font-size: 32px; color: #333;">&#xe669;</span>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-		</div>
-		<div class="bottom">
-			<div class="button-container">
-				<button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" id="submitbtn" lay-submit="" lay-filter="news-save">
-					<i class="layui-icon layui-icon-ok"></i>
-					提交
-				</button>
-				<button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">
-					<i class="layui-icon layui-icon-refresh"></i>
-					重置
-				</button>
 			</div>
 		</div>
 	</form>
@@ -144,6 +128,7 @@
 			var edit = tinymce.render({
 				elem : "#content2",
 				height : 500,
+				readonly : 1,
 				images_upload_handler : function(blobInfo, success, failure) {
 					var form = new FormData();
 					form.append('file', blobInfo.blob(), blobInfo.filename());
@@ -247,8 +232,6 @@
 					$('#previewImg' + currentidx).css('width', '30%');
 					$('#previewImg' + currentidx).css('height', '100%');
 					$('#previewImg' + currentidx).attr('src', imgsrc);
-					$("#upload-drag" + currentidx).css("display", "none");
-					$("#delbtn" + currentidx).css("display", "");
 					$("#picname" + currentidx).val(res.msg);
 				}
 			});
@@ -283,6 +266,8 @@
 						tree.reload('test-tree-demoId1', {
 							data : result.data
 						});
+						$("input").attr("disabled","disabled");
+						form.render();
 					}
 				});
 			});
@@ -299,6 +284,8 @@
 					tree.reload('test-tree-demoId1', {
 						data : result.data
 					});
+					$("input").attr("disabled","disabled");
+					form.render();
 				}
 			});
 		})
@@ -308,8 +295,6 @@
 			$('#previewImg' + currentidx).css('width', '30%');
 			$('#previewImg' + currentidx).css('height', '100%');
 			$('#previewImg' + currentidx).attr('src', imgsrc);
-			$("#upload-drag" + currentidx).css("display", "none");
-			$("#delbtn" + currentidx).css("display", "");
 			$("#picname" + currentidx).val(picname);
 		}
 		
@@ -323,8 +308,6 @@
 					console.log(result);
 					$("#previewImg" + idx).attr("style", "");
 					$("#previewImg" + idx).attr("src", "");
-					$("#upload-drag" + idx).css("display", "");
-					$("#delbtn" + idx).css("display", "none");
 					$("#picname" + idx).val('');
 				}
 			});

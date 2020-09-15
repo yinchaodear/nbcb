@@ -82,9 +82,6 @@
 					<div class="layui-form-item">
 						<label class="layui-form-label">发布频道</label>
 						<div class="layui-input-block">
-							<button type="button" class="layui-btn layui-btn-sm" lay-demo="getChecked">获取选中节点数据</button>
-							<button type="button" class="layui-btn layui-btn-sm" lay-demo="setChecked">勾选指定节点</button>
-							<button type="button" class="layui-btn layui-btn-sm" lay-demo="reload">重载实例</button>
 							<div id="test-tree-demo1"></div>
 						</div>
 					</div>
@@ -106,7 +103,7 @@
 		</div>
 		<div class="bottom">
 			<div class="button-container">
-				<button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="news-save">
+				<button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" id="submitbtn" lay-submit="" lay-filter="news-save">
 					<i class="layui-icon layui-icon-ok"></i>
 					提交
 				</button>
@@ -140,7 +137,7 @@
 
 			var edit = tinymce.render({
 				elem : "#content2",
-				height : 300,
+				height : 500,
 				images_upload_handler : function(blobInfo, success, failure) {
 					var form = new FormData();
 					form.append('file', blobInfo.blob(), blobInfo.filename());
@@ -202,7 +199,6 @@
 				,
 				click : function(obj) {
 					var data = obj.data; //获取当前点击的节点数据
-					layer.msg('状态：' + obj.state + '<br>节点数据：' + JSON.stringify(data));
 				}
 			});
 
@@ -228,6 +224,10 @@
 				}
 			});
 			form.on('submit(news-save)', function(data) {
+				var DISABLED = 'layui-btn-disabled';
+				$('#submitbtn').addClass(DISABLED);
+				$('#submitbtn').attr('disabled', 'disabled');
+				
 				var checkedData = tree.getChecked('test-tree-demoId1');
 				
 				data.field.channels = JSON.stringify(checkedData);
@@ -243,17 +243,26 @@
 						if (result.success) {
 							layer.msg(result.msg, {
 								icon : 1,
-								time : 1000
+								time : 5000
 							}, function() {
+								$('#submitbtn').removeClass(DISABLED);
+								$('#submitbtn').removeAttr('disabled');
 								parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
 								parent.layui.table.reload("news-table");
 							});
 						} else {
 							layer.msg(result.msg, {
 								icon : 2,
-								time : 1000
+								time : 5000
+							}, function() {
+								$('#submitbtn').removeClass(DISABLED);
+								$('#submitbtn').removeAttr('disabled');
 							});
 						}
+					},
+					error : function(XMLHttpRequest, textStatus, errorThrown) {
+						$('#submitbtn').removeClass(DISABLED);
+						$('#submitbtn').removeAttr('disabled');
 					}
 				})
 				return false;

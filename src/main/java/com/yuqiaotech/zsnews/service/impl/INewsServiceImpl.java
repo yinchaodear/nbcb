@@ -30,7 +30,7 @@ public class INewsServiceImpl implements INewsService {
 	private BaseRepository<Comment, Long> commentRepository;
 
 	@Override
-	public List selectNews(String kind, Long userInfoId, Map<String, Object> params) {
+	public List selectNews(Long userInfoId, Map<String, Object> params) {
 		List news = null;
 		try {
 			Integer pageNo = 0;
@@ -48,13 +48,7 @@ public class INewsServiceImpl implements INewsService {
 			String type = params.get("type") != null ? (String) params.get("type") : "";
 			//调整为查询channel
 //			String wheresql = "where 1 =1 and t.f_kind ='" + kind + "'";
-			String wheresql = "where 1 =1 ";
-
-			if (!StringUtils.isEmpty(kind)) {
-				wheresql += " and (t.f_kind = '" + kind + "' or nc.f_id is not null)";
-			} else {
-				wheresql += " and nc.f_id is not null";
-			}
+			String wheresql = "where 1 =1 and nc.f_id is not null ";
 
 			Long teamId = params.get("teamId") != null ? Long.valueOf((String) params.get("teamId")) : null;
 			if (teamId != null) {

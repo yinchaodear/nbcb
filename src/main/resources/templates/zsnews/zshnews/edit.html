@@ -42,13 +42,12 @@
 					</div>
 					<div class="layui-form-item layui-row layui-col-space10">
 						<div class="layui-col-md3">
-							<label class="layui-form-label">资源类型</label>
+							<hql:queryForList hql="from Channel where status=0 and deltag=0 and kind='浙商号'  order by displayOrder" id="channellist" />
+							<label class="layui-form-label">浙商号</label>
 							<div class="layui-input-block">
-								<select lay-filter="changemediatype" name="mediaType" readonly>
-									<option value="文章" th:selected="${news.mediaType eq '文章'}">文章</option>
-									<option value="链接" th:selected="${news.mediaType eq '链接'}">链接</option>
-									<option value="图片" th:selected="${news.mediaType eq '图片'}">图片</option>
-									<option value="视频" th:selected="${news.mediaType eq '视频'}">视频</option>
+								<select name="channelid" id="channelid" lay-search lay-filter="channelfilter" lay-verify="required">
+									<option value="" th:selected="${news.authorChannel==null}"></option>
+									<option th:each="c : ${channellist}" th:value="${c.id}" th:text="${c.title}"  th:selected="${news.authorChannel!=null && news.authorChannel.id eq c.id}"></option>
 								</select>
 							</div>
 						</div>
@@ -71,25 +70,8 @@
 						</div>
 					</div>
 
-					<div class="layui-form-item" id="hrefdiv" th:style="'display:' + @{(${news.mediaType eq '链接'} ? '' : 'none')} + ''">
-						<label class="layui-form-label">链接地址</label>
-						<div class="layui-input-block">
-							<input type="text" name="link" th:value="${ news.link }" autocomplete="off" placeholder="请输入链接地址" class="layui-input" maxlength="200">
-						</div>
-					</div>
-					<hql:queryForList hql="from Channel where status=0 and deltag=0 and kind='浙商号'  order by displayOrder" id="channellist" />
-					<div class="layui-form-item ">
-						<label class="layui-form-label">浙商号</label>
-						<div class="layui-input-block">
-							<select name="channelid" id="channelid" lay-search lay-filter="channelfilter">
-								<option value="" th:selected="${news.authorChannel==null}">首页频道</option>
-								<option th:each="c : ${channellist}" th:value="${c.id}" th:text="${c.title}" th:selected="${news.authorChannel!=null && news.authorChannel.id eq c.id}"></option>
-							</select>
-						</div>
-					</div>
-
 					<div class="layui-form-item">
-						<label class="layui-form-label">发布频道</label>
+						<label class="layui-form-label">发布分类</label>
 						<div class="layui-input-block">
 							<div id="test-tree-demo1">加载中...</div>
 						</div>
@@ -138,7 +120,7 @@
 			let util = layui.util;
 			let tree = layui.tree;
 			upload = layui.upload;
-			let MODULE_PATH = "/zsnews/news/";
+			let MODULE_PATH = "/zsnews/zshnews/";
 
 			
 			var edit = tinymce.render({

@@ -10,6 +10,10 @@ public class NewsBean extends News
     
     private String topics;//所属专题
     
+    private String categoryid;
+    
+    private String categorys;//展示分类
+    
     private String objectId;
     
     private String objectType;
@@ -122,5 +126,25 @@ public class NewsBean extends News
     public void setTopcheck(String topcheck)
     {
         this.topcheck = topcheck;
+    }
+    
+    public String getCategoryid()
+    {
+        return categoryid;
+    }
+    
+    public void setCategoryid(String categoryid)
+    {
+        this.categoryid = categoryid;
+    }
+    
+    public String getCategorys()
+    {
+        return categorys;
+    }
+    
+    public void setCategorys(String categorys)
+    {
+        this.categorys = categorys;
     }
 }

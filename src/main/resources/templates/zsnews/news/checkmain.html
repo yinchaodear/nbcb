@@ -95,13 +95,10 @@
 </script>
 
 <script type="text/html" id="news-bar">
-    <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit" title="修改"><i class="layui-icon layui-icon-edit"></i></button>
-    <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove" title="删除"><i class="layui-icon layui-icon-delete"></i></button>
-{{#  if(d.status === 0){ }}
-	<button class="pear-btn  pear-btn-sm" title="下架"  onclick="updown({{d.id}},1)" ><i class="layui-icon layui-icon-pause"></i></button>
-{{#  } }}
-{{#  if(d.status === 1 && (d.columns && d.columns!='' && d.columns!='null' && d.channels && d.channels!='' && d.channels!='null')){ }}
-	<button class="pear-btn  pear-btn-sm" title="上架"  onclick="updown({{d.id}},0)" ><i class="layui-icon layui-icon-play"></i></button>
+<button class="layui-btn layui-btn-sm layui-btn-primary" lay-event="edit" title="查看">查看</button>
+{{#  if(d.status === 3){ }}
+	<button class="layui-btn layui-btn-sm layui-btn-normal" title="通过"  onclick="check({{d.id}},0)" >通过</button>
+	<button class="layui-btn layui-btn-sm layui-btn-danger" title="不通过"  onclick="check({{d.id}},4)" >不通过</button>
 {{#  } }}
 </script>
 
@@ -228,11 +225,11 @@
 		window.edit = function(obj) {
 			layer.open({
 				type : 2,
-				title : '修改',
+				title : '查看',
 				shade : 0.1,
 				area : [ '1200px', '80%' ],
 				maxmin : true,
-				content : MODULE_PATH + 'edit?id=' + obj.data['id']
+				content : MODULE_PATH + 'show?id=' + obj.data['id']
 			});
 		}
 
@@ -315,28 +312,29 @@
 			table.reload('news-table');
 		}
 		
-		window.updown = function(uid, status) {
-			if(status == 1){
-				layer.confirm('确定要下架该资源', {
-					icon : 3,
-					title : '提示'
-				}, function(index) {
+		window.check = function(uid, status) {
+			if (status == 0) {
+				//审核通过
+				checktmp(uid, status, '');
+			} else {
+				layer.prompt({
+					title : '审核意见',
+					formType : 2
+				}, function(text, index) {
 					layer.close(index);
-					updowntmp(uid,status);
+					checktmp(uid, status, text);
 				});
-			}else{
-				updowntmp(uid,status);
 			}
 		}
-		
-		window.updowntmp = function(uid, status) {
+
+		window.checktmp = function(uid, status, msg) {
 			$.ajax({
-				url : MODULE_PATH + "updown/" + uid + "?status=" + status,
+				url : MODULE_PATH + "check/" + uid + "?status=" + status + "&msg=" + msg,
 				dataType : 'json',
 				type : 'get',
 				success : function(result) {
 					if (result.success) {
-						layer.msg('操作成功', {
+						layer.msg('审核完成', {
 							icon : 1,
 							time : 5000
 						}, function() {

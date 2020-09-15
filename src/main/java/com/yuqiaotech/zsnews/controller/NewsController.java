@@ -869,10 +869,10 @@ public class NewsController extends BaseController
      * @param params
      * @return
      */
-    @RequestMapping("/selectNews/{kind}")
-    public Result selectNews(@PathVariable("kind") String kind, @RequestParam Map<String, Object> params)
+    @RequestMapping("/selectNews")
+    public Result selectNews(@RequestParam Map<String, Object> params)
     {
-        return success(iNewsService.selectNews(kind, getCurrentUserInfoId(), params));
+        return success(iNewsService.selectNews(getCurrentUserInfoId(), params));
     }
     
     /**

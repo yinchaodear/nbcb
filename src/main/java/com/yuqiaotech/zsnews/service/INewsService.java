@@ -13,10 +13,9 @@ public interface INewsService {
 	 * 查询社区提问，发稿
 	 *
 	 * @param
-	 * kind: news-kind
 	 * @return 参数配置信息
 	 */
-	List selectNews(String kind, Long userInfoId,Map<String, Object> params);
+	List selectNews(Long userInfoId,Map<String, Object> params);
 
 	/**
 	 * 查询社区发稿，提问详情

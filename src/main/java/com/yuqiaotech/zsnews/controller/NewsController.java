@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.BeanUtils;
@@ -116,11 +117,20 @@ public class NewsController extends BaseController
         return JumpPage(MODULE_PATH + "main");
     }
     
-    @GetMapping("data")
-    public ResultTable data(News news, PageDomain pageDomain)
+    @GetMapping("checkmain")
+    public ModelAndView checkmain()
     {
-        DetachedCriteria dc = composeDetachedCriteria(news);
-        PaginationSupport ps = newsRepository.paginateByCriteria(dc, pageDomain.getPage(), pageDomain.getLimit());
+        return JumpPage(MODULE_PATH + "checkmain");
+    }
+    
+    @GetMapping("data")
+    public ResultTable data(NewsBean news, PageDomain pageDomain)
+    {
+        //        DetachedCriteria dc = composeDetachedCriteria(news);
+        String hql = buildSearchCondition(news);
+        //        PaginationSupport ps = newsRepository.paginateByCriteria(dc, pageDomain.getPage(), pageDomain.getLimit());
+        PaginationSupport ps =
+            newsRepository.paginateByHql(hql, pageDomain.getPage(), pageDomain.getLimit(), new HashMap<>());
         
         List<NewsBean> newsBeanList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(ps.getItems()))
@@ -347,14 +357,62 @@ public class NewsController extends BaseController
         return dataTable(treeArr);
     }
     
-    public DetachedCriteria composeDetachedCriteria(News news)
+    public DetachedCriteria composeDetachedCriteria(NewsBean news)
     {
         DetachedCriteria dc = DetachedCriteria.forClass(News.class);
         //新闻资源管理列表，展示的是除浙商号资源以外的资源，不管状态为何
         //所以，如果authorChannel为空，标识没有关联浙商号
+        if (StringUtils.isNotEmpty(news.getTitle()))
+        {
+            dc.add(Restrictions.or(Restrictions.ilike("title", news.getTitle(), MatchMode.ANYWHERE),
+                Restrictions.ilike("content", news.getContent(), MatchMode.ANYWHERE)));
+        }
+        if (news.getStatus() != null)
+        {
+            dc.add(Restrictions.eq("status", news.getStatus()));
+        }
+        if (news.getIstop() != null)
+        {
+            dc.add(Restrictions.eq("istop", news.getIstop()));
+        }
+        if (StringUtils.isNotEmpty(news.getChannelid()))
+        {
+            
+        }
+        
         dc.add(Restrictions.isNull("authorChannel"));
         dc.addOrder(Order.desc("created"));
         return dc;
+    }
+    
+    public String buildSearchCondition(NewsBean news)
+    {
+        String hql = "select n from News n";
+        String condition = " where 1=1";
+        if (StringUtils.isNotEmpty(news.getTitle()))
+        {
+            condition += " and (title like '%" + news.getTitle() + "%' or content like '%" + news.getTitle() + "%')";
+        }
+        if (news.getStatus() != null)
+        {
+            condition += " and status = " + news.getStatus();
+        }
+        if (news.getIstop() != null)
+        {
+            condition += " and istop=" + news.getIstop();
+        }
+        if (StringUtils.isNotEmpty(news.getChannelid()))
+        {
+            hql += " left join NewsChannel nc on n.id = nc.news.id";
+            condition += " and nc.channel.id = " + news.getChannelid();
+        }
+        if (StringUtils.isNotEmpty(news.getMediaType()))
+        {
+            condition += " and mediaType='" + news.getMediaType() + "'";
+        }
+        condition += " and n.authorChannel is null and n.deltag=" + NewsDicConstants.ICommon.DELETE_NO;
+        condition += " order by n.created desc";
+        return hql + condition;
     }
     
     @GetMapping("add")
@@ -374,8 +432,14 @@ public class NewsController extends BaseController
         news.setFrom("平台");
         news.setType("新闻");
         news.setDeltag(NewsDicConstants.ICommon.DELETE_NO);
-        news.setStatus(NewsDicConstants.INews.Status.CHECKING);//新建发布后的数据默认为审核中
-        
+        if (StringUtils.isNotEmpty(newsbean.getChannels()))
+        {
+            news.setStatus(NewsDicConstants.INews.Status.CHECKING);//新建发布后的数据默认为审核中，这里逻辑需要增加一个：如果没有关联发布目标，状态为处理中
+        }
+        else
+        {
+            news.setStatus(NewsDicConstants.INews.Status.DOING);
+        }
         if (StringUtils.isNotEmpty(newsbean.getTopcheck()))
         {
             if ("on".equals(newsbean.getTopcheck()))
@@ -556,6 +620,73 @@ public class NewsController extends BaseController
         return nodeIdList;
     }
     
+    @GetMapping("check/{nid}")
+    public Result check(@PathVariable Long nid, Integer status, String msg)
+    {
+        News news = newsRepository.findUniqueBy("id", nid, News.class);
+        if (news.getStatus() != NewsDicConstants.INews.Status.CHECKING)
+        {
+            return decide(false, null, "资源状态非审核中，不可审核");
+        }
+        
+        if (status == NewsDicConstants.INews.Status.UP || status == NewsDicConstants.INews.Status.FAIL)
+        {
+            news.setStatus(status);
+            news.setCheckDate(new Date());
+            news.setCheckUser(getCurrentUser());
+            news.setCheckResult(msg);
+            newsRepository.update(news);
+            return success();
+        }
+        else
+        {
+            return decide(false, null, "异常状态码");
+        }
+    }
+    
+    /**
+     * 上下架
+     * @param nid
+     * @param status
+     * @param msg
+     * @return
+     */
+    @GetMapping("updown/{nid}")
+    public Result updown(@PathVariable Long nid, Integer status)
+    {
+        News news = newsRepository.findUniqueBy("id", nid, News.class);
+        
+        if (status == NewsDicConstants.INews.Status.UP)
+        {
+            if (news.getStatus() != NewsDicConstants.INews.Status.DOWN)
+            {
+                return decide(false, null, "非下架状态资源不可上架");
+            }
+            else
+            {
+                news.setStatus(status);
+                newsRepository.update(news);
+            }
+        }
+        else if (status == NewsDicConstants.INews.Status.DOWN)
+        {
+            if (news.getStatus() != NewsDicConstants.INews.Status.UP)
+            {
+                return decide(false, null, "非上架资源不可下架");
+            }
+            else
+            {
+                news.setStatus(status);
+                newsRepository.update(news);
+            }
+        }
+        else
+        {
+            return decide(false, null, "异常状态码");
+        }
+        return success();
+    }
+    
     private String abstractImg(String s, News news)
     {
         String key = "data:image/png;base64,";
@@ -680,6 +811,14 @@ public class NewsController extends BaseController
         return modelAndView;
     }
     
+    @GetMapping("show")
+    public ModelAndView show(ModelAndView modelAndView, Long id)
+    {
+        ModelAndView mv = edit(modelAndView, id);
+        mv.setViewName(MODULE_PATH + "show");
+        return mv;
+    }
+    
     @PutMapping("update")
     public Result update(@RequestBody NewsBean newsbean)
     {
@@ -696,6 +835,15 @@ public class NewsController extends BaseController
             {
                 news.setIstop(NewsDicConstants.INews.Top.NO);
             }
+        }
+        
+        if (StringUtils.isNotEmpty(newsbean.getChannels()))
+        {
+            news.setStatus(NewsDicConstants.INews.Status.CHECKING);//新建发布后的数据默认为审核中，这里逻辑需要增加一个：如果没有关联发布目标，状态为处理中
+        }
+        else
+        {
+            news.setStatus(NewsDicConstants.INews.Status.DOING);
         }
         
         //先删除picmapping
@@ -842,7 +990,14 @@ public class NewsController extends BaseController
     @Logging(title = "删除角色")
     public Result remove(@PathVariable Long id)
     {
-        newsRepository.remove(id, News.class);
+        News newsdb = newsRepository.findUniqueBy("id", id, News.class);
+        if (newsdb.getStatus() == NewsDicConstants.INews.Status.UP)
+        {
+            return decide(false, null, "上架状态，不可删除");
+        }
+        newsdb.setDeltag(NewsDicConstants.ICommon.DELETE_YES);
+        newsdb.setStatus(NewsDicConstants.INews.Status.DOWN);
+        newsRepository.update(newsdb);
         return decide(true);
     }
     
@@ -857,8 +1012,16 @@ public class NewsController extends BaseController
             DetachedCriteria dc = DetachedCriteria.forClass(News.class);
             dc.add(Restrictions.in("id", cdids));
             List<News> newsList = newsRepository.findByCriteria(dc);
-            newsList.forEach(newsRepository::delete);
-            return decide(true);
+            for (News newsdb : newsList)
+            {
+                if (newsdb.getStatus() == NewsDicConstants.INews.Status.UP)
+                {
+                    continue;
+                }
+                newsdb.setDeltag(NewsDicConstants.ICommon.DELETE_YES);
+                newsdb.setStatus(NewsDicConstants.INews.Status.DOWN);
+                newsRepository.update(newsdb);
+            }
         }
         return decide(false);
     }

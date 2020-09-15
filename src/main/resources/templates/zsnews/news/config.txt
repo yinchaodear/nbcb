@@ -7,3 +7,6 @@
 	"href": "/zsnews/news/main",
 	"children": []
 }
+
+
+checkmain: 新闻审核的主页

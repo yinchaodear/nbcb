@@ -1,5 +1,7 @@
 package com.yuqiaotech.zsnews.model;
 
+import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -71,6 +73,15 @@ public class News extends BaseModel
     private Integer deltag;//删除标识
     
     private Integer status;//
+    
+    private String checkResult;//不通过意见
+    
+    private Date checkDate;//审核日期
+    
+    @JsonIgnoreProperties(value = {"hibernateLazyInitializer"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "f_check_user_id")
+    private User checkUser;//审核人
     
     public Long getId()
     {
@@ -271,5 +282,35 @@ public class News extends BaseModel
     public void setStatus(Integer status)
     {
         this.status = status;
+    }
+    
+    public String getCheckResult()
+    {
+        return checkResult;
+    }
+    
+    public void setCheckResult(String checkResult)
+    {
+        this.checkResult = checkResult;
+    }
+    
+    public Date getCheckDate()
+    {
+        return checkDate;
+    }
+    
+    public void setCheckDate(Date checkDate)
+    {
+        this.checkDate = checkDate;
+    }
+    
+    public User getCheckUser()
+    {
+        return checkUser;
+    }
+    
+    public void setCheckUser(User checkUser)
+    {
+        this.checkUser = checkUser;
     }
 }

@@ -49,7 +49,6 @@ import com.yuqiaotech.common.web.domain.response.Result;
 import com.yuqiaotech.common.web.domain.response.ResultTable;
 import com.yuqiaotech.sysadmin.model.User;
 import com.yuqiaotech.zsnews.NewsDicConstants;
-import com.yuqiaotech.zsnews.bean.ChannelTree;
 import com.yuqiaotech.zsnews.bean.NewsBean;
 import com.yuqiaotech.zsnews.model.Category;
 import com.yuqiaotech.zsnews.model.Channel;
@@ -205,9 +204,31 @@ public class NewsController extends BaseController
     }
     
     @GetMapping("channelTree")
-    public ResultTable channelTree(Long cid)
+    public ResultTable channelTree(Long cid, Long newsid)
     {
-        List<ChannelTree> treeList = new ArrayList<>();
+        //如果newsid不空，表示需要进行初始化
+        Set<String> selectNodIdSet = new HashSet<>();
+        if (newsid != null)
+        {
+            List<NewsChannel> ncList = newsChannelRepository.findByHql("from NewsChannel where news.id=" + newsid);
+            List<NewsTopic> ntList = newsTopicRepository.findByHql("from NewsTopic where news.id=" + newsid);
+            List<NewsCategory> ncategoryList =
+                newsCategoryRepository.findByHql("from NewsCategory where news.id=" + newsid);
+            
+            for (NewsChannel nc : ncList)
+            {
+                selectNodIdSet.add("channel_" + nc.getChannel().getId());
+            }
+            
+            for (NewsTopic nt : ntList)
+            {
+                selectNodIdSet.add("topic_" + nt.getTopic().getId());
+            }
+            for (NewsCategory nc : ncategoryList)
+            {
+                selectNodIdSet.add("category_" + nc.getId());
+            }
+        }
         JSONArray treeArr = new JSONArray();
         if (cid == null)
         {
@@ -246,6 +267,7 @@ public class NewsController extends BaseController
                         channelObj1.put("title", channel.getTitle());
                         channelObj1.put("type", "channel");
                         channelObj1.put("displayOrder", 1);
+                        channelObj1.put("checked", selectNodIdSet.contains(channelObj1.get("id")));
                         
                         children2.add(channelObj1);
                         
@@ -269,6 +291,7 @@ public class NewsController extends BaseController
                                 topicObj.put("title", topic.getTitle());
                                 topicObj.put("type", "topic");
                                 topicObj.put("displayOrder", 1);
+                                topicObj.put("checked", selectNodIdSet.contains(topicObj.get("id")));
                                 children3.add(topicObj);
                             }
                             topicObjjoin.put("children", children3);
@@ -312,6 +335,7 @@ public class NewsController extends BaseController
                 categoryObj.put("title", categoryMapping.getCategory().getTitle());
                 categoryObj.put("type", "category");
                 categoryObj.put("displayOrder", categoryMapping.getCategory().getDisplayOrder());
+                categoryObj.put("checked", selectNodIdSet.contains(categoryObj.get("id")));
                 
                 children.add(categoryObj);
             }
@@ -657,11 +681,160 @@ public class NewsController extends BaseController
     }
     
     @PutMapping("update")
-    public Result update(@RequestBody News news)
+    public Result update(@RequestBody NewsBean newsbean)
     {
-        News newsdb = newsRepository.findUniqueBy("id", news.getId(), News.class);
-        BeanUtils.copyProperties(news, newsdb, getNullPropertyNames(news));
-        newsRepository.update(newsdb);
+        News news = newsRepository.findUniqueBy("id", newsbean.getId(), News.class);
+        BeanUtils.copyProperties(newsbean, news, getNullPropertyNames(newsbean));
+        
+        if (StringUtils.isNotEmpty(newsbean.getTopcheck()))
+        {
+            if ("on".equals(newsbean.getTopcheck()))
+            {
+                news.setIstop(NewsDicConstants.INews.Top.YES);
+            }
+            else
+            {
+                news.setIstop(NewsDicConstants.INews.Top.NO);
+            }
+        }
+        
+        //先删除picmapping
+        picMappingRepository.executeUpdate("delete from PicMapping where news.id=" + newsbean.getId(), new HashMap<>());
+        
+        List<PicMapping> picmappinglist = new ArrayList<>();
+        if (StringUtils.isNotEmpty(newsbean.getPicname1()))
+        {
+            PicMapping pm = new PicMapping();
+            pm.setNews(news);
+            pm.setDisplayOrder(1);
+            pm.setPicpath(newsbean.getPicname1());
+            picmappinglist.add(pm);
+        }
+        if (StringUtils.isNotEmpty(newsbean.getPicname2()))
+        {
+            PicMapping pm = new PicMapping();
+            pm.setNews(news);
+            pm.setDisplayOrder(2);
+            pm.setPicpath(newsbean.getPicname2());
+            picmappinglist.add(pm);
+        }
+        if (StringUtils.isNotEmpty(newsbean.getPicname3()))
+        {
+            PicMapping pm = new PicMapping();
+            pm.setNews(news);
+            pm.setDisplayOrder(3);
+            pm.setPicpath(newsbean.getPicname3());
+            picmappinglist.add(pm);
+        }
+        
+        if (CollectionUtils.isEmpty(picmappinglist))
+        {
+            news.setDisplaytype("5");
+        }
+        else
+        {
+            if (picmappinglist.size() == 1)
+            {
+                news.setDisplaytype("2");
+            }
+            else
+            {
+                news.setDisplaytype("1");
+            }
+        }
+        
+        if (StringUtils.isNotEmpty(newsbean.getChannelid()))
+        {
+            //如果不为空，表示选择了浙商号
+            Long authorChannelId = Long.valueOf(newsbean.getChannelid());
+            Channel authorChannel = channelRepository.findUniqueBy("id", authorChannelId, Channel.class);
+            news.setAuthorChannel(authorChannel);
+        }
+        
+        String objectId = newsbean.getObjectId();
+        String objectType = newsbean.getObjectType();
+        //考虑文章中的图片路径
+        if (StringUtils.isNotEmpty(news.getContent()))
+        {
+            if (news.getContent().contains("objectId=" + objectId))
+            {
+                news.setContent(news.getContent().replace("objectId=" + objectId, "objectId=" + news.getId()));
+            }
+        }
+        newsRepository.update(news);
+        
+        if (CollectionUtils.isNotEmpty(picmappinglist))
+        {
+            for (PicMapping pm : picmappinglist)
+            {
+                picMappingRepository.save(pm);
+            }
+        }
+        
+        //最后处理关联关系
+        //后台提交新闻修改保存
+        //[{"displayOrder":1,"id":"column_1","title":"新闻","type":"column","children":[{"displayOrder":2,"id":"cj_4","title":"热点","type":"cj","children":[{"displayOrder":1,"id":"channel_4","title":"热点","type":"channel"},{"displayOrder":2,"id":"topic_join_4","title":"专题","type":"zt","children":[{"displayOrder":1,"id":"topic_2","title":"抗疫","type":"topic"}]}]}]}]
+        //删除关联关系
+        newsCategoryRepository.executeUpdate("delete from NewsCategory where news.id=" + newsbean.getId(),
+            new HashMap<>());
+        newsChannelRepository.executeUpdate("delete from NewsChannel where news.id=" + newsbean.getId(),
+            new HashMap<>());
+        newsTopicRepository.executeUpdate("delete from NewsTopic where news.id=" + newsbean.getId(), new HashMap<>());
+        String channels = newsbean.getChannels();//存放上架目标
+        List<String> nodeIdList = null;
+        if (StringUtils.isNotEmpty(channels))
+        {
+            nodeIdList = buildTreeIdList(JSONArray.parseArray(channels));
+        }
+        if (CollectionUtils.isNotEmpty(nodeIdList))
+        {
+            Set<String> nodeIdSet = new HashSet<>();
+            for (String nodeId : nodeIdList)
+            {
+                if (!nodeIdSet.contains(nodeId))
+                {
+                    nodeIdSet.add(nodeId);
+                    if (nodeId.startsWith("channel_"))
+                    {
+                        Long channelId = Long.valueOf(nodeId.replace("channel_", ""));
+                        Channel channel = channelRepository.findUniqueBy("id", channelId, Channel.class);
+                        if (channel != null)
+                        {
+                            NewsChannel newsChannel = new NewsChannel();
+                            newsChannel.setNews(news);
+                            newsChannel.setChannel(channel);
+                            newsChannelRepository.save(newsChannel);
+                        }
+                    }
+                    if (nodeId.startsWith("topic_"))
+                    {
+                        Long topicId = Long.valueOf(nodeId.replace("topic_", ""));
+                        Topic topic = topicRepository.findUniqueBy("id", topicId, Topic.class);
+                        if (topic != null)
+                        {
+                            NewsTopic newsTopic = new NewsTopic();
+                            newsTopic.setNews(news);
+                            newsTopic.setTopic(topic);
+                            newsTopicRepository.save(newsTopic);
+                        }
+                    }
+                    
+                    if (nodeId.startsWith("category_"))
+                    {
+                        Long categoryId = Long.valueOf(nodeId.replace("category_", ""));
+                        Category category = categoryRepository.findUniqueBy("id", categoryId, Category.class);
+                        if (category != null)
+                        {
+                            NewsCategory newsCategory = new NewsCategory();
+                            newsCategory.setNews(news);
+                            newsCategory.setCategory(category);
+                            newsCategoryRepository.save(newsCategory);
+                        }
+                    }
+                }
+            }
+        }
+        
         return decide(true);
     }
     

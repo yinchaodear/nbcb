@@ -44,7 +44,7 @@ public class News extends BaseModel
     
     private String from; //文章发布方(平台/个人)，如果是平台 取User的信息， 如果是个人app发布 就是取UserInfo的
     
-    private String type;//新闻，投稿，提问, 加个政务,(政务活动,政务通告,政务)
+    private String type;//新闻，投稿，提问, 加个政务,(政务活动,政务通告,政务) ，政务活动类型（自有/外部）
     
     private String kind;//属于  政务 /社区/浙商
     

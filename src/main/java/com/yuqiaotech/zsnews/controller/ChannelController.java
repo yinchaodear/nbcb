@@ -148,15 +148,30 @@ public class ChannelController extends BaseController
     {
         Channel channel = new Channel();
         BeanUtils.copyProperties(channelBean, channel);
-        
+        Column column = null;
         if (channelBean.getColumnid() != null)
         {
-            Column column = columnRepository.findUniqueBy("id", channelBean.getColumnid(), Column.class);
+            column = columnRepository.findUniqueBy("id", channelBean.getColumnid(), Column.class);
             channel.setColumn(column);
         }
         channel.setStatus(NewsDicConstants.ICommon.STATUS_UP);//默认上架
         channel.setDeltag(NewsDicConstants.ICommon.DELETE_NO);//默认未删除
-        channel.setKind(NewsDicConstants.IChannel.KIND.PD);
+        if (column == null)
+        {
+            channel.setKind(NewsDicConstants.IChannel.KIND.PD);
+        }
+        else
+        {
+            //这个地方只能写死了
+            if (NewsDicConstants.IChannel.KIND.ZW.equals(column.getTitle().trim()))
+            {
+                channel.setKind(NewsDicConstants.IChannel.KIND.ZW);
+            }
+            else
+            {
+                channel.setKind(NewsDicConstants.IChannel.KIND.PD);
+            }
+        }
         channel.setUser(getCurrentUser());
         if (channel.getDisplayOrder() == null)
         {
@@ -201,11 +216,16 @@ public class ChannelController extends BaseController
                 //如果原来没有。或者新的修改了
                 column = columnRepository.findUniqueBy("id", channelBean.getColumnid(), Column.class);
             }
+            else
+            {
+                column = columndb;
+            }
         }
         BeanUtils.copyProperties(channelBean, channeldb, getNullPropertyNames(channelBean));
         if (column != null)
         {
             channeldb.setColumn(column);
+            
         }
         
         if (channeldb.getDisplayOrder() == null)
@@ -220,7 +240,22 @@ public class ChannelController extends BaseController
         {
             channeldb.setStatus(NewsDicConstants.ICommon.STATUS_UP);
         }
-        channeldb.setKind(NewsDicConstants.IChannel.KIND.PD);
+        if (column == null)
+        {
+            channeldb.setKind(NewsDicConstants.IChannel.KIND.PD);
+        }
+        else
+        {
+            //这个地方只能写死了
+            if (NewsDicConstants.IChannel.KIND.ZW.equals(column.getTitle().trim()))
+            {
+                channeldb.setKind(NewsDicConstants.IChannel.KIND.ZW);
+            }
+            else
+            {
+                channeldb.setKind(NewsDicConstants.IChannel.KIND.PD);
+            }
+        }
         channeldb.setUser(getCurrentUser());
         channelRepository.update(channeldb);
         return decide(true);
@@ -270,14 +305,15 @@ public class ChannelController extends BaseController
     {
         return success(iChannelService.toogleJoinTeam(getCurrentUserInfoId(), params));
     }
-
+    
     /**
      * channel 小组详情
      * @param params
      * @return
      */
     @RequestMapping("/community/teamDetail")
-    public Result getTeamDetail(@RequestParam Map<String, Object> params) {
+    public Result getTeamDetail(@RequestParam Map<String, Object> params)
+    {
         return success(iChannelService.getTeamDetail(getCurrentUserInfoId(), params));
     }
     

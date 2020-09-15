@@ -56,6 +56,11 @@ public interface NewsDicConstants
              * 个人
              */
             String GR = "个人";
+            
+            /**
+             * 政务
+             */
+            String ZW = "政务";
         }
     }
     
@@ -257,5 +262,4 @@ public interface NewsDicConstants
             Integer FAIL = 3;
         }
     }
-    
 }

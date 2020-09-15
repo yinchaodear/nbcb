@@ -141,7 +141,7 @@
 				"type": "1",
 				"openType": null,
 				"icon": "layui-icon layui-icon-user",
-				"href": "/zsnews/news/main",
+				"href": "/zsnews/zshnews/checkmain",
 				"children": []
 			},
 			{

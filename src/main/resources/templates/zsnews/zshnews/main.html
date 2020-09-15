@@ -98,7 +98,7 @@
 {{#  if(d.status === 0){ }}
 	<button class="pear-btn  pear-btn-sm" title="下架"  onclick="updown({{d.id}},1)" ><i class="layui-icon layui-icon-pause"></i></button>
 {{#  } }}
-{{#  if(d.status === 1 && (d.columns && d.columns!='' && d.columns!='null' && d.channels && d.channels!='' && d.channels!='null')){ }}
+{{#  if(d.status === 1 && (d.categorys && d.categorys!='' && d.categorys!='null' )){ }}
 	<button class="pear-btn  pear-btn-sm" title="上架"  onclick="updown({{d.id}},0)" ><i class="layui-icon layui-icon-play"></i></button>
 {{#  } }}
 </script>

@@ -11,7 +11,59 @@
 	<div class="layui-card">
 		<div class="layui-card-body">
 			<form class="layui-form" action="">
+
 				<div class="layui-form-item">
+					<div class="layui-form-item layui-inline">
+						<label class="layui-form-label">资源名称</label>
+						<div class="layui-input-inline">
+							<input type="text" name="title" placeholder="请输入资源名称或者内容" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item layui-inline">
+						<label class="layui-form-label">状态</label>
+						<div class="layui-input-inline">
+							<select name="status">
+								<option value=""></option>
+								<option value="0">已上架</option>
+								<option value="1">已下架</option>
+								<option value="2">处理中</option>
+								<option value="3">审核中</option>
+								<option value="4">已失败</option>
+							</select>
+						</div>
+					</div>
+					<div class="layui-form-item layui-inline">
+						<label class="layui-form-label">置顶</label>
+						<div class="layui-input-inline">
+							<select name="istop">
+								<option value=""></option>
+								<option value="1">置顶</option>
+								<option value="0">不置顶</option>
+							</select>
+						</div>
+					</div>
+					<hql:queryForList hql="from Channel where status=0 and deltag=0 and kind='频道'  order by displayOrder" id="channellist" />
+					<div class="layui-form-item layui-inline">
+						<label class="layui-form-label">发布频道</label>
+						<div class="layui-input-inline">
+							<select name="channelid" lay-search>
+								<option value=""></option>
+								<option th:each="c : ${channellist}" th:value="${c.id}" th:text="${c.title}"></option>
+							</select>
+						</div>
+					</div>
+					<div class="layui-form-item layui-inline">
+						<label class="layui-form-label">资源类型</label>
+						<div class="layui-input-inline">
+							<select name="mediaType">
+								<option value=""></option>
+								<option value="文章">文章</option>
+								<option value="链接">链接</option>
+								<option value="图片">图片</option>
+								<option value="视频">视频</option>
+							</select>
+						</div>
+					</div>
 					<button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="news-query">
 						<i class="layui-icon layui-icon-search"></i>
 						查询
@@ -169,7 +221,7 @@
 				title : '新增',
 				shade : 0.1,
 				area : [ '1200px', '80%' ],
-				maxmin: true, 
+				maxmin : true,
 				content : MODULE_PATH + 'add'
 			});
 		}
@@ -180,7 +232,7 @@
 				title : '修改',
 				shade : 0.1,
 				area : [ '1200px', '80%' ],
-				maxmin: true, 
+				maxmin : true,
 				content : MODULE_PATH + 'edit?id=' + obj.data['id']
 			});
 		}

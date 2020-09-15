@@ -69,7 +69,7 @@ public class NewsService extends BaseController
         @RequestParam Long cid)
     {
         System.out.println("NewsService.AppNewsData()" + getCurrentUserInfoId());
-        String wheresql = "where 1 =1 and c.f_kind ='频道'";
+        String wheresql = "";
         if (type.equals("推荐"))
         {
             
@@ -82,14 +82,19 @@ public class NewsService extends BaseController
         }
         else
         {
-            wheresql += " and f_channel_id =" + id;
+            wheresql += " and c1.f_id =" + id;
         }
-        String sql = " SELECT  t.* ,d.f_title as channelname ," + " case when b.apprisecount >=10000  then  "
-            + " concat(cast(  convert(b.apprisecount/10000,decimal(10,1)) as char),'万' ) else cast(b.apprisecount  as char)  end as apprisecount "
-            + " FROM t_news t " + "  left join  ( SELECT f_news_id  as id2, count(1) "
-            + " as apprisecount FROM t_comment  where f_type ='评论' or f_type ='回答' group by f_news_id ) b on b.id2 =t.f_id "
-            + " inner join t_channel  c on  c.f_id = t.f_channel_id  inner join t_channel d on d.f_id =t.f_author_channel_id and"
-            + " c.f_status = 0  " + wheresql + " order by f_display_order asc ";
+        String sql = "SELECT    t.* ,  d.f_title as channelname ,pm1.imgs , case when b.apprisecount  >=10000  then "
+        		+ " concat(cast(  convert(b.apprisecount/10000,decimal(10,1)) as char),'万' ) "
+        		+ " else cast(b.apprisecount  as char)  end as apprisecount  FROM t_news t left join  "
+        		+ "( SELECT f_news_id  as id2, count(1)  as apprisecount FROM t_comment where f_type ='评论'  or f_type ='回答' "
+        		+ " group by f_news_id )  b on b.id2 =t.f_id  left  join  t_channel d on d.f_id =t.f_author_channel_id  left join  ("
+        		+ " select pm.f_news_id as pmid , group_concat(f_picpath) as imgs from t_pic_mapping pm group by pm.f_news_id )"
+        		+ " pm1 on pm1.pmid = t.f_id where t.f_status = 0 and exists ( SELECT  c1.f_title,nc.f_news_id FROM t_news_channel  nc "
+        		+ " inner join t_channel c1 on nc.f_channel_id = c1.f_id  and c1.f_status = 0 and c1.f_kind ='频道' where  nc.f_news_id =t.f_id "
+        		+ wheresql
+        		+ ") "
+        		+ " order by f_display_order, f_updated desc ";
         List news = newsRepository.findMapByNativeSql(sql);
         Map result = new HashMap<>();
         result.put("news", news);
@@ -143,18 +148,20 @@ public class NewsService extends BaseController
         String wheresql = "";
         if ("已关注".equals(currentstatus))
         {
-            wheresql =
-                "inner join t_channel_follower cf on cf.f_channel_id = t.f_author_channel_id and cf.f_user_info_id = "
+            wheresql ="inner join t_channel_follower cf on cf.f_channel_id = t.f_author_channel_id and cf.f_user_info_id = "
                     + getCurrentUserInfoId();
         }
-        String sql = "SELECT t.*  ,c.f_kind as channelkind,c.f_type as channeltype,"
+        String sql = "SELECT t.*  ,c.f_kind as channelkind,c.f_type as channeltype,pm1.imgs , "
             + " case when b.apprisecount >=10000  then  "
             + " concat(cast(  convert(b.apprisecount/10000,decimal(10,1)) as char),'万' ) else cast(b.apprisecount  as char)  end as apprisecount "
             + ",c.f_title as channelname "
             + "FROM t_news t left join  ( SELECT  f_news_id  as id1,count(1) as apprisecount FROM t_comment cm1 "
             + "where cm1.f_type ='评论' or cm1.f_type='回答' group by f_news_id ) b on b.id1 =t.f_id "
-            + "inner join t_channel  c on  c.f_id = t.f_author_channel_id " + wheresql + " where c.f_kind ='" + kind
-            + "' and c.f_type ='" + type + "'" + " and c.f_status = 0  order by f_display_order asc ";
+            + "inner join t_channel  c on  c.f_id = t.f_author_channel_id "
+            + "left join  (select pm.f_news_id as pmid , group_concat(f_picpath) as imgs from t_pic_mapping pm group by pm.f_news_id )"
+        	+ " pm1 on pm1.pmid = t.f_id "
+            +  wheresql + " where c.f_kind ='" + kind
+            + "' and c.f_type ='" + type + "'" + " and c.f_status = 0  and t.f_status = 0  order by f_display_order asc ";
         List news = newsRepository.findMapByNativeSql(sql);
         Map result = new HashMap<>();
         result.put("news", news);

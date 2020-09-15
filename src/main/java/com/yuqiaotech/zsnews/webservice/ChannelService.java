@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +18,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.yuqiaotech.common.web.base.BaseController;
 import com.yuqiaotech.common.web.base.BaseRepository;
 import com.yuqiaotech.common.web.domain.response.Result;
+import com.yuqiaotech.sysadmin.model.User;
 import com.yuqiaotech.zsnews.model.Category;
 import com.yuqiaotech.zsnews.model.Channel;
 import com.yuqiaotech.zsnews.model.ChannelFollower;
@@ -53,12 +55,12 @@ public class ChannelService extends BaseController
     {
         System.out.println("ChannelService.AppChannelData()" + getCurrentUserInfoId());
         String sql = "SELECT t.f_title, t1.f_id as cfid,t.f_id as f_id FROM t_channel_follower  "
-            + "t1 inner join t_channel t on t1.f_channel_id = t.f_id  where t.f_kind='频道' and t.f_status= 0 and f_user_info_id ="
+            + "t1 inner join t_channel t on t1.f_channel_id = t.f_id  where t.f_kind='频道' and  t.f_title!='推荐' and t.f_title!='热点'  and t.f_status= 0 and f_user_info_id ="
             + getCurrentUserInfoId();
         List mymenu = channelRepository.findMapByNativeSql(sql);
         String sqlleft = " select f_title,f_id from t_channel  t  where f_id not in"
             + "   (SELECT  f_channel_id  FROM t_channel_follower where f_user_info_id =" + getCurrentUserInfoId()
-            + ") and f_kind='频道' and t.f_status= 0 ";
+            + ") and f_kind='频道' and  t.f_title!='推荐' and t.f_title!='热点'  and t.f_status= 0 ";
         List moremenu = channelRepository.findMapByNativeSql(sqlleft);
         Map result = new HashMap<>();
         result.put("mymenu", mymenu);
@@ -168,4 +170,18 @@ public class ChannelService extends BaseController
         return success(result);
     }
     
+    
+    
+    /*
+     * 用户注册
+     */
+    @RequestMapping("register")
+    public Result Register(@RequestBody User user) {
+       System.out.println("ChannelService.Register()");
+       System.err.println(user.getUsername());
+       System.err.println(user.getMobile());
+       System.err.println(user.getPassword());     	
+       Map result = new HashMap<>();    	
+       return success(result);
+    }
 }

@@ -117,6 +117,12 @@ public class NewsController extends BaseController
         return JumpPage(MODULE_PATH + "main");
     }
     
+    @GetMapping("checkmain")
+    public ModelAndView checkmain()
+    {
+        return JumpPage(MODULE_PATH + "checkmain");
+    }
+    
     @GetMapping("data")
     public ResultTable data(NewsBean news, PageDomain pageDomain)
     {
@@ -426,8 +432,14 @@ public class NewsController extends BaseController
         news.setFrom("平台");
         news.setType("新闻");
         news.setDeltag(NewsDicConstants.ICommon.DELETE_NO);
-        news.setStatus(NewsDicConstants.INews.Status.CHECKING);//新建发布后的数据默认为审核中
-        
+        if (StringUtils.isNotEmpty(newsbean.getChannels()))
+        {
+            news.setStatus(NewsDicConstants.INews.Status.CHECKING);//新建发布后的数据默认为审核中，这里逻辑需要增加一个：如果没有关联发布目标，状态为处理中
+        }
+        else
+        {
+            news.setStatus(NewsDicConstants.INews.Status.DOING);
+        }
         if (StringUtils.isNotEmpty(newsbean.getTopcheck()))
         {
             if ("on".equals(newsbean.getTopcheck()))
@@ -608,6 +620,73 @@ public class NewsController extends BaseController
         return nodeIdList;
     }
     
+    @GetMapping("check/{nid}")
+    public Result check(@PathVariable Long nid, Integer status, String msg)
+    {
+        News news = newsRepository.findUniqueBy("id", nid, News.class);
+        if (news.getStatus() != NewsDicConstants.INews.Status.CHECKING)
+        {
+            return decide(false, null, "资源状态非审核中，不可审核");
+        }
+        
+        if (status == NewsDicConstants.INews.Status.UP || status == NewsDicConstants.INews.Status.FAIL)
+        {
+            news.setStatus(status);
+            news.setCheckDate(new Date());
+            news.setCheckUser(getCurrentUser());
+            news.setCheckResult(msg);
+            newsRepository.update(news);
+            return success();
+        }
+        else
+        {
+            return decide(false, null, "异常状态码");
+        }
+    }
+    
+    /**
+     * 上下架
+     * @param nid
+     * @param status
+     * @param msg
+     * @return
+     */
+    @GetMapping("updown/{nid}")
+    public Result updown(@PathVariable Long nid, Integer status)
+    {
+        News news = newsRepository.findUniqueBy("id", nid, News.class);
+        
+        if (status == NewsDicConstants.INews.Status.UP)
+        {
+            if (news.getStatus() != NewsDicConstants.INews.Status.DOWN)
+            {
+                return decide(false, null, "非下架状态资源不可上架");
+            }
+            else
+            {
+                news.setStatus(status);
+                newsRepository.update(news);
+            }
+        }
+        else if (status == NewsDicConstants.INews.Status.DOWN)
+        {
+            if (news.getStatus() != NewsDicConstants.INews.Status.UP)
+            {
+                return decide(false, null, "非上架资源不可下架");
+            }
+            else
+            {
+                news.setStatus(status);
+                newsRepository.update(news);
+            }
+        }
+        else
+        {
+            return decide(false, null, "异常状态码");
+        }
+        return success();
+    }
+    
     private String abstractImg(String s, News news)
     {
         String key = "data:image/png;base64,";
@@ -732,6 +811,14 @@ public class NewsController extends BaseController
         return modelAndView;
     }
     
+    @GetMapping("show")
+    public ModelAndView show(ModelAndView modelAndView, Long id)
+    {
+        ModelAndView mv = edit(modelAndView, id);
+        mv.setViewName(MODULE_PATH + "show");
+        return mv;
+    }
+    
     @PutMapping("update")
     public Result update(@RequestBody NewsBean newsbean)
     {
@@ -748,6 +835,15 @@ public class NewsController extends BaseController
             {
                 news.setIstop(NewsDicConstants.INews.Top.NO);
             }
+        }
+        
+        if (StringUtils.isNotEmpty(newsbean.getChannels()))
+        {
+            news.setStatus(NewsDicConstants.INews.Status.CHECKING);//新建发布后的数据默认为审核中，这里逻辑需要增加一个：如果没有关联发布目标，状态为处理中
+        }
+        else
+        {
+            news.setStatus(NewsDicConstants.INews.Status.DOING);
         }
         
         //先删除picmapping

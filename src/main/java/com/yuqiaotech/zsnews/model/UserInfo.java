@@ -55,7 +55,17 @@ public class UserInfo extends BaseModel
     private Integer status;//状态，用户的头像和用户名需要审核，存在状态位：审核中，通过，不通过，未提交审核
     
     private Integer deltag;//删除标识
-    
+
+    private Integer push;//推送
+
+    public Integer getPush() {
+        return push;
+    }
+
+    public void setPush(Integer push) {
+        this.push = push;
+    }
+
     public String getRegion()
     {
         return region;

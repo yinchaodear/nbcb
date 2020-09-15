@@ -261,5 +261,19 @@ public interface NewsDicConstants
              */
             Integer FAIL = 3;
         }
+
+        /**
+         * 推送
+         */
+        interface push{
+            /**
+             * 允许推送
+             */
+            Integer YES=0;
+            /**
+             * 不推送
+             */
+            Integer NO = 1;
+    }
     }
 }

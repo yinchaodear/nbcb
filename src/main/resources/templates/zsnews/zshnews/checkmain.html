@@ -10,34 +10,13 @@
 <body class="pear-container">
 	<div class="layui-card">
 		<div class="layui-card-body">
-			<div class="layui-tab layui-tab-brief" lay-filter="component-tabs-brief">
-				<ul class="layui-tab-title">
-					<li class="layui-this">浙商号管理</li>
-					<li onclick="redicttozshnr()">浙商号内容管理</li>
-				</ul>
-			</div>
-		</div>
-	</div>
-	<div class="layui-card">
-		<div class="layui-card-body">
 			<form class="layui-form" action="">
+
 				<div class="layui-form-item">
 					<div class="layui-form-item layui-inline">
-						<label class="layui-form-label" style="width: 100px !important;">浙商号名称</label>
+						<label class="layui-form-label">资源名称</label>
 						<div class="layui-input-inline">
-							<input type="text" name="title" placeholder="请输入浙商号名称或者描述" class="layui-input">
-						</div>
-					</div>
-					<div class="layui-form-item layui-inline">
-						<label class="layui-form-label" style="width: 100px !important;">浙商号类型</label>
-						<div class="layui-input-inline">
-							<select name="type">
-								<option value=""></option>
-								<option value="商会号">商会号</option>
-								<option value="企业号">企业号</option>
-								<option value="媒体号">媒体号</option>
-								<option value="个人号">个人号</option>
-							</select>
+							<input type="text" name="title" placeholder="请输入资源名称或者内容" class="layui-input">
 						</div>
 					</div>
 					<div class="layui-form-item layui-inline">
@@ -47,10 +26,45 @@
 								<option value=""></option>
 								<option value="0">已上架</option>
 								<option value="1">已下架</option>
+								<option value="2">处理中</option>
+								<option value="3">审核中</option>
+								<option value="4">已失败</option>
 							</select>
 						</div>
 					</div>
-					<button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="channel-query">
+					<div class="layui-form-item layui-inline">
+						<label class="layui-form-label">置顶</label>
+						<div class="layui-input-inline">
+							<select name="istop">
+								<option value=""></option>
+								<option value="1">置顶</option>
+								<option value="0">不置顶</option>
+							</select>
+						</div>
+					</div>
+					<hql:queryForList hql="from Channel where status=0 and deltag=0 and kind='频道'  order by displayOrder" id="channellist" />
+					<div class="layui-form-item layui-inline">
+						<label class="layui-form-label">发布频道</label>
+						<div class="layui-input-inline">
+							<select name="channelid" lay-search>
+								<option value=""></option>
+								<option th:each="c : ${channellist}" th:value="${c.id}" th:text="${c.title}"></option>
+							</select>
+						</div>
+					</div>
+					<div class="layui-form-item layui-inline">
+						<label class="layui-form-label">资源类型</label>
+						<div class="layui-input-inline">
+							<select name="mediaType">
+								<option value=""></option>
+								<option value="文章">文章</option>
+								<option value="链接">链接</option>
+								<option value="图片">图片</option>
+								<option value="视频">视频</option>
+							</select>
+						</div>
+					</div>
+					<button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="news-query">
 						<i class="layui-icon layui-icon-search"></i>
 						查询
 					</button>
@@ -64,12 +78,12 @@
 	</div>
 	<div class="layui-card">
 		<div class="layui-card-body">
-			<table id="channel-table" lay-filter="channel-table"></table>
+			<table id="news-table" lay-filter="news-table"></table>
 		</div>
 	</div>
 </body>
 
-<script type="text/html" id="channel-toolbar">
+<script type="text/html" id="news-toolbar">
     <button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">
         <i class="layui-icon layui-icon-add-1"></i>
         新增
@@ -80,13 +94,12 @@
     </button>
 </script>
 
-<script type="text/html" id="channel-bar">
-    <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i></button>
-    <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i class="layui-icon layui-icon-delete"></i></button>
-</script>
-
-<script type="text/html" id="status-enable">
-	<input type="checkbox" value="{{d.f_id}}" lay-skin="switch" lay-text="已上架|已下架"  lay-filter="status-enable" {{ d.f_status == 0 ? 'checked' : '' }}>
+<script type="text/html" id="news-bar">
+<button class="layui-btn layui-btn-sm layui-btn-primary" lay-event="edit" title="查看">查看</button>
+{{#  if(d.status === 3){ }}
+	<button class="layui-btn layui-btn-sm layui-btn-normal" title="通过"  onclick="check({{d.id}},0)" >通过</button>
+	<button class="layui-btn layui-btn-sm layui-btn-danger" title="不通过"  onclick="check({{d.id}},4)" >不通过</button>
+{{#  } }}
 </script>
 
 <script src="../../component/layui/layui.js"></script>
@@ -96,7 +109,7 @@
 		let form = layui.form;
 		let $ = layui.jquery;
 
-		let MODULE_PATH = "/zsnews/zshchannel/";
+		let MODULE_PATH = "/zsnews/news/";
 
 		let cols = [ [ {
 			type : 'checkbox'
@@ -106,57 +119,72 @@
 			align : 'center',
 			width : 80
 		}, {
-			title : '浙商号名称',
-			field : 'f_title',
+			title : '展示栏目',
+			field : 'columns',
 			align : 'center',
 			width : 200
 		}, {
-			title : '浙商号类型',
-			field : 'f_type',
+			title : '所属频道',
+			field : 'channels',
 			align : 'center',
 			width : 200
 		}, {
-			title : '展示分类',
-			field : 'title2',
+			title : '标题',
+			field : 'title',
 			align : 'center',
-			width : 300
+			width : 200
 		}, {
-			title : '展示顺序',
-			field : 'f_display_order',
+			title : '资源链接',
+			field : 'link',
 			align : 'center',
-			width : 150
+			width : 250
 		}, {
 			title : '状态',
-			field : 'f_status',
+			field : 'status',
 			align : 'center',
 			width : 200,
-			templet : '#status-enable'
+			templet : function(d) {
+				if (d.status == 0)
+					return '<div>已上架</div>';
+				else if (d.status == 1)
+					return '<div>已下架</div>';
+				else if (d.status == 2)
+					return '<div>处理中</div>';
+				else if (d.status == 3)
+					return '<div>审核中</div>';
+				else if (d.status == 4)
+					return '<div>已失败</div>';
+				else
+					return '';
+			}
 		}, {
 			title : '创建时间',
-			field : 'f_created',
+			field : 'created',
 			align : 'center',
-			width : 200,
+			width : 300,
 			templet : "<div>{{layui.util.toDateString(d.created, 'yyyy-MM-dd HH:mm:ss')}}</div>"
 		}, {
 			title : '操作',
-			toolbar : '#channel-bar',
+			toolbar : '#news-bar',
 			align : 'center'
 		} ] ]
 
 		table.render({
-			elem : '#channel-table',
+			elem : '#news-table',
 			url : MODULE_PATH + 'data',
 			page : true,
 			cols : cols,
 			skin : 'line',
-			toolbar : '#channel-toolbar',
+			toolbar : '#news-toolbar',
 			defaultToolbar : [ {
 				layEvent : 'refresh',
 				icon : 'layui-icon-refresh',
-			}, 'filter', 'print', 'exports' ]
+			}, 'filter', 'print', 'exports' ],
+			done : function() {
+			}
 		});
 
-		table.on('tool(channel-table)', function(obj) {
+		table.on('tool(news-table)', function(obj) {
 			if (obj.event === 'remove') {
 				window.remove(obj);
 			} else if (obj.event === 'edit') {
@@ -166,7 +194,7 @@
 			}
 		});
 
-		table.on('toolbar(channel-table)', function(obj) {
+		table.on('toolbar(news-table)', function(obj) {
 			if (obj.event === 'add') {
 				window.add();
 			} else if (obj.event === 'refresh') {
@@ -176,41 +204,11 @@
 			}
 		});
 
-		form.on('submit(channel-query)', function(data) {
-			table.reload('channel-table', {
+		form.on('submit(news-query)', function(data) {
+			table.reload('news-table', {
 				where : data.field
 			})
 			return false;
-		});
-
-		form.on('switch(status-enable)', function(obj) {
-			let loading = layer.load();
-			$.ajax({
-				url : MODULE_PATH + "status/" + this.value,
-				dataType : 'json',
-				type : 'get',
-				success : function(result) {
-					layer.close(loading);
-					if (result.success) {
-						if (obj.elem.checked) {
-							layer.msg('启用成功', {
-								icon : 1,
-								time : 5000
-							});
-						} else {
-							layer.msg('停用成功', {
-								icon : 1,
-								time : 5000
-							});
-						}
-					} else {
-						layer.msg('状态更新失败', {
-							icon : 2,
-							time : 1000
-						});
-					}
-				}
-			})
 		});
 
 		window.add = function() {
@@ -218,7 +216,8 @@
 				type : 2,
 				title : '新增',
 				shade : 0.1,
-				area : [ '800px', '80%' ],
+				area : [ '1200px', '80%' ],
+				maxmin : true,
 				content : MODULE_PATH + 'add'
 			});
 		}
@@ -226,10 +225,11 @@
 		window.edit = function(obj) {
 			layer.open({
 				type : 2,
-				title : '修改',
+				title : '查看',
 				shade : 0.1,
-				area : [ '800px', '80%' ],
-				content : MODULE_PATH + 'edit?id=' + obj.data['f_id']
+				area : [ '1200px', '80%' ],
+				maxmin : true,
+				content : MODULE_PATH + 'show?id=' + obj.data['id']
 			});
 		}
 
@@ -241,7 +241,7 @@
 				layer.close(index);
 				let loading = layer.load();
 				$.ajax({
-					url : MODULE_PATH + "remove/" + obj.data['f_id'],
+					url : MODULE_PATH + "remove/" + obj.data['id'],
 					dataType : 'json',
 					type : 'delete',
 					success : function(result) {
@@ -275,7 +275,7 @@
 			}
 			let ids = "";
 			for (let i = 0; i < data.length; i++) {
-				ids += data[i].f_id + ",";
+				ids += data[i].id + ",";
 			}
 			ids = ids.substr(0, ids.length - 1);
 			layer.confirm('确定要删除', {
@@ -295,7 +295,7 @@
 								icon : 1,
 								time : 1000
 							}, function() {
-								table.reload('channel-table');
+								table.reload('news-table');
 							});
 						} else {
 							layer.msg(result.msg, {
@@ -309,11 +309,54 @@
 		}
 
 		window.refresh = function() {
-			table.reload('channel-table');
+			table.reload('news-table');
+		}
+		
+		window.check = function(uid, status) {
+			if (status == 0) {
+				//审核通过
+				checktmp(uid, status, '');
+			} else {
+				layer.prompt({
+					title : '审核意见',
+					formType : 2
+				}, function(text, index) {
+					layer.close(index);
+					checktmp(uid, status, text);
+				});
+			}
+		}
+
+		window.checktmp = function(uid, status, msg) {
+			$.ajax({
+				url : MODULE_PATH + "check/" + uid + "?status=" + status + "&msg=" + msg,
+				dataType : 'json',
+				type : 'get',
+				success : function(result) {
+					if (result.success) {
+						layer.msg('审核完成', {
+							icon : 1,
+							time : 5000
+						}, function() {
+							table.reload('news-table');
+						});
+					} else {
+						layer.msg(result.msg, {
+							icon : 2,
+							time : 5000
+						});
+					}
+				}
+			})
 		}
 	})
+
+	function redicttozsh() {
+		window.location.href = '/zsnews/zshchannel/main';
+	}
+
 	function redicttozshnr() {
-		window.location.href = '/zsnews/zshnews/main';
+		window.location.href = '/zsnews/news/main';
 	}
 </script>
 </html>

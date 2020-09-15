@@ -40,18 +40,24 @@ public class UserSerive extends BaseController implements NewsDicConstants {
     @Autowired
     private BaseRepository<News, Long> newsRepository;
 
+    @Autowired
+    private BaseRepository<Comment, Long> commentRepository;
 
     //获取用户信息、问答数量、收藏数量
     @GetMapping("getUserInfo")
     public Result getUserInfo() {
         Map result = new HashMap<>();
         UserInfo userInfo = userinfoRepository.get(getCurrentUserInfoId(), UserInfo.class);
-        String sql = "SELECT COUNT(*) FROM `t_news_follower` WHERE f_user_info_id = " + getCurrentUserInfoId();
-        List<Map<String, Object>> newsFollower = userinfoRepository.findMapByNativeSql(sql);
-        result.put("newsFollower", newsFollower.get(0).values());
-        String sql2 = "SELECT COUNT(*) FROM `t_news` WHERE f_type = '问答' AND f_userinfo_id = " + getCurrentUserInfoId();
-        List<Map<String, Object>> wenda = userinfoRepository.findMapByNativeSql(sql2, null);
-        result.put("wenda", wenda.get(0).values());
+        String sql = "SELECT COUNT(*) FROM t_comment WHERE f_type = '收藏' AND f_news_id IN (SELECT f_id FROM t_news WHERE f_userinfo_id = " + getCurrentUserInfoId() + ")";
+        List<Map<String, Object>> collection = commentRepository.findMapByNativeSql(sql);
+        result.put("collection", collection.get(0).values());
+        //回答总数
+        String sql2 = "SELECT COUNT(*) FROM t_comment WHERE f_type = '评论' AND f_news_id IN (SELECT f_id FROM t_news WHERE f_type='提问' AND f_userinfo_id = " + getCurrentUserInfoId() + ")";
+        List<Map<String, Object>> answer = commentRepository.findMapByNativeSql(sql2);
+        //提问总数
+        String sql3 = "SELECT COUNT(*) FROM t_news WHERE f_type = '提问' AND f_userinfo_id = " + getCurrentUserInfoId();
+        List<Map<String, Object>> question = newsRepository.findMapByNativeSql(sql3);
+        result.put("question", Long.valueOf(answer.get(0).values().toString()) + Long.valueOf(question.get(0).values().toString()));
         result.put("userInfo", userInfo);
         return success(result);
     }
@@ -75,17 +81,20 @@ public class UserSerive extends BaseController implements NewsDicConstants {
                     userInfo.setRegion(value);
                     break;
                 case "userName":
+                    String sql = "SELECT * FROM t_user_info WHERE f_username = '" + value + "'";
                     if (userInfo.getStatus() == IUserInfo.Status.CHECKING) {
                         errMsg = "用户信息正在审核";
+                    } else if (userinfoRepository.findMapByNativeSql(sql) != null) {
+                        errMsg="用户名已存在";
                     } else {
-                        userInfo.setUsername(value);
+                        userInfo.setNewUsername(value);
                     }
                     break;
                 case "remark":
                     if (userInfo.getStatus() == IUserInfo.Status.CHECKING) {
                         errMsg = "用户信息正在审核";
                     } else {
-                        userInfo.setRemark(value);
+                        userInfo.setNewAvatar(value);
                     }
                     break;
                 case "push":
@@ -94,18 +103,16 @@ public class UserSerive extends BaseController implements NewsDicConstants {
             }
         }
         userinfoRepository.update(userInfo);
-        if (StringUtils.isEmpty(errMsg)) {
-            return success("success");
-        } else {
-            return failure(errMsg);
-        }
+        Map result = new HashMap();
+        result.put("errMsg",errMsg);
+        return success(result);
     }
 
     //获取收藏列表
     @GetMapping("getCollection")
-    public Result getCollection () {
-        String sql = "SELECT f_title FROM t_news WHERE f_id IN (SELECT f_news_id FROM `t_news_follower` WHERE f_user_info_id = " + getCurrentUserInfoId() + " )";
-        List<Map<String, Object>> userFollowerList = userinfoRepository.findMapByNativeSql(sql, null);
+    public Result getCollection() {
+        String sql = "SELECT f_id,f_title,f_content FROM t_news WHERE f_id IN (SELECT f_news_id FROM t_comment WHERE f_user_info_id = " + getCurrentUserInfoId() + ")";
+        List<Map<String, Object>> userFollowerList = newsRepository.findMapByNativeSql(sql);
         Map result = new HashMap();
         result.put("userFollowerList", userFollowerList);
         return success(userFollowerList);
@@ -114,25 +121,26 @@ public class UserSerive extends BaseController implements NewsDicConstants {
     //取消收藏
     @GetMapping("delCollection")
     public Result delCollection(Long newsId) {
-//        String sql = "SELECT f_id FROM `t_news_follower` WHERE f_user_info_id= "+userId+" AND f_news_id = "+newsId;
-        UserInfo userInfo = new UserInfo();
-        userInfo.setId(getCurrentUserInfoId());
-        News news = new News();
-        news.setId(newsId);
-        NewsFollower newsFollower = new NewsFollower();
-        newsFollower.setNews(news);
-        newsFollower.setUserInfo(userInfo);
-        newsFollowerRepository.delete(newsFollower);
         return success("success");
     }
 
-    //问答列表
+    //提问列表
     @GetMapping("getQuestion")
     public Result getQuestion() {
-        String sql="";
-        List<Map<String, Object>> wendaList = userinfoRepository.findMapByNativeSql(sql, null);
+        String sql = "SELECT f_id,f_title,f_content FROM t_news WHERE f_type = '提问' AND f_userinfo_id = " + getCurrentUserInfoId();
+        List<Map<String, Object>> questionList = newsRepository.findMapByNativeSql(sql);
         Map result = new HashMap();
-        result.put("wendaList", wendaList);
+        result.put("questionList", questionList);
+        return success(result);
+    }
+
+    //回答列表
+    @GetMapping()
+    public Result getAnswer(Long commentId) {
+        String sql = "SELECT f_content FROM t_comment WHERE f_type = '评论' AND f_news_id =" + commentId;
+        List<Map<String, Object>> answerList = commentRepository.findMapByNativeSql(sql);
+        Map result = new HashMap();
+        result.put("answerList", answerList);
         return success(result);
     }
 

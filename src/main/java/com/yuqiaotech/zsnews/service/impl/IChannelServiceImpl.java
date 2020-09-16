@@ -54,7 +54,7 @@ public class IChannelServiceImpl implements IChannelService {
 					" 	where f_type = '提问'\n" +
 					"   group by f_channel_id\n" +
 					") cn on c.f_id = cn.f_channel_id \n" +
-					"where c.f_kind = '小组'\n" +
+					"where c.f_kind = '小组' and c.f_status=0 and c.f_deltag=0 "  +
 					"order by f_type desc";
 			channels = channelRepository.findMapByNativeSql(sql);
 

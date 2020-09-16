@@ -113,7 +113,7 @@ public class ChannelService extends BaseController
         return success(result);
     }
     
-    //社区页面 查询小组等相关信息
+    //浙商号页面 查询浙商号相关信息
     @GetMapping("querynewsCommunityGroup")
     public Result AppChannelGroup(ModelAndView modelAndView, @RequestParam Long cid, @RequestParam String category,
         @RequestParam String kind, @RequestParam String type)
@@ -147,6 +147,45 @@ public class ChannelService extends BaseController
         result.put("groupchannel", group);
         return success(result);
     }
+    
+    
+    //社区 查询小组等
+    @GetMapping("querynewsCommunityGroupSheQu")
+    public Result AppChannelGroupSheQu(ModelAndView modelAndView, @RequestParam Long cid, @RequestParam String category,
+        @RequestParam String kind, @RequestParam String type)
+    {
+        System.out.println("ChannelService.AppChannelGroupSheQu()");
+        String wheresql = "";
+        if (!StringUtils.isEmpty(category) && !"所有".equals(category))
+        {
+            wheresql = " and cate.f_title = '" + category + "'";
+        }
+        String wherekindandtype = " c.f_kind ='" + kind + "'";
+        String sql = "SELECT  c.f_title as f_category  FROM t_channe_catego_mappin m inner join t_channel t "
+        		+ " on t.f_id =m.f_channel_id inner join t_category c on c.f_id =m.f_category_id  "
+        		+ " where t.f_kind = '"+kind+"'  group by c.f_title";
+        List categorygroup = channelRepository.findMapByNativeSql(sql);
+        String sqlgroup = "SELECT  distinct t.* , b.* , case when c.number >=10000  then  concat(cast(  convert(c.number/10000,decimal(10,1)) as char),'万' )"
+                + " else cast(c.number  as char)  end as number  FROM  t_channel t  left  join (select cf.f_id as cfid ,cf.f_channel_id as chid "
+                + ",cf.f_user_info_id as cid from t_channel_follower cf inner join t_channel c  on c.f_id = "
+                + "cf.f_channel_id  where f_user_info_id = " + getCurrentUserInfoId() + " and " + wherekindandtype
+                + ") b on t.f_id = b.chid "
+                + " left join (select c.f_id as channelid ,count(1) as number from t_channel_follower cf inner"
+                + " join t_channel c  on c.f_id = cf.f_channel_id  where  " + wherekindandtype
+                + " group by  cf.f_channel_id) c on c.channelid  = t.f_id "
+                + "inner join  t_channe_catego_mappin tcm on t.f_id =tcm.f_channel_id inner join t_category cate "
+                + " on  cate.f_id =tcm.f_category_id  "
+                + " where t.f_status= 0 and t.f_deltag =0 "
+                + " and t.f_kind ='" + kind + "'" + wheresql;
+        List group = channelRepository.findMapByNativeSql(sqlgroup);
+        Map result = new HashMap<>();
+        result.put("category", categorygroup);
+        result.put("groupchannel", group);
+        return success(result);
+    }
+    
+    
+    
     
     //社区页面 查询小组等相关信息
     /*
@@ -190,5 +229,6 @@ public class ChannelService extends BaseController
         return success(result);
     }
     
-  
+    
+
 }

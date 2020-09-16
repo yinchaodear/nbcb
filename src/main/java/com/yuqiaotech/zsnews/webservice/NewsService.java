@@ -271,14 +271,19 @@ public class NewsService extends BaseController {
 		String title = (String) params.get("title");
 		String content = (String) params.get("content");
 		String type = (String) params.get("type");
+		
 
 		String kind = (String) params.get("kind");
-
+        if("提问".equals(type)){
+			kind ="社区";
+		}
 		// if("文章".equals(type)){
 		// 此处不知道原先的匹配type文章，暂放开
 		if (true) {
 			News news = new News();
 			news.setType(type);
+			news.setDeltag(0);
+			news.setStatus(0);
 			if (!StringUtils.isEmpty(kind)) {
 				news.setKind(kind);
 			}

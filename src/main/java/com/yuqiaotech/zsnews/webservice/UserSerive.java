@@ -57,7 +57,8 @@ public class UserSerive extends BaseController implements NewsDicConstants {
         //提问总数
         String sql3 = "SELECT COUNT(*) FROM t_news WHERE f_type = '提问' AND f_userinfo_id = " + getCurrentUserInfoId();
         List<Map<String, Object>> question = newsRepository.findMapByNativeSql(sql3);
-        result.put("question", Long.valueOf(answer.get(0).values().toString()) + Long.valueOf(question.get(0).values().toString()));
+        String a =question.get(0).get("COUNT(*)").toString();
+        result.put("question", Long.valueOf(answer.get(0).get("COUNT(*)").toString()) + Long.valueOf(question.get(0).get("COUNT(*)").toString()));
         result.put("userInfo", userInfo);
         return success(result);
     }
@@ -82,19 +83,23 @@ public class UserSerive extends BaseController implements NewsDicConstants {
                     break;
                 case "userName":
                     String sql = "SELECT * FROM t_user_info WHERE f_username = '" + value + "'";
+                    if (userinfoRepository.findMapByNativeSql(sql) != null) {
+                        errMsg="用户名已存在";
+                        break;
+                    }
                     if (userInfo.getStatus() == IUserInfo.Status.CHECKING) {
                         errMsg = "用户信息正在审核";
-                    } else if (userinfoRepository.findMapByNativeSql(sql) != null) {
-                        errMsg="用户名已存在";
                     } else {
                         userInfo.setNewUsername(value);
+                        userInfo.setStatus(IUserInfo.Status.CHECKING);
                     }
                     break;
                 case "remark":
                     if (userInfo.getStatus() == IUserInfo.Status.CHECKING) {
                         errMsg = "用户信息正在审核";
                     } else {
-                        userInfo.setNewAvatar(value);
+                        userInfo.setNewRemark(value);
+                        userInfo.setStatus(IUserInfo.Status.CHECKING);
                     }
                     break;
                 case "push":

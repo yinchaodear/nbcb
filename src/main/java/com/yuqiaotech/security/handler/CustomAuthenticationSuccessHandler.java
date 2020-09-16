@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -62,6 +63,9 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 		resuBean.setMsg("登录成功");
 		resuBean.setCode(200);
 		resuBean.setData(token);
+
+		Cookie cookie=new Cookie("token",token);
+		httpServletResponse.addCookie(cookie);
 
 
 		httpServletRequest.getSession()

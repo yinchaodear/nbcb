@@ -37,7 +37,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public static final String passUrls = "/attachment/**,/login/**,/assets/**,/admin/**,/component/**,/favicon.ico,/demo/**" +
-			",/logout/**,/register/**";
+			",/logout/**,/register/**,/zsnews/**";
 
 	@Resource
 	private CustomPermissionEvaluator securityPowerEvaluator;

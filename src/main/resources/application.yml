@@ -1,6 +1,8 @@
 # Tomcat 端口
 server:
   port: 9292
+  session:
+    tracking-modes: cookie
 
 spring:
   # Druid Pool 运行环境
@@ -16,6 +18,13 @@ spring:
     open-in-view: true
   main:
     allow-bean-definition-overriding: true
+  servlet:
+    multipart:
+      enabled: true
+      #是单个文件大小
+      max-file-size: 20MB
+      #总上传的数据大小
+      max-request-size: 200MB
 # mybatis 配置
 mybatis:
   # 配 置 扫 描

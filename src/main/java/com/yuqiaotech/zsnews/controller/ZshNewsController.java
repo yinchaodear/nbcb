@@ -496,22 +496,21 @@ public class ZshNewsController extends BaseController
             {
                 picMappingRepository.save(pm);
             }
-            
-            //把图片移动到material对应的ID下
-            File srcFile = new File(attachmentRoot + "/" + objectType + "/" + objectId + "/");
-            File dstFile = new File(attachmentRoot + "/" + objectType + "/" + news.getId() + "/");
-            if (srcFile.exists())
+        }
+        //把图片移动到material对应的ID下
+        File srcFile = new File(attachmentRoot + "/" + objectType + "/" + objectId + "/");
+        File dstFile = new File(attachmentRoot + "/" + objectType + "/" + news.getId() + "/");
+        if (srcFile.exists())
+        {
+            try
             {
-                try
-                {
-                    org.apache.commons.io.FileUtils.copyDirectory(srcFile, dstFile);
-                }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-                FileUtils.deleteDir(srcFile);
+                org.apache.commons.io.FileUtils.copyDirectory(srcFile, dstFile);
             }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+            FileUtils.deleteDir(srcFile);
         }
         
         //最后处理关联关系
@@ -973,6 +972,6 @@ public class ZshNewsController extends BaseController
                 newsRepository.update(newsdb);
             }
         }
-        return decide(false);
+        return decide(true);
     }
 }

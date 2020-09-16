@@ -32,7 +32,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -66,11 +65,14 @@ import com.yuqiaotech.zsnews.service.INewsService;
 
 import sun.misc.BASE64Decoder;
 
+/**
+ * 商会号资源
+ */
 @RestController
-@RequestMapping(value = {"zsnews/news", "ws/news"})
-public class NewsController extends BaseController
+@RequestMapping(value = {"zsnews/shhnews", "ws/shhnews"})
+public class ShhNewsController extends BaseController
 {
-    private static String MODULE_PATH = "zsnews/news/";
+    private static String MODULE_PATH = "zsnews/shhnews/";
     
     @Autowired
     private BaseRepository<News, Long> newsRepository;
@@ -142,19 +144,19 @@ public class NewsController extends BaseController
                 newsidlist.add(newstmp.getId().toString());
             }
             
-            List<NewsChannel> nclist = newsChannelRepository.findByHql("from NewsChannel where news.id in ("
+            List<NewsCategory> nclist = newsCategoryRepository.findByHql("from NewsCategory where news.id in ("
                 + com.yuqiaotech.common.tools.common.CollectionUtils.join(newsidlist, ",") + ")");
             
-            Map<Long, List<Channel>> newsChannelMap = new HashMap<>();
+            Map<Long, List<Category>> newsCategoryMap = new HashMap<>();
             if (CollectionUtils.isNotEmpty(nclist))
             {
-                for (NewsChannel newsChannel : nclist)
+                for (NewsCategory newsCategory : nclist)
                 {
-                    if (!newsChannelMap.containsKey(newsChannel.getNews().getId()))
+                    if (!newsCategoryMap.containsKey(newsCategory.getNews().getId()))
                     {
-                        newsChannelMap.put(newsChannel.getNews().getId(), new ArrayList<Channel>());
+                        newsCategoryMap.put(newsCategory.getNews().getId(), new ArrayList<Category>());
                     }
-                    newsChannelMap.get(newsChannel.getNews().getId()).add(newsChannel.getChannel());
+                    newsCategoryMap.get(newsCategory.getNews().getId()).add(newsCategory.getCategory());
                 }
             }
             
@@ -162,11 +164,10 @@ public class NewsController extends BaseController
             {
                 NewsBean newsBeanTmp = new NewsBean();
                 BeanUtils.copyProperties(newstmp, newsBeanTmp);
-                //接下来构造news所属栏目，频道，专题
-                if (newsChannelMap.containsKey(newstmp.getId()))
+                //接下来构造news所属分类
+                if (newsCategoryMap.containsKey(newstmp.getId()))
                 {
-                    newsBeanTmp.setColumns(buildColumns(newsChannelMap.get(newstmp.getId())));
-                    newsBeanTmp.setChannels(buildChannels(newsChannelMap.get(newstmp.getId())));
+                    newsBeanTmp.setCategorys(buildCategorys(newsCategoryMap.get(newstmp.getId())));
                 }
                 newsBeanList.add(newsBeanTmp);
             }
@@ -179,38 +180,17 @@ public class NewsController extends BaseController
      * @param channelList
      * @return
      */
-    private String buildColumns(List<Channel> channelList)
+    private String buildCategorys(List<Category> categoryList)
     {
-        List<String> columnList = new ArrayList<>();
-        for (Channel channel : channelList)
+        List<String> cList = new ArrayList<>();
+        for (Category category : categoryList)
         {
-            if (channel.getColumn() != null)
+            if (!cList.contains(category.getTitle()))
             {
-                if (!columnList.contains(channel.getColumn().getTitle()))
-                {
-                    columnList.add(channel.getColumn().getTitle());
-                }
+                cList.add(category.getTitle());
             }
         }
-        return com.yuqiaotech.common.tools.common.CollectionUtils.join(columnList, ",");
-    }
-    
-    /**
-     * 根据频道列表构造频道名称字符串
-     * @param channelList
-     * @return
-     */
-    private String buildChannels(List<Channel> channelList)
-    {
-        List<String> channelNameList = new ArrayList<>();
-        for (Channel channel : channelList)
-        {
-            if (!channelNameList.contains(channel.getTitle()))
-            {
-                channelNameList.add(channel.getTitle());
-            }
-        }
-        return com.yuqiaotech.common.tools.common.CollectionUtils.join(channelNameList, ",");
+        return com.yuqiaotech.common.tools.common.CollectionUtils.join(cList, ",");
     }
     
     @GetMapping("channelTree")
@@ -401,16 +381,13 @@ public class NewsController extends BaseController
         {
             condition += " and istop=" + news.getIstop();
         }
-        if (StringUtils.isNotEmpty(news.getChannelid()))
+        if (StringUtils.isNotEmpty(news.getCategoryid()))
         {
-            hql += " left join NewsChannel nc on n.id = nc.news.id";
-            condition += " and nc.channel.id = " + news.getChannelid();
+            hql += " left join NewsCategory nc on n.id = nc.news.id";
+            condition += " and nc.category.id = " + news.getCategoryid();
         }
-        if (StringUtils.isNotEmpty(news.getMediaType()))
-        {
-            condition += " and mediaType='" + news.getMediaType() + "'";
-        }
-        condition += " and n.authorChannel is null and n.deltag=" + NewsDicConstants.ICommon.DELETE_NO;
+        condition += " and n.authorChannel is not null and n.deltag=" + NewsDicConstants.ICommon.DELETE_NO
+            + " and n.authorChannel.type='商会号'";
         condition += " order by n.created desc";
         return hql + condition;
     }
@@ -431,8 +408,9 @@ public class NewsController extends BaseController
         news.setUser(getCurrentUser());
         news.setFrom("平台");
         news.setType("新闻");
+        news.setKind("浙商");
         news.setDeltag(NewsDicConstants.ICommon.DELETE_NO);
-        if (StringUtils.isNotEmpty(newsbean.getChannels()) && !"[]".equals(newsbean.getChannels()))
+        if (StringUtils.isNotEmpty(newsbean.getCategorys()) && !"[]".equals(newsbean.getCategorys()))
         {
             news.setStatus(NewsDicConstants.INews.Status.CHECKING);//新建发布后的数据默认为审核中，这里逻辑需要增加一个：如果没有关联发布目标，状态为处理中
         }
@@ -523,6 +501,7 @@ public class NewsController extends BaseController
                 picMappingRepository.save(pm);
             }
         }
+        
         //把图片移动到material对应的ID下
         File srcFile = new File(attachmentRoot + "/" + objectType + "/" + objectId + "/");
         File dstFile = new File(attachmentRoot + "/" + objectType + "/" + news.getId() + "/");
@@ -542,11 +521,11 @@ public class NewsController extends BaseController
         //最后处理关联关系
         //后台提交新闻修改保存
         //[{"displayOrder":1,"id":"column_1","title":"新闻","type":"column","children":[{"displayOrder":2,"id":"cj_4","title":"热点","type":"cj","children":[{"displayOrder":1,"id":"channel_4","title":"热点","type":"channel"},{"displayOrder":2,"id":"topic_join_4","title":"专题","type":"zt","children":[{"displayOrder":1,"id":"topic_2","title":"抗疫","type":"topic"}]}]}]}]
-        String channels = newsbean.getChannels();//存放上架目标
+        String categorys = newsbean.getCategorys();
         List<String> nodeIdList = null;
-        if (StringUtils.isNotEmpty(channels))
+        if (StringUtils.isNotEmpty(categorys))
         {
-            nodeIdList = buildTreeIdList(JSONArray.parseArray(channels));
+            nodeIdList = buildTreeIdList(JSONArray.parseArray(categorys));
         }
         if (CollectionUtils.isNotEmpty(nodeIdList))
         {
@@ -556,30 +535,6 @@ public class NewsController extends BaseController
                 if (!nodeIdSet.contains(nodeId))
                 {
                     nodeIdSet.add(nodeId);
-                    if (nodeId.startsWith("channel_"))
-                    {
-                        Long channelId = Long.valueOf(nodeId.replace("channel_", ""));
-                        Channel channel = channelRepository.findUniqueBy("id", channelId, Channel.class);
-                        if (channel != null)
-                        {
-                            NewsChannel newsChannel = new NewsChannel();
-                            newsChannel.setNews(news);
-                            newsChannel.setChannel(channel);
-                            newsChannelRepository.save(newsChannel);
-                        }
-                    }
-                    if (nodeId.startsWith("topic_"))
-                    {
-                        Long topicId = Long.valueOf(nodeId.replace("topic_", ""));
-                        Topic topic = topicRepository.findUniqueBy("id", topicId, Topic.class);
-                        if (topic != null)
-                        {
-                            NewsTopic newsTopic = new NewsTopic();
-                            newsTopic.setNews(news);
-                            newsTopic.setTopic(topic);
-                            newsTopicRepository.save(newsTopic);
-                        }
-                    }
                     
                     if (nodeId.startsWith("category_"))
                     {
@@ -836,7 +791,7 @@ public class NewsController extends BaseController
             }
         }
         
-        if (StringUtils.isNotEmpty(newsbean.getChannels()) && !"[]".equals(newsbean.getChannels()))
+        if (StringUtils.isNotEmpty(newsbean.getChannels()))
         {
             news.setStatus(NewsDicConstants.INews.Status.CHECKING);//新建发布后的数据默认为审核中，这里逻辑需要增加一个：如果没有关联发布目标，状态为处理中
         }
@@ -1023,72 +978,5 @@ public class NewsController extends BaseController
             }
         }
         return decide(true);
-    }
-    
-    /**
-     * 社区文章查询
-     * @param kind
-     * @param params
-     * @return
-     */
-    @RequestMapping("/selectNews")
-    public Result selectNews(@RequestParam Map<String, Object> params)
-    {
-        return success(iNewsService.selectNews(getCurrentUserInfoId(), params));
-    }
-    
-    /**
-     * 社区文章详情
-     * @param params
-     * @return
-     */
-    @RequestMapping("/community/newsDetail")
-    public Result getNewsDetail(@RequestParam Map<String, Object> params)
-    {
-        return success(iNewsService.getNewsDetail(getCurrentUserInfoId(), params));
-    }
-    
-    /**
-     * 社区文章点赞收藏
-     * @param params
-     * @return
-     */
-    @RequestMapping("/community/toggleCollectOrAgree")
-    public Result toggleCollect(@RequestParam Map<String, Object> params)
-    {
-        return success(iNewsService.toggleCollectOrAgree(getCurrentUserInfoId(), params));
-    }
-    
-    /**
-     * 文章评论|回复评论|对回复对回复
-     * @param params
-     * @return
-     */
-    @RequestMapping("/makeComment")
-    public Result makeComment(@RequestBody Map<String, Object> params)
-    {
-        return success(iNewsService.makeComment(getCurrentUserInfoId(), params));
-    }
-    
-    /**
-     * 文章评论|回复
-     * @param params
-     * @return
-     */
-    @RequestMapping("/comments")
-    public Result selectComments(@RequestParam Map<String, Object> params)
-    {
-        return success(iNewsService.selectComments(getCurrentUserInfoId(), params));
-    }
-    
-    /**
-     * 社区文章评论（回复）点赞
-     * @param params
-     * @return
-     */
-    @RequestMapping("/toggleCommentAgree")
-    public Result toggleCommentAgree(@RequestParam Map<String, Object> params)
-    {
-        return success(iNewsService.toggleCommentAgree(getCurrentUserInfoId(), params));
     }
 }

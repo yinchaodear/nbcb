@@ -181,14 +181,15 @@ public class NewsService extends BaseController {
 	@GetMapping("querynewsGovernment")
 	public Result AppNewsGovernment(ModelAndView modelAndView, @RequestParam String type, @RequestParam String kind) {
 		System.out.println("NewsController.AppNewsGovernment()" + type + kind);
-		String sql = " SELECT t.*  ,c.f_kind as channelkind,pm1.imgs ,c.f_type as channeltype, b.apprisecount as  apprisecount ,b1.agreecount,c.f_title as channelname FROM t_news t  "
+		String sql = " SELECT t.*  ,c.f_kind as channelkind,pm1.imgs ,c.f_type as channeltype, b.apprisecount as  apprisecount ,b1.agreecount,d.f_title as channelname FROM t_news t  "
 				+ " left join  ( SELECT f_news_id  as id2, count(1) as apprisecount FROM t_comment cm where cm.f_type ='回答' or cm.f_type ='评论' group by f_news_id ) b on b.id2 =t.f_id "
 				+ " left join ( SELECT f_news_id  as id3, count(1)  as agreecount FROM t_comment cm1 where cm1.f_type ='点赞' group by f_news_id ) b1 on b1.id3 =t.f_id"
 				+ " inner join t_news_channel nc on nc.f_news_id = t.f_id "
 				+ " inner join t_channel  c on  c.f_id = nc.f_channel_id  "
 				+ " left join  (select pm.f_news_id as pmid , group_concat(f_picpath) as imgs from "
 				+ " t_pic_mapping pm group by pm.f_news_id ) pm1 on pm1.pmid = t.f_id "
-				+ " where c.f_kind ='"+kind+"' and c.f_title ='"+type+"' "
+				+ " left join t_channel d on d.f_id = t.f_author_channel_id "
+				+ " where t.f_deltag=0 and t.f_status=0 and  c.f_kind ='"+kind+"' and c.f_title ='"+type+"' "
 				+ " order by f_display_order ,f_updated  desc";
 		List news = newsRepository.findMapByNativeSql(sql);
 		Map result = new HashMap<>();

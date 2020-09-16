@@ -139,7 +139,7 @@ public class ChannelService extends BaseController
                 + " group by  cf.f_channel_id) c on c.channelid  = t.f_id "
                 + "inner join  t_channe_catego_mappin tcm on t.f_id =tcm.f_channel_id inner join t_category cate "
                 + " on  cate.f_id =tcm.f_category_id  "
-                + " where t.f_status= 0 and  t.f_type ='" + type
+                + " where t.f_status= 0 and t.f_deltag =0  and  t.f_type ='" + type
                 + "' and t.f_kind ='" + kind + "'" + wheresql;
         List group = channelRepository.findMapByNativeSql(sqlgroup);
         Map result = new HashMap<>();

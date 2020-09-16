@@ -8,6 +8,8 @@ public class ChannelBean extends Channel
     
     private String categoryids;
     
+    private String categorys;
+    
     public Long getColumnid()
     {
         return columnid;
@@ -28,4 +30,13 @@ public class ChannelBean extends Channel
         this.categoryids = categoryids;
     }
     
+    public String getCategorys()
+    {
+        return categorys;
+    }
+    
+    public void setCategorys(String categorys)
+    {
+        this.categorys = categorys;
+    }
 }

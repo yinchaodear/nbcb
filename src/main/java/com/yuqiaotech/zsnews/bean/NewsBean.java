@@ -26,6 +26,8 @@ public class NewsBean extends News
     
     private String channelid;//存政务发布频道
     
+    private String channeltitle;
+    
     private String topcheck;
     
     public String getColumns()
@@ -148,4 +150,13 @@ public class NewsBean extends News
         this.categorys = categorys;
     }
     
+    public String getChanneltitle()
+    {
+        return channeltitle;
+    }
+    
+    public void setChanneltitle(String channeltitle)
+    {
+        this.channeltitle = channeltitle;
+    }
 }

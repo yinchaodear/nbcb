@@ -1,0 +1,12 @@
+{
+	"id": "1012",
+	"title": "新闻管理",
+	"type": "1",
+	"openType": null,
+	"icon": "layui-icon layui-icon-vercode",
+	"href": "/zsnews/news/main",
+	"children": []
+}
+
+
+checkmain: 新闻审核的主页

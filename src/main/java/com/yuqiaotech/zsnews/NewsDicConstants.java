@@ -48,9 +48,9 @@ public interface NewsDicConstants
             String ZSH = "浙商号";
             
             /**
-             * 社区
+             * 小组
              */
-            String SQ = "社区";
+            String SQ = "小组";
             
             /**
              * 个人
@@ -261,19 +261,21 @@ public interface NewsDicConstants
              */
             Integer FAIL = 3;
         }
-
+        
         /**
          * 推送
          */
-        interface push{
+        interface push
+        {
             /**
              * 允许推送
              */
-            Integer YES=0;
+            Integer YES = 0;
+            
             /**
              * 不推送
              */
             Integer NO = 1;
-    }
+        }
     }
 }

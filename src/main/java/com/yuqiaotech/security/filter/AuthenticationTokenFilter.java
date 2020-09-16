@@ -67,42 +67,45 @@ public class AuthenticationTokenFilter extends OncePerRequestFilter {
 		if (authToken != null) {
 			try {
 				if (SecurityContextHolder.getContext().getAuthentication() == null) {
-					if (request.getRequestURI().equals("/auth/login")) {
-						chain.doFilter(request, response);
-						return;
-					}
 
-					if (StringUtils.isEmpty(authToken)) {
+
+					if (!StringUtils.isEmpty(authToken)) {
+						DecodedJWT tokenInfo = JwtUtils.verify(authToken);
+						String username = tokenInfo.getClaim("username").asString();
+						String password = tokenInfo.getClaim("password").asString();
+
+						if (username != null) {
+							//根据用户名获取用户对象
+							SecurityUserDetails userDetails = (SecurityUserDetails) securityUserDetailsService.loadUserByUsername(username);
+
+							if (userDetails != null) {
+								UsernamePasswordAuthenticationToken authentication =
+										new UsernamePasswordAuthenticationToken(userDetails, null, null);
+								authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+								//设置为已登录
+								request.getSession().setAttribute(SysConstants.SECURITY_USERTYPE_KEY, userDetails.getType());
+								request.getSession().setAttribute(SysConstants.SECURITY_USER_LOGINTYPE_KEY, userDetails.getLoginType());
+
+								request.getSession()
+										.setAttribute(SysConstants.SECURITY_CONTEXT_KEY, (SecurityUserDetails) authentication.getPrincipal());
+								request.getSession()
+										.setAttribute(SysConstants.SECURITY_USERNAME_KEY,
+												((SecurityUserDetails) authentication.getPrincipal()).getUsername());
+								request.getSession()
+										.setAttribute(SysConstants.SECURITY_USERID_KEY,
+												((SecurityUserDetails) authentication.getPrincipal()).getId());
+								SecurityContextHolder.getContext().setAuthentication(authentication);
+							}
+						}
+					}else{
+						if ("/auth/login".equals(request.getRequestURI())|| request.getRequestURI().contains("/zsnews/")) {
+							chain.doFilter(request, response);
+							return;
+						}
 						throw new TokenExpiredException("");
 					}
 
-					DecodedJWT tokenInfo = JwtUtils.verify(authToken);
-					String username = tokenInfo.getClaim("username").asString();
-					String password = tokenInfo.getClaim("password").asString();
 
-					if (username != null) {
-						//根据用户名获取用户对象
-						SecurityUserDetails userDetails = (SecurityUserDetails) securityUserDetailsService.loadUserByUsername(username);
-
-						if (userDetails != null) {
-							UsernamePasswordAuthenticationToken authentication =
-									new UsernamePasswordAuthenticationToken(userDetails, null, null);
-							authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-							//设置为已登录
-							request.getSession().setAttribute(SysConstants.SECURITY_USERTYPE_KEY, userDetails.getType());
-							request.getSession().setAttribute(SysConstants.SECURITY_USER_LOGINTYPE_KEY, userDetails.getLoginType());
-
-							request.getSession()
-									.setAttribute(SysConstants.SECURITY_CONTEXT_KEY, (SecurityUserDetails) authentication.getPrincipal());
-							request.getSession()
-									.setAttribute(SysConstants.SECURITY_USERNAME_KEY,
-											((SecurityUserDetails) authentication.getPrincipal()).getUsername());
-							request.getSession()
-									.setAttribute(SysConstants.SECURITY_USERID_KEY,
-											((SecurityUserDetails) authentication.getPrincipal()).getId());
-							SecurityContextHolder.getContext().setAuthentication(authentication);
-						}
-					}
 				}
 
 				chain.doFilter(request, response);

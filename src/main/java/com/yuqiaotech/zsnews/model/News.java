@@ -46,7 +46,7 @@ public class News extends BaseModel
     
     private String type;//新闻，投稿，提问, 加个政务,(政务活动,政务通告,政务) ，政务活动类型（自有/外部）
     
-    private String kind;//属于  政务 /社区/浙商
+    private String kind;//属于  政务 /社区/浙商  为空表示首页
     
     private String mediaType;//图片、文章(文章1,文章2)、链接、视频
     

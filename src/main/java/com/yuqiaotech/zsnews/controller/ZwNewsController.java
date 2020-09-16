@@ -168,6 +168,11 @@ public class ZwNewsController extends BaseController
                 {
                     newsBeanTmp.setColumns(buildColumns(newsChannelMap.get(newstmp.getId())));
                     newsBeanTmp.setChannels(buildChannels(newsChannelMap.get(newstmp.getId())));
+                    if (newsChannelMap.get(newstmp.getId()) != null && !newsChannelMap.get(newstmp.getId()).isEmpty())
+                    {
+                        newsBeanTmp.setChannelid(newsChannelMap.get(newstmp.getId()).get(0).getId().toString());
+                    }
+                    
                 }
                 newsBeanList.add(newsBeanTmp);
             }
@@ -407,8 +412,7 @@ public class ZwNewsController extends BaseController
         {
             condition += " and n.type = '" + news.getType() + "'";
         }
-        condition +=
-            " and n.authorChannel is not null and n.deltag=" + NewsDicConstants.ICommon.DELETE_NO + " and n.kind='政务'";
+        condition += " and n.deltag=" + NewsDicConstants.ICommon.DELETE_NO + " and n.kind='政务'";
         condition += " order by n.created desc";
         return hql + condition;
     }
@@ -690,6 +694,12 @@ public class ZwNewsController extends BaseController
                     break;
                 }
             }
+        }
+        
+        List<NewsChannel> nclist = newsChannelRepository.findByHql("from NewsChannel where news.id =" + id);
+        if (CollectionUtils.isNotEmpty(nclist))
+        {
+            newsBean.setChannelid(nclist.get(0).getChannel().getId().toString());
         }
         
         modelAndView.addObject("news", newsBean);

@@ -410,7 +410,8 @@ public class NewsController extends BaseController
         {
             condition += " and mediaType='" + news.getMediaType() + "'";
         }
-        condition += " and n.authorChannel is null and n.deltag=" + NewsDicConstants.ICommon.DELETE_NO;
+        condition +=
+            " and n.authorChannel is null and n.deltag=" + NewsDicConstants.ICommon.DELETE_NO + " and  n.kind is null";
         condition += " order by n.created desc";
         return hql + condition;
     }

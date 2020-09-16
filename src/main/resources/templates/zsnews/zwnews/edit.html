@@ -51,8 +51,8 @@
 						<label class="layui-form-label">所属频道</label>
 						<div class="layui-input-block">
 							<select name="channelid" id="channelid" lay-search lay-filter="channelfilter">
-								<option value="" th:selected="${news.authorChannel==null}"></option>
-								<option th:each="c : ${channellist}" th:value="${c.id}" th:text="${c.title}" th:selected="${news.authorChannel!=null && news.authorChannel.id eq c.id}"></option>
+								<option value=""></option>
+								<option th:each="c : ${channellist}" th:value="${c.id}" th:text="${c.title}" th:selected="${news.channelid eq ''+c.id}"></option>
 							</select>
 						</div>
 					</div>

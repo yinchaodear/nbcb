@@ -24,7 +24,7 @@ public class NewsBean extends News
     
     private String picname3;
     
-    private String channelid;
+    private String channelid;//存政务发布频道
     
     private String topcheck;
     
@@ -147,4 +147,5 @@ public class NewsBean extends News
     {
         this.categorys = categorys;
     }
+    
 }

@@ -28,6 +28,16 @@ public interface NewsDicConstants
          * 已删除
          */
         Integer DELETE_YES = 1;
+        
+        /**
+         *  默认显示
+         */
+        Integer SHOW_YES = 0;
+        
+        /**
+         * 默认不显示
+         */
+        Integer SHOW_NO = 1;
     }
     
     /**

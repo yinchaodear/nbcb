@@ -102,6 +102,26 @@ public class ChannelController extends BaseController
         return success();
     }
     
+    @GetMapping("show/{cid}")
+    public Result changeShow(@PathVariable Long cid)
+    {
+        Channel channel = channelRepository.findUniqueBy("id", cid, Channel.class);
+        if (channel != null)
+        {
+            if (channel.getShowtag() == null || channel.getShowtag() == NewsDicConstants.ICommon.SHOW_NO)
+            {
+                channel.setShowtag(NewsDicConstants.ICommon.SHOW_YES);
+            }
+            else
+            {
+                channel.setShowtag(NewsDicConstants.ICommon.SHOW_NO);
+            }
+            
+            channelRepository.update(channel);
+        }
+        return success();
+    }
+    
     public DetachedCriteria composeDetachedCriteria(Channel channel)
     {
         DetachedCriteria dc = DetachedCriteria.forClass(Channel.class);

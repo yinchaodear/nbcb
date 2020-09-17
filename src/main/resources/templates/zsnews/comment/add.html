@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
+<head>
+<meta charset="UTF-8">
+<title>新增</title>
+<link rel="stylesheet" href="../../admin/css/pearCommon.css" />
+<link rel="stylesheet" href="../../component/layui/css/layui.css" />
+</head>
+<body>
+	<form class="layui-form" action="">
+		<input type="hidden" name="type" value="评论">
+		<div class="mainBox">
+			<div class="main-container">
+				<div class="main-container">
+					<div class="layui-form-item">
+						<hql:queryForList hql="from News where status=0 and deltag=0  and kind='社区' and type='提问'  order by displayOrder" id="newslist" />
+						<label class="layui-form-label">问题名称</label>
+						<div class="layui-input-block">
+							<select name="newsid" lay-verify="required" lay-search>
+								<option></option>
+								<option th:each="c : ${newslist}" th:value="${c.id}" th:text="${c.title}"></option>
+							</select>
+						</div>
+					</div>
+					<div class="layui-form-item" id="">
+						<label class="layui-form-label">回复内容</label>
+						<div class="layui-input-block">
+							<textarea name="content" placeholder="请输入回复内容" class="layui-textarea" maxlength="500"></textarea>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="bottom">
+			<div class="button-container">
+				<button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="comment-save" id="submitbtn">
+					<i class="layui-icon layui-icon-ok"></i>
+					提交
+				</button>
+				<button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">
+					<i class="layui-icon layui-icon-refresh"></i>
+					重置
+				</button>
+			</div>
+		</div>
+	</form>
+	<script src="../../component/layui/layui.js"></script>
+	<script>
+		layui.use([ 'form', 'jquery' ], function() {
+			let form = layui.form;
+			let $ = layui.jquery;
+			let MODULE_PATH = "/zsnews/comment/";
+
+			form.on('submit(comment-save)', function(data) {
+				var DISABLED = 'layui-btn-disabled';
+				$('#submitbtn').addClass(DISABLED);
+				$('#submitbtn').attr('disabled', 'disabled');
+				$.ajax({
+					url : MODULE_PATH + 'save',
+					data : JSON.stringify(data.field),
+					dataType : 'json',
+					contentType : 'application/json',
+					type : 'post',
+					success : function(result) {
+						if (result.success) {
+							layer.msg(result.msg, {
+								icon : 1,
+								time : 5000
+							}, function() {
+								$('#submitbtn').removeClass(DISABLED);
+								$('#submitbtn').removeAttr('disabled');
+								parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+								parent.layui.table.reload("comment-table");
+							});
+						} else {
+							layer.msg(result.msg, {
+								icon : 2,
+								time : 5000
+							}, function() {
+								$('#submitbtn').removeClass(DISABLED);
+								$('#submitbtn').removeAttr('disabled');
+							});
+						}
+					},
+					error : function(XMLHttpRequest, textStatus, errorThrown) {
+						$('#submitbtn').removeClass(DISABLED);
+						$('#submitbtn').removeAttr('disabled');
+					}
+				})
+				return false;
+			});
+		})
+	</script>
+</body>
+</html>

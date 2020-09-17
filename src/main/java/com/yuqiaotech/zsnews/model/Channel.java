@@ -61,6 +61,8 @@ public class Channel extends BaseModel
     
     private Integer deltag;//删除标识
     
+    private Integer showtag;//默认显示（0：显示；1：不显示）
+    
     public Long getId()
     {
         return id;
@@ -220,4 +222,15 @@ public class Channel extends BaseModel
     {
         this.deltag = deltag;
     }
+    
+    public Integer getShowtag()
+    {
+        return showtag;
+    }
+    
+    public void setShowtag(Integer showtag)
+    {
+        this.showtag = showtag;
+    }
+    
 }

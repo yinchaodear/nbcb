@@ -1,7 +1,9 @@
 package com.yuqiaotech.zsnews.controller;
 
 import java.awt.Image;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -18,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.yuqiaotech.common.web.base.BaseController;
 
 import net.coobird.thumbnailator.Thumbnails;
+import sun.misc.BASE64Decoder;
 
 /**
  *https://blog.csdn.net/qq_23875211/article/details/100533869
@@ -38,35 +41,40 @@ public class UploadController extends BaseController
     
     @RequestMapping(value = "/uploadFile", method = RequestMethod.POST)
     @ResponseBody
-    public String uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("objectId") String objectId,
-        @RequestParam("objectType") String objectType, HttpServletRequest request)
+    public String uploadFile(@RequestParam(value="file",required=false) MultipartFile file, @RequestParam("objectId") String objectId,
+        @RequestParam("objectType") String objectType,@RequestParam(value="imgBase64",required=false) String imgBase64
+            ,@RequestParam(value="imgBase64Name",required=false) String imgBase64Name, HttpServletRequest request)
     {
-        String pathString = null;
-        String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-        if (file != null)
+        String filename = System.currentTimeMillis() + "_" + imgBase64Name;
+        if(file!=null)
+            filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        String pathString = attachmentRoot + "/" + objectType + "/" + objectId + "/" + filename;
+        File files = new File(pathString);
+        if (!files.getParentFile().exists())
         {
-            pathString = attachmentRoot + "/" + objectType + "/" + objectId + "/" + filename;
-            
-            try
-            {
-                File files = new File(pathString);
-                if (!files.getParentFile().exists())
-                {
-                    files.getParentFile().mkdirs();
-                }
+            files.getParentFile().mkdirs();
+        }
+
+        try
+        {
+            if (file != null){
                 file.transferTo(files);
-                
-                justImage(new File(pathString));
-                
-                org.apache.commons.io.FileUtils.moveFile(new File(pathString + ".small.png"),
+            }else if(imgBase64!=null) {
+                int index = imgBase64.indexOf(",");
+                imgBase64 = imgBase64.substring(index + 1);
+                generateImage(imgBase64, pathString);
+            }
+
+            justImage(new File(pathString));
+
+            org.apache.commons.io.FileUtils.moveFile(new File(pathString + ".small.png"),
                     new File(pathString + ".small"));
-                org.apache.commons.io.FileUtils.moveFile(new File(pathString + ".middle.png"),
+            org.apache.commons.io.FileUtils.moveFile(new File(pathString + ".middle.png"),
                     new File(pathString + ".middle"));
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
         
         return "{\"code\":0,\"msg\":\"" + filename + "\"}";
@@ -127,6 +135,30 @@ public class UploadController extends BaseController
         }
         
         return null;
+    }
+
+    private static void generateImage(String realStr, String filePath) {
+        BASE64Decoder decoder = new BASE64Decoder();
+        BufferedOutputStream bos = null;
+        try {
+            File f = new File(filePath);
+            if (!f.getParentFile().exists())
+                f.getParentFile().mkdirs();
+            byte[] data = decoder.decodeBuffer(realStr);
+            bos = new BufferedOutputStream(new FileOutputStream(filePath));
+            bos.write(data);
+            bos.flush();
+            bos.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        } finally {
+            if (bos != null)
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
     }
     
     @RequestMapping(value = "/deleteFile", method = RequestMethod.GET)

@@ -244,18 +244,20 @@ public class UserSerive extends BaseController implements NewsDicConstants {
         List<Map<String, Object>> historyIntegralList = historyIntegralRepository.findMapByNativeSql(sql);
         Integer signDays = 0;
         Long persentintergral = 0L;
-        String occurTime = null;
+        String occurTime = "";
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         if (historyIntegralList != null && !historyIntegralList.isEmpty()) {
             signDays = (Integer) historyIntegralList.get(0).get("f_sign_days");
             persentintergral = Long.valueOf(historyIntegralList.get(0).get("f_persentintergral").toString());
             occurTime = historyIntegralList.get(0).get("f_occur_time").toString();
+            if(StringUtils.isNotEmpty(occurTime)){
+                occurTime = occurTime.substring(0, 10);
+            }
         }
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String now = sdf.format(new Date());
         now = now.substring(0, 10);
-        occurTime = occurTime.substring(0, 10);
         Map result = new HashMap();
-        if (occurTime.equals(now)) {
+        if (now.equals(occurTime) ) {
             result.put("errMsg", "今天已经签过了");
         } else {
             HistoryIntegral historyIntegral = new HistoryIntegral();

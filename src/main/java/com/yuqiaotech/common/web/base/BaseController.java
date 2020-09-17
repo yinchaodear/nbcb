@@ -10,12 +10,19 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.yuqiaotech.common.SysConstants;
+import com.yuqiaotech.common.tools.token.JwtUtils;
+import com.yuqiaotech.security.domain.SecurityUserDetails;
+import com.yuqiaotech.security.domain.SecurityUserDetailsService;
 import com.yuqiaotech.zsnews.model.UserInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.ModelAndView;
@@ -41,6 +48,8 @@ public class BaseController
     private BaseRepository<User, Long> userRepository;
     @Resource
     private BaseRepository<UserInfo, Long> userInfoRepository;
+    @Resource
+    private SecurityUserDetailsService securityUserDetailsService;
 
     /** 后台用户ID */
     public Long getCurrentUserId()
@@ -75,7 +84,42 @@ public class BaseController
     public Long getCurrentUserInfoId()
     {
         if(SysConstants.SECURITY_USERTYPE_FRONT.equals(ServletUtil.getCurrentUserType())){
-            return ServletUtil.getCurrentUserId();
+            Long userInfoId =ServletUtil.getCurrentUserId();
+
+            if(userInfoId==null) {
+                String authToken = ServletUtil.getHeader("X-Token");
+                if (!StringUtils.isEmpty(authToken)) {
+                    DecodedJWT tokenInfo = JwtUtils.verify(authToken);
+                    String username = tokenInfo.getClaim("username").asString();
+                    String password = tokenInfo.getClaim("password").asString();
+
+                    if (username != null) {
+                        //根据用户名获取用户对象
+                        SecurityUserDetails userDetails = (SecurityUserDetails) securityUserDetailsService.loadUserByUsername(username);
+
+                        if (userDetails != null) {
+                            UsernamePasswordAuthenticationToken authentication =
+                                    new UsernamePasswordAuthenticationToken(userDetails, null, null);
+                            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(ServletUtil.getRequest()));
+                            //设置为已登录
+                            ServletUtil.getSession().setAttribute(SysConstants.SECURITY_USERTYPE_KEY, userDetails.getType());
+                            ServletUtil.getSession().setAttribute(SysConstants.SECURITY_USER_LOGINTYPE_KEY, userDetails.getLoginType());
+
+                            ServletUtil.getSession()
+                                    .setAttribute(SysConstants.SECURITY_CONTEXT_KEY, (SecurityUserDetails) authentication.getPrincipal());
+                            ServletUtil.getSession()
+                                    .setAttribute(SysConstants.SECURITY_USERNAME_KEY,
+                                            ((SecurityUserDetails) authentication.getPrincipal()).getUsername());
+                            ServletUtil.getSession()
+                                    .setAttribute(SysConstants.SECURITY_USERID_KEY,
+                                            ((SecurityUserDetails) authentication.getPrincipal()).getId());
+                            SecurityContextHolder.getContext().setAuthentication(authentication);
+                            userInfoId = ((SecurityUserDetails) authentication.getPrincipal()).getId();
+                        }
+                    }
+                }
+            }
+            return userInfoId;
         }else{
             return null;
         }

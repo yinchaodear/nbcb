@@ -1,6 +1,7 @@
 
 package com.yuqiaotech.zsnews.controller;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -22,11 +23,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.yuqiaotech.common.logging.annotation.Logging;
+import com.yuqiaotech.common.tools.common.ImgBase64Utils;
 import com.yuqiaotech.common.web.base.BaseController;
 import com.yuqiaotech.common.web.base.BaseRepository;
 import com.yuqiaotech.common.web.domain.dao.PaginationSupport;
@@ -34,6 +35,7 @@ import com.yuqiaotech.common.web.domain.request.PageDomain;
 import com.yuqiaotech.common.web.domain.response.Result;
 import com.yuqiaotech.common.web.domain.response.ResultTable;
 import com.yuqiaotech.zsnews.NewsDicConstants;
+import com.yuqiaotech.zsnews.bean.ColumnBean;
 import com.yuqiaotech.zsnews.model.Column;
 
 @RestController
@@ -104,18 +106,33 @@ public class ColumnController extends BaseController
     public ModelAndView add(ModelAndView modelAndView)
     {
         modelAndView.addObject("displayOrder", getNextDisplayOrder());
+        modelAndView.addObject("objectId", System.currentTimeMillis());
         modelAndView.setViewName(MODULE_PATH + "add");
         return modelAndView;
     }
     
     @PostMapping("save")
-    public Result save(@RequestBody Column column)
+    public Result save(@RequestBody ColumnBean columnBean)
     {
+        Column column = new Column();
+        BeanUtils.copyProperties(columnBean, column);
+        
         column.setStatus(NewsDicConstants.ICommon.STATUS_UP);//默认上架
         column.setDeltag(NewsDicConstants.ICommon.DELETE_NO);//默认未删除
         if (column.getDisplayOrder() == null)
         {
             column.setDisplayOrder(getNextDisplayOrder());
+        }
+        
+        if (StringUtils.isNotEmpty(columnBean.getPicname1()))
+        {
+            File srcFile = new File(attachmentRoot + "/" + columnBean.getObjectType() + "/" + columnBean.getObjectId()
+                + "/" + columnBean.getPicname1() + ".small");
+            if (srcFile != null && srcFile.exists() && srcFile.isFile())
+            {
+                //保存logo
+                column.setLogo(ImgBase64Utils.getImgStr(srcFile));
+            }
         }
         columnRepository.save(column);
         return decide(true);
@@ -143,10 +160,11 @@ public class ColumnController extends BaseController
     }
     
     @PutMapping("update")
-    public Result update(@RequestBody Column column)
+    public Result update(@RequestBody ColumnBean columnBean)
     {
-        Column columndb = columnRepository.findUniqueBy("id", column.getId(), Column.class);
-        BeanUtils.copyProperties(column, columndb, getNullPropertyNames(column));
+        
+        Column columndb = columnRepository.findUniqueBy("id", columnBean.getId(), Column.class);
+        BeanUtils.copyProperties(columnBean, columndb, getNullPropertyNames(columnBean));
         if (columndb.getDisplayOrder() == null)
         {
             columndb.setDisplayOrder(getNextDisplayOrder());
@@ -158,6 +176,21 @@ public class ColumnController extends BaseController
         if (columndb.getStatus() == null)
         {
             columndb.setStatus(NewsDicConstants.ICommon.STATUS_UP);
+        }
+        
+        if (StringUtils.isNotEmpty(columnBean.getPicname1()))
+        {
+            File srcFile = new File(attachmentRoot + "/" + columnBean.getObjectType() + "/" + columnBean.getObjectId()
+                + "/" + columnBean.getPicname1() + ".small");
+            if (srcFile != null && srcFile.exists() && srcFile.isFile())
+            {
+                //保存logo
+                columndb.setLogo(ImgBase64Utils.getImgStr(srcFile));
+            }
+        }
+        else
+        {
+            columndb.setLogo("");
         }
         columnRepository.update(columndb);
         return decide(true);
@@ -200,10 +233,10 @@ public class ColumnController extends BaseController
     @GetMapping("listcolumn")
     public Result AppColum(ModelAndView modelAndView)
     {
-    	String sql ="SELECT f_title as title,f_h5href as path,f_id FROM t_column order by f_display_order asc";
-    	List column = columnRepository.findMapByNativeSql(sql);	
-    	Map result =new HashMap<>();
-    	result.put("column", column);
+        String sql = "SELECT f_title as title,f_h5href as path,f_id FROM t_column order by f_display_order asc";
+        List column = columnRepository.findMapByNativeSql(sql);
+        Map result = new HashMap<>();
+        result.put("column", column);
         return success(result);
     }
     

@@ -59,16 +59,16 @@ public class ChannelService extends BaseController
     {
         System.out.println("ChannelService.AppChannelData()" + getCurrentUserInfoId());
         String sql = "SELECT t.f_title, t1.f_id as cfid,t.f_id as f_id FROM t_channel_follower  "
-            + "t1 inner join t_channel t on t1.f_channel_id = t.f_id  where t.f_kind='频道' and  t.f_title!='推荐' and t.f_title!='热点'  and t.f_status= 0 and f_user_info_id ="
+            + "t1 inner join t_channel t on t1.f_channel_id = t.f_id  where t.f_kind='频道' and  t.f_title!='推荐' and t.f_title!='热点'  and t.f_status= 0 "
+            + " and t.f_deltag =0 and f_user_info_id ="
             + getCurrentUserInfoId();
         List mymenu = channelRepository.findMapByNativeSql(sql);
-        String sqlleft = " select f_title,f_id from t_channel  t  where f_id not in"
-            + "   (SELECT  f_channel_id  FROM t_channel_follower where f_user_info_id =" + getCurrentUserInfoId()
-            + ") and f_kind='频道' and  t.f_title!='推荐' and t.f_title!='热点'  and t.f_status= 0 ";
-        List moremenu = channelRepository.findMapByNativeSql(sqlleft);
+        String sqlall = " select f_title,f_id,f_showtag from t_channel  t  where "
+            + " f_kind='频道' and  t.f_title!='推荐' and t.f_title!='热点'  and t.f_status= 0  and t.f_deltag =0 order by  f_display_order asc";
+        List menuall = channelRepository.findMapByNativeSql( sqlall);
         Map result = new HashMap<>();
         result.put("mymenu", mymenu);
-        result.put("moremenu", moremenu);
+        result.put("moremenu",menuall);
         return success(result);
     }
     

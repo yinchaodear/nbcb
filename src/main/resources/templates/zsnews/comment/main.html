@@ -48,26 +48,6 @@
 							</select>
 						</div>
 					</div>
-					<hql:queryForList hql="from Channel where status=0 and deltag=0 and kind='小组'  order by displayOrder" id="channellist" />
-					<div class="layui-form-item layui-inline">
-						<label class="layui-form-label">发布小组</label>
-						<div class="layui-input-inline">
-							<select name="channelid" lay-search>
-								<option value=""></option>
-								<option th:each="c : ${channellist}" th:value="${c.id}" th:text="${c.title}"></option>
-							</select>
-						</div>
-					</div>
-					<hql:queryForList hql="from Category where status=0 and deltag=0  order by displayOrder" id="categorylist" />
-					<div class="layui-form-item layui-inline">
-						<label class="layui-form-label">小组分类</label>
-						<div class="layui-input-inline">
-							<select name="categoryid" lay-search>
-								<option value=""></option>
-								<option th:each="c : ${categorylist}" th:value="${c.id}" th:text="${c.title}"></option>
-							</select>
-						</div>
-					</div>
 					<button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="comment-query">
 						<i class="layui-icon layui-icon-search"></i>
 						查询
@@ -101,6 +81,13 @@
 <script type="text/html" id="comment-bar">
     <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i></button>
     <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i class="layui-icon layui-icon-delete"></i></button>
+    <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="addcomment" > <i class="layui-icon layui-icon-add-1"></i>新增回复</button>
+{{#  if(d.status === 0){ }}
+	<button class="pear-btn  pear-btn-sm" title="下架"  onclick="updown({{d.id}},1)" ><i class="layui-icon layui-icon-pause"></i></button>
+{{#  } }}
+{{#  if(d.status === 1){ }}
+	<button class="pear-btn  pear-btn-sm" title="上架"  onclick="updown({{d.id}},0)" ><i class="layui-icon layui-icon-play"></i></button>
+{{#  } }}
 </script>
 
 <script src="../../component/layui/layui.js"></script>
@@ -129,7 +116,9 @@
 			field : 'news',
 			align : 'center',
 			width : 200,
-			templet : function(d) {return '<div>'+d.news.title+'</div>'}
+			templet : function(d) {
+				return '<div>' + d.news.title + '</div>'
+			}
 		}, {
 			title : '回复内容',
 			field : 'content',
@@ -197,6 +186,8 @@
 				window.edit(obj);
 			} else if (obj.event === 'power') {
 				window.power(obj);
+			} else if (obj.event === 'addcomment') {
+				window.addcomment(obj);
 			}
 		});
 
@@ -235,6 +226,24 @@
 				area : [ '800px', '80%' ],
 				content : MODULE_PATH + 'edit?id=' + obj.data['id']
 			});
+		}
+
+		window.addcomment = function(obj) {
+			var status = obj.data['status'];
+			if (status != 0) {
+				layer.msg('当前回复未上架，不可追评', {
+					icon : 2,
+					time : 3000
+				});
+			} else {
+				layer.open({
+					type : 2,
+					title : '新增回复',
+					shade : 0.1,
+					area : [ '800px', '80%' ],
+					content : MODULE_PATH + 'addcomment?commentid=' + obj.data['id']
+				});
+			}
 		}
 
 		window.remove = function(obj) {
@@ -314,6 +323,43 @@
 
 		window.refresh = function() {
 			table.reload('comment-table');
+		}
+
+		window.updown = function(uid, status) {
+			if (status == 1) {
+				layer.confirm('确定要下架该资源', {
+					icon : 3,
+					title : '提示'
+				}, function(index) {
+					layer.close(index);
+					updowntmp(uid, status);
+				});
+			} else {
+				updowntmp(uid, status);
+			}
+		}
+
+		window.updowntmp = function(uid, status) {
+			$.ajax({
+				url : MODULE_PATH + "updown/" + uid + "?status=" + status,
+				dataType : 'json',
+				type : 'get',
+				success : function(result) {
+					if (result.success) {
+						layer.msg('操作成功', {
+							icon : 1,
+							time : 5000
+						}, function() {
+							table.reload('comment-table');
+						});
+					} else {
+						layer.msg(result.msg, {
+							icon : 2,
+							time : 5000
+						});
+					}
+				}
+			})
 		}
 	})
 

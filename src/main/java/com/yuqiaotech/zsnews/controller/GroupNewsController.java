@@ -209,7 +209,7 @@ public class GroupNewsController extends BaseController
             
             String commentcntsql = "select f_news_id ,count(f_id) cnt from t_comment where f_news_id in("
                 + com.yuqiaotech.common.tools.common.CollectionUtils.join(newsidlist, ",")
-                + ") and f_type='评论'  and f_deltag=0";
+                + ") and f_type in ('评论','回复')   and f_deltag=0 group by f_news_id";
             
             List<Map<String, Object>> cmtrstmap = commentRepository.findMapByNativeSql(commentcntsql);
             Map<Long, Integer> newscmtcntmap = new HashMap<>();
@@ -457,11 +457,12 @@ public class GroupNewsController extends BaseController
         String condition = " where 1=1";
         if (StringUtils.isNotEmpty(news.getTitle()))
         {
-            condition += " and (title like '%" + news.getTitle() + "%' or content like '%" + news.getTitle() + "%')";
+            condition +=
+                " and (n.title like '%" + news.getTitle() + "%' or n.content like '%" + news.getTitle() + "%')";
         }
         if (news.getStatus() != null)
         {
-            condition += " and status = " + news.getStatus();
+            condition += " and n.status = " + news.getStatus();
         }
         if (StringUtils.isNotEmpty(news.getChannelid()))
         {

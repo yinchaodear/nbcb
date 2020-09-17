@@ -10,23 +10,13 @@
 <body class="pear-container">
 	<div class="layui-card">
 		<div class="layui-card-body">
-			<div class="layui-tab layui-tab-brief" lay-filter="component-tabs-brief">
-				<ul class="layui-tab-title">
-					<li onclick="redicttosqxz()">社区小组管理</li>
-					<li onclick="redicttosqwt()">社区问题管理</li>
-					<li class="layui-this">社区回复管理</li>
-				</ul>
-			</div>
-		</div>
-	</div>
-	<div class="layui-card">
-		<div class="layui-card-body">
 			<form class="layui-form" action="">
+				<input type="hidden" name="newsid" th:value="${currentnews.id }" />
 				<div class="layui-form-item">
 					<div class="layui-form-item layui-inline">
 						<label class="layui-form-label">问题标题</label>
 						<div class="layui-input-inline">
-							<input type="text" name="title" placeholder="请输入问题标题或者内容" class="layui-input">
+							<input type="text" name="newstitle" placeholder="请输入问题标题或者内容" class="layui-input">
 						</div>
 					</div>
 					<div class="layui-form-item layui-inline">
@@ -48,26 +38,6 @@
 							</select>
 						</div>
 					</div>
-					<hql:queryForList hql="from Channel where status=0 and deltag=0 and kind='小组'  order by displayOrder" id="channellist" />
-					<div class="layui-form-item layui-inline">
-						<label class="layui-form-label">发布小组</label>
-						<div class="layui-input-inline">
-							<select name="channelid" lay-search>
-								<option value=""></option>
-								<option th:each="c : ${channellist}" th:value="${c.id}" th:text="${c.title}"></option>
-							</select>
-						</div>
-					</div>
-					<hql:queryForList hql="from Category where status=0 and deltag=0  order by displayOrder" id="categorylist" />
-					<div class="layui-form-item layui-inline">
-						<label class="layui-form-label">小组分类</label>
-						<div class="layui-input-inline">
-							<select name="categoryid" lay-search>
-								<option value=""></option>
-								<option th:each="c : ${categorylist}" th:value="${c.id}" th:text="${c.title}"></option>
-							</select>
-						</div>
-					</div>
 					<button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="comment-query">
 						<i class="layui-icon layui-icon-search"></i>
 						查询
@@ -75,6 +45,10 @@
 					<button type="reset" class="pear-btn pear-btn-md">
 						<i class="layui-icon layui-icon-refresh"></i>
 						重置
+					</button>
+					<button class="pear-btn pear-btn-md " lay-submit lay-filter="comment-back">
+						<i class="layui-icon layui-icon-return"></i>
+						返回
 					</button>
 				</div>
 			</form>
@@ -87,24 +61,16 @@
 	</div>
 </body>
 
-<script type="text/html" id="comment-toolbar">
-    <button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">
-        <i class="layui-icon layui-icon-add-1"></i>
-        新增评论
-    </button>
-    <button class="pear-btn pear-btn-danger pear-btn-md" lay-event="batchRemove">
-        <i class="layui-icon layui-icon-delete"></i>
-        删除
-    </button>
-</script>
-
 <script type="text/html" id="comment-bar">
-    <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i></button>
-    <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i class="layui-icon layui-icon-delete"></i></button>
+{{#  if(d.status === 3){ }}
+	<button class="layui-btn layui-btn-sm layui-btn-normal" title="通过"  onclick="check({{d.id}},0)" >通过</button>
+	<button class="layui-btn layui-btn-sm layui-btn-danger" title="不通过"  onclick="check({{d.id}},4)" >不通过</button>
+{{#  } }}
 </script>
 
 <script src="../../component/layui/layui.js"></script>
-<script>
+<script th:inline="javascript">
+	var currentnewsid = [[${currentnews.id}]];
 	layui.use([ 'table', 'form', 'jquery' ], function() {
 		let table = layui.table;
 		let form = layui.form;
@@ -129,12 +95,19 @@
 			field : 'news',
 			align : 'center',
 			width : 200,
-			templet : function(d) {return '<div>'+d.news.title+'</div>'}
+			templet : function(d) {
+				return '<div>' + d.news.title + '</div>'
+			}
 		}, {
 			title : '回复内容',
 			field : 'content',
 			align : 'center',
 			width : 250
+		}, {
+			title : '类型',
+			field : 'type',
+			align : 'center',
+			width : 100
 		}, {
 			title : '追评内容',
 			field : 'comment',
@@ -150,7 +123,7 @@
 			title : '状态',
 			field : 'status',
 			align : 'center',
-			width : 200,
+			width : 150,
 			templet : function(d) {
 				if (d.status == 0)
 					return '<div>已上架</div>';
@@ -182,6 +155,9 @@
 			url : MODULE_PATH + 'data',
 			page : true,
 			cols : cols,
+			where : {
+				newsid : currentnewsid
+			},
 			skin : 'line',
 			toolbar : '#comment-toolbar',
 			defaultToolbar : [ {
@@ -214,6 +190,11 @@
 			table.reload('comment-table', {
 				where : data.field
 			})
+			return false;
+		});
+		
+		form.on('submit(comment-back)', function(data) {
+			window.location.href="/zsnews/groupnews/checkmain";
 			return false;
 		});
 
@@ -314,6 +295,44 @@
 
 		window.refresh = function() {
 			table.reload('comment-table');
+		}
+		
+		window.check = function(uid, status) {
+			if (status == 0) {
+				//审核通过
+				checktmp(uid, status, '');
+			} else {
+				layer.prompt({
+					title : '审核意见',
+					formType : 2
+				}, function(text, index) {
+					layer.close(index);
+					checktmp(uid, status, text);
+				});
+			}
+		}
+
+		window.checktmp = function(uid, status, msg) {
+			$.ajax({
+				url : MODULE_PATH + "check/" + uid + "?status=" + status + "&msg=" + msg,
+				dataType : 'json',
+				type : 'get',
+				success : function(result) {
+					if (result.success) {
+						layer.msg('审核完成', {
+							icon : 1,
+							time : 5000
+						}, function() {
+							table.reload('comment-table');
+						});
+					} else {
+						layer.msg(result.msg, {
+							icon : 2,
+							time : 5000
+						});
+					}
+				}
+			})
 		}
 	})
 

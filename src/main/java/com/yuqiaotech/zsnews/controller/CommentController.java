@@ -3,6 +3,7 @@ package com.yuqiaotech.zsnews.controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +11,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.FetchMode;
 import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.BeanUtils;
@@ -64,8 +67,16 @@ public class CommentController extends BaseController
         return JumpPage(MODULE_PATH + "main");
     }
     
+    @GetMapping("checkmain")
+    public ModelAndView checkmain(ModelAndView modelAndView, Long newsid)
+    {
+        modelAndView.addObject("currentnews", newsRepository.findUniqueBy("id", newsid, News.class));
+        modelAndView.setViewName(MODULE_PATH + "checkmain");
+        return modelAndView;
+    }
+    
     @GetMapping("data")
-    public ResultTable data(Comment comment, PageDomain pageDomain)
+    public ResultTable data(CommentBean comment, PageDomain pageDomain)
     {
         DetachedCriteria dc = composeDetachedCriteria(comment);
         PaginationSupport ps = commentRepository.paginateByCriteria(dc, pageDomain.getPage(), pageDomain.getLimit());
@@ -145,9 +156,27 @@ public class CommentController extends BaseController
         return pageTable(cblist, ps.getTotalCount());
     }
     
-    public DetachedCriteria composeDetachedCriteria(Comment comment)
+    public DetachedCriteria composeDetachedCriteria(CommentBean comment)
     {
         DetachedCriteria dc = DetachedCriteria.forClass(Comment.class);
+        dc.setFetchMode("news", FetchMode.JOIN);
+        if (comment.getNewsid() != null)
+        {
+            dc.add(Restrictions.eq("news.id", comment.getNewsid()));
+        }
+        if (StringUtils.isNotEmpty(comment.getNewstitle()))
+        {
+            dc.add(Restrictions.or(Restrictions.ilike("news.title", comment.getNewstitle(), MatchMode.ANYWHERE),
+                Restrictions.ilike("news.content", comment.getNewstitle(), MatchMode.ANYWHERE)));
+        }
+        if (StringUtils.isNotEmpty(comment.getContent()))
+        {
+            dc.add(Restrictions.ilike("content", comment.getContent(), MatchMode.ANYWHERE));
+        }
+        if (comment.getStatus() != null)
+        {
+            dc.add(Restrictions.eq("status", comment.getStatus()));
+        }
         dc.add(Restrictions.eq("deltag", NewsDicConstants.ICommon.DELETE_NO));
         dc.addOrder(Order.desc("created"));
         return dc;
@@ -157,6 +186,14 @@ public class CommentController extends BaseController
     public ModelAndView add(ModelAndView modelAndView)
     {
         return JumpPage(MODULE_PATH + "add");
+    }
+    
+    @GetMapping("addcomment")
+    public ModelAndView addcomment(ModelAndView modelAndView, Long commentid)
+    {
+        modelAndView.addObject("currentcomment", commentRepository.findUniqueBy("id", commentid, Comment.class));
+        modelAndView.setViewName(MODULE_PATH + "addcomment");
+        return modelAndView;
     }
     
     @PostMapping("save")
@@ -172,6 +209,30 @@ public class CommentController extends BaseController
         newcomment.setNews(news);
         newcomment.setDeltag(NewsDicConstants.ICommon.DELETE_NO);
         newcomment.setStatus(NewsDicConstants.INews.Status.CHECKING);
+        
+        commentRepository.save(newcomment);
+        return decide(true);
+    }
+    
+    @PostMapping("saveComment")
+    public Result saveComment(@RequestBody CommentBean comment)
+    {
+        if (comment.getCommentid() == null)
+        {
+            return decide(false, null, "请选择追评目标");
+        }
+        Comment oldComment = commentRepository.findUniqueBy("id", comment.getCommentid(), Comment.class);
+        if (oldComment == null || oldComment.getStatus() != NewsDicConstants.INews.Status.UP)
+        {
+            return decide(false, null, "追评目标未上架");
+        }
+        Comment newcomment = new Comment();
+        newcomment.setComment(oldComment);
+        newcomment.setNews(oldComment.getNews());
+        newcomment.setDeltag(NewsDicConstants.ICommon.DELETE_NO);
+        newcomment.setStatus(NewsDicConstants.INews.Status.CHECKING);
+        newcomment.setContent(comment.getContent());
+        newcomment.setType("回复");
         
         commentRepository.save(newcomment);
         return decide(true);
@@ -194,11 +255,78 @@ public class CommentController extends BaseController
         return decide(true);
     }
     
+    @GetMapping("check/{cid}")
+    public Result check(@PathVariable Long cid, Integer status, String msg)
+    {
+        Comment comment = commentRepository.findUniqueBy("id", cid, Comment.class);
+        if (comment.getStatus() != NewsDicConstants.INews.Status.CHECKING)
+        {
+            return decide(false, null, "资源状态非审核中，不可审核");
+        }
+        
+        if (status == NewsDicConstants.INews.Status.UP || status == NewsDicConstants.INews.Status.FAIL)
+        {
+            comment.setStatus(status);
+            comment.setCheckDate(new Date());
+            comment.setCheckUser(getCurrentUser());
+            comment.setCheckResult(msg);
+            commentRepository.update(comment);
+            return success();
+        }
+        else
+        {
+            return decide(false, null, "异常状态码");
+        }
+    }
+    
+    @GetMapping("updown/{cid}")
+    public Result updown(@PathVariable Long cid, Integer status)
+    {
+        Comment commentdb = commentRepository.findUniqueBy("id", cid, Comment.class);
+        
+        if (status == NewsDicConstants.INews.Status.UP)
+        {
+            if (commentdb.getStatus() != NewsDicConstants.INews.Status.DOWN)
+            {
+                return decide(false, null, "非下架状态资源不可上架");
+            }
+            else
+            {
+                commentdb.setStatus(status);
+                commentRepository.update(commentdb);
+            }
+        }
+        else if (status == NewsDicConstants.INews.Status.DOWN)
+        {
+            if (commentdb.getStatus() != NewsDicConstants.INews.Status.UP)
+            {
+                return decide(false, null, "非上架资源不可下架");
+            }
+            else
+            {
+                commentdb.setStatus(status);
+                commentRepository.update(commentdb);
+            }
+        }
+        else
+        {
+            return decide(false, null, "异常状态码");
+        }
+        return success();
+    }
+    
     @DeleteMapping("remove/{id}")
     @Logging(title = "删除角色")
     public Result remove(@PathVariable Long id)
     {
-        commentRepository.remove(id, Comment.class);
+        Comment commentdb = commentRepository.findUniqueBy("id", id, Comment.class);
+        if (commentdb.getStatus() == NewsDicConstants.INews.Status.UP)
+        {
+            return decide(false, null, "上架状态，不可删除");
+        }
+        commentdb.setDeltag(NewsDicConstants.ICommon.DELETE_YES);
+        commentdb.setStatus(NewsDicConstants.INews.Status.DOWN);
+        commentRepository.update(commentdb);
         return decide(true);
     }
     
@@ -213,7 +341,18 @@ public class CommentController extends BaseController
             DetachedCriteria dc = DetachedCriteria.forClass(Comment.class);
             dc.add(Restrictions.in("id", cdids));
             List<Comment> commentList = commentRepository.findByCriteria(dc);
-            commentList.forEach(commentRepository::delete);
+            
+            for (Comment commentdb : commentList)
+            {
+                if (commentdb.getStatus() == NewsDicConstants.INews.Status.UP)
+                {
+                    continue;
+                }
+                commentdb.setDeltag(NewsDicConstants.ICommon.DELETE_YES);
+                commentdb.setStatus(NewsDicConstants.INews.Status.DOWN);
+                commentRepository.update(commentdb);
+            }
+            
             return decide(true);
         }
         return decide(false);

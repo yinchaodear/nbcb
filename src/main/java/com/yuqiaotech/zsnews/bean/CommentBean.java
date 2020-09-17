@@ -16,6 +16,8 @@ public class CommentBean extends Comment
     
     private Long newsid;
     
+    private Long commentid;
+    
     public String getChannelid()
     {
         return channelid;
@@ -75,4 +77,15 @@ public class CommentBean extends Comment
     {
         this.newsid = newsid;
     }
+    
+    public Long getCommentid()
+    {
+        return commentid;
+    }
+    
+    public void setCommentid(Long commentid)
+    {
+        this.commentid = commentid;
+    }
+    
 }

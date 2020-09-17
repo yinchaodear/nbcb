@@ -130,8 +130,14 @@
 			title : '回复数量',
 			field : 'commentcnt',
 			align : 'center',
-			width : 100
-		},{
+			width : 100,
+			templet : function(d) {
+				if (d.commentcnt == 0)
+					return '<div>0</div>';
+				else
+					return '<div style="color:#2D8CF0;cursor: pointer;font-weight: bold;" onclick="tocommentcheckmain(' + d.id + ')">' + d.commentcnt + '</div>';
+			}
+		}, {
 			title : '状态',
 			field : 'status',
 			align : 'center',
@@ -304,7 +310,7 @@
 		window.refresh = function() {
 			table.reload('news-table');
 		}
-		
+
 		window.check = function(uid, status) {
 			if (status == 0) {
 				//审核通过
@@ -350,6 +356,10 @@
 
 	function redicttozshnr() {
 		window.location.href = '/zsnews/news/main';
+	}
+
+	function tocommentcheckmain(id) {
+		window.location.href = '/zsnews/comment/checkmain?newsid=' + id;
 	}
 </script>
 </html>

@@ -166,7 +166,11 @@ public class ChannelService extends BaseController
         		+ " where t.f_kind = '"+kind+"'  group by c.f_title";
         List categorygroup = channelRepository.findMapByNativeSql(sql);
         String sqlgroup = "SELECT  distinct t.* , b.* , case when c.number >=10000  then  concat(cast(  convert(c.number/10000,decimal(10,1)) as char),'万' )"
-                + " else cast(c.number  as char)  end as number  FROM  t_channel t  left  join (select cf.f_id as cfid ,cf.f_channel_id as chid "
+                + " else cast(c.number  as char)  end as number,  "
+                + " case when chan.questionnumber >=10000  then "
+                + "concat(cast(  convert(chan.questionnumber/10000,decimal(10,1)) as char),'万' )"
+                + " else cast(chan.questionnumber  as char)  end as questionnumber "         
+                + " FROM  t_channel t  left  join (select cf.f_id as cfid ,cf.f_channel_id as chid "
                 + ",cf.f_user_info_id as cid from t_channel_follower cf inner join t_channel c  on c.f_id = "
                 + "cf.f_channel_id  where f_user_info_id = " + getCurrentUserInfoId() + " and " + wherekindandtype
                 + ") b on t.f_id = b.chid "
@@ -175,6 +179,10 @@ public class ChannelService extends BaseController
                 + " group by  cf.f_channel_id) c on c.channelid  = t.f_id "
                 + "inner join  t_channe_catego_mappin tcm on t.f_id =tcm.f_channel_id inner join t_category cate "
                 + " on  cate.f_id =tcm.f_category_id  "
+                + " left join ( SELECT     ch.f_id as channelid ,  count(1) as questionnumber FROM t_news "
+                + " t inner join t_news_channel nc on nc.f_news_id = "
+                + " t.f_id  inner join t_channel ch on ch.f_id = nc.f_channel_id and ch.f_kind ='小组' group by ch.f_id) "
+                + "chan on chan.channelid = t.f_id " 
                 + " where t.f_status= 0 and t.f_deltag =0 "
                 + " and t.f_kind ='" + kind + "'" + wheresql;
         List group = channelRepository.findMapByNativeSql(sqlgroup);

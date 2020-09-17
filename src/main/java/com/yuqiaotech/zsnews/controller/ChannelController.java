@@ -1,6 +1,7 @@
 
 package com.yuqiaotech.zsnews.controller;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.yuqiaotech.common.logging.annotation.Logging;
+import com.yuqiaotech.common.tools.common.ImgBase64Utils;
 import com.yuqiaotech.common.web.base.BaseController;
 import com.yuqiaotech.common.web.base.BaseRepository;
 import com.yuqiaotech.common.web.domain.dao.PaginationSupport;
@@ -159,6 +161,7 @@ public class ChannelController extends BaseController
     public ModelAndView add(ModelAndView modelAndView)
     {
         modelAndView.addObject("displayOrder", getNextDisplayOrder());
+        modelAndView.addObject("objectId", System.currentTimeMillis());
         modelAndView.setViewName(MODULE_PATH + "add");
         return modelAndView;
     }
@@ -197,6 +200,18 @@ public class ChannelController extends BaseController
         {
             channel.setDisplayOrder(getNextDisplayOrder());
         }
+        
+        if (StringUtils.isNotEmpty(channelBean.getPicname1()))
+        {
+            File srcFile = new File(attachmentRoot + "/" + channelBean.getObjectType() + "/" + channelBean.getObjectId()
+                + "/" + channelBean.getPicname1() + ".small");
+            if (srcFile != null && srcFile.exists() && srcFile.isFile())
+            {
+                //保存logo
+                channel.setLogo(ImgBase64Utils.getImgStr(srcFile));
+            }
+        }
+        
         channelRepository.save(channel);
         return decide(true);
     }
@@ -276,6 +291,22 @@ public class ChannelController extends BaseController
                 channeldb.setKind(NewsDicConstants.IChannel.KIND.PD);
             }
         }
+        
+        if (StringUtils.isNotEmpty(channelBean.getPicname1()))
+        {
+            File srcFile = new File(attachmentRoot + "/" + channelBean.getObjectType() + "/" + channelBean.getObjectId()
+                + "/" + channelBean.getPicname1() + ".small");
+            if (srcFile != null && srcFile.exists() && srcFile.isFile())
+            {
+                //保存logo
+                channeldb.setLogo(ImgBase64Utils.getImgStr(srcFile));
+            }
+        }
+        else
+        {
+            channeldb.setLogo("");
+        }
+        
         channeldb.setUser(getCurrentUser());
         channelRepository.update(channeldb);
         return decide(true);

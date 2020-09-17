@@ -1,6 +1,7 @@
 
 package com.yuqiaotech.zsnews.controller;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.yuqiaotech.common.logging.annotation.Logging;
+import com.yuqiaotech.common.tools.common.ImgBase64Utils;
 import com.yuqiaotech.common.web.base.BaseController;
 import com.yuqiaotech.common.web.base.BaseRepository;
 import com.yuqiaotech.common.web.domain.dao.PaginationSupport;
@@ -156,6 +158,7 @@ public class GroupController extends BaseController
     public ModelAndView add(ModelAndView modelAndView)
     {
         modelAndView.addObject("displayOrder", getNextDisplayOrder());
+        modelAndView.addObject("objectId", System.currentTimeMillis());
         modelAndView.setViewName(MODULE_PATH + "add");
         return modelAndView;
     }
@@ -173,6 +176,17 @@ public class GroupController extends BaseController
         if (channel.getDisplayOrder() == null)
         {
             channel.setDisplayOrder(getNextDisplayOrder());
+        }
+        
+        if (StringUtils.isNotEmpty(channelBean.getPicname1()))
+        {
+            File srcFile = new File(attachmentRoot + "/" + channelBean.getObjectType() + "/" + channelBean.getObjectId()
+                + "/" + channelBean.getPicname1() + ".small");
+            if (srcFile != null && srcFile.exists() && srcFile.isFile())
+            {
+                //保存logo
+                channel.setLogo(ImgBase64Utils.getImgStr(srcFile));
+            }
         }
         
         channel = channelRepository.save(channel);
@@ -253,6 +267,21 @@ public class GroupController extends BaseController
             channeldb.setStatus(NewsDicConstants.ICommon.STATUS_UP);
         }
         channeldb.setKind(NewsDicConstants.IChannel.KIND.SQ);
+        
+        if (StringUtils.isNotEmpty(channelBean.getPicname1()))
+        {
+            File srcFile = new File(attachmentRoot + "/" + channelBean.getObjectType() + "/" + channelBean.getObjectId()
+                + "/" + channelBean.getPicname1() + ".small");
+            if (srcFile != null && srcFile.exists() && srcFile.isFile())
+            {
+                //保存logo
+                channeldb.setLogo(ImgBase64Utils.getImgStr(srcFile));
+            }
+        }
+        else
+        {
+            channeldb.setLogo("");
+        }
         
         channelCategoryMappingRepository
             .executeUpdate("delete from ChannelCategoryMapping where channel.id=" + channeldb.getId(), new HashMap<>());

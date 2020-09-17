@@ -10,6 +10,12 @@ public class ChannelBean extends Channel
     
     private String categorys;
     
+    private String objectId;
+    
+    private String objectType;
+    
+    private String picname1;
+    
     public Long getColumnid()
     {
         return columnid;
@@ -38,5 +44,35 @@ public class ChannelBean extends Channel
     public void setCategorys(String categorys)
     {
         this.categorys = categorys;
+    }
+    
+    public String getObjectId()
+    {
+        return objectId;
+    }
+    
+    public void setObjectId(String objectId)
+    {
+        this.objectId = objectId;
+    }
+    
+    public String getObjectType()
+    {
+        return objectType;
+    }
+    
+    public void setObjectType(String objectType)
+    {
+        this.objectType = objectType;
+    }
+    
+    public String getPicname1()
+    {
+        return picname1;
+    }
+    
+    public void setPicname1(String picname1)
+    {
+        this.picname1 = picname1;
     }
 }

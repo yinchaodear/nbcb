@@ -89,36 +89,40 @@ public class BaseController
         }
 
         if(userInfoId==null) {
-            String authToken = ServletUtil.getHeader("X-Token");
-            if (!StringUtils.isEmpty(authToken)) {
-                DecodedJWT tokenInfo = JwtUtils.verify(authToken);
-                String username = tokenInfo.getClaim("username").asString();
-                String password = tokenInfo.getClaim("password").asString();
+            try {
+                String authToken = ServletUtil.getHeader("X-Token");
+                if (!StringUtils.isEmpty(authToken)) {
+                    DecodedJWT tokenInfo = JwtUtils.verify(authToken);
+                    String username = tokenInfo.getClaim("username").asString();
+                    String password = tokenInfo.getClaim("password").asString();
 
-                if (username != null) {
-                    //根据用户名获取用户对象
-                    SecurityUserDetails userDetails = (SecurityUserDetails) securityUserDetailsService.loadUserByUsername(username);
+                    if (username != null) {
+                        //根据用户名获取用户对象
+                        SecurityUserDetails userDetails = (SecurityUserDetails) securityUserDetailsService.loadUserByUsername(username);
 
-                    if (userDetails != null) {
-                        UsernamePasswordAuthenticationToken authentication =
-                                new UsernamePasswordAuthenticationToken(userDetails, null, null);
-                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(ServletUtil.getRequest()));
-                        //设置为已登录
-                        ServletUtil.getSession().setAttribute(SysConstants.SECURITY_USERTYPE_KEY, userDetails.getType());
-                        ServletUtil.getSession().setAttribute(SysConstants.SECURITY_USER_LOGINTYPE_KEY, userDetails.getLoginType());
+                        if (userDetails != null) {
+                            UsernamePasswordAuthenticationToken authentication =
+                                    new UsernamePasswordAuthenticationToken(userDetails, null, null);
+                            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(ServletUtil.getRequest()));
+                            //设置为已登录
+                            ServletUtil.getSession().setAttribute(SysConstants.SECURITY_USERTYPE_KEY, userDetails.getType());
+                            ServletUtil.getSession().setAttribute(SysConstants.SECURITY_USER_LOGINTYPE_KEY, userDetails.getLoginType());
 
-                        ServletUtil.getSession()
-                                .setAttribute(SysConstants.SECURITY_CONTEXT_KEY, (SecurityUserDetails) authentication.getPrincipal());
-                        ServletUtil.getSession()
-                                .setAttribute(SysConstants.SECURITY_USERNAME_KEY,
-                                        ((SecurityUserDetails) authentication.getPrincipal()).getUsername());
-                        ServletUtil.getSession()
-                                .setAttribute(SysConstants.SECURITY_USERID_KEY,
-                                        ((SecurityUserDetails) authentication.getPrincipal()).getId());
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
-                        userInfoId = ((SecurityUserDetails) authentication.getPrincipal()).getId();
+                            ServletUtil.getSession()
+                                    .setAttribute(SysConstants.SECURITY_CONTEXT_KEY, (SecurityUserDetails) authentication.getPrincipal());
+                            ServletUtil.getSession()
+                                    .setAttribute(SysConstants.SECURITY_USERNAME_KEY,
+                                            ((SecurityUserDetails) authentication.getPrincipal()).getUsername());
+                            ServletUtil.getSession()
+                                    .setAttribute(SysConstants.SECURITY_USERID_KEY,
+                                            ((SecurityUserDetails) authentication.getPrincipal()).getId());
+                            SecurityContextHolder.getContext().setAuthentication(authentication);
+                            userInfoId = ((SecurityUserDetails) authentication.getPrincipal()).getId();
+                        }
                     }
                 }
+            }catch (Exception e){
+                e.printStackTrace();
             }
         }
         return userInfoId;

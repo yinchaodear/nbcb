@@ -55,6 +55,7 @@ import com.yuqiaotech.zsnews.model.Category;
 import com.yuqiaotech.zsnews.model.Channel;
 import com.yuqiaotech.zsnews.model.ChannelCategoryMapping;
 import com.yuqiaotech.zsnews.model.Column;
+import com.yuqiaotech.zsnews.model.Comment;
 import com.yuqiaotech.zsnews.model.News;
 import com.yuqiaotech.zsnews.model.NewsCategory;
 import com.yuqiaotech.zsnews.model.NewsChannel;
@@ -101,6 +102,9 @@ public class GroupNewsController extends BaseController
     
     @Autowired
     private BaseRepository<Category, Long> categoryRepository;
+    
+    @Autowired
+    private BaseRepository<Comment, Long> commentRepository;
     
     @Autowired
     private BaseRepository<ChannelCategoryMapping, Long> channelCategoryMappingRepository;
@@ -203,6 +207,35 @@ public class GroupNewsController extends BaseController
                 }
             }
             
+            String commentcntsql = "select f_news_id ,count(f_id) cnt from t_comment where f_news_id in("
+                + com.yuqiaotech.common.tools.common.CollectionUtils.join(newsidlist, ",")
+                + ") and f_type='评论'  and f_deltag=0";
+            
+            List<Map<String, Object>> cmtrstmap = commentRepository.findMapByNativeSql(commentcntsql);
+            Map<Long, Integer> newscmtcntmap = new HashMap<>();
+            for (Map<String, Object> map : cmtrstmap)
+            {
+                if (StringUtils
+                    .isNotEmpty(com.yuqiaotech.common.tools.common.StringUtils.parseNull(map.get("f_news_id"))))
+                {
+                    newscmtcntmap.put(
+                        Long.valueOf(com.yuqiaotech.common.tools.common.StringUtils.parseNull(map.get("f_news_id"))),
+                        com.yuqiaotech.common.tools.common.StringUtils
+                            .parseInt(com.yuqiaotech.common.tools.common.StringUtils.parseNull(map.get("cnt"))));
+                }
+            }
+            
+            for (NewsBean newsBean : newsBeanList)
+            {
+                if (newscmtcntmap.containsKey(newsBean.getId()))
+                {
+                    newsBean.setCommentcnt(newscmtcntmap.get(newsBean.getId()));
+                }
+                else
+                {
+                    newsBean.setCommentcnt(0);
+                }
+            }
         }
         return pageTable(newsBeanList, ps.getTotalCount());
     }
@@ -514,13 +547,18 @@ public class GroupNewsController extends BaseController
             }
         }
         
-        news = newsRepository.save(news);
+        Channel channeltmp = null;
         
         if (StringUtils.isNotEmpty(newsbean.getChannelid()))
         {
-            //如果不为空，表示选择了浙商号
             Long authorChannelId = Long.valueOf(newsbean.getChannelid());
-            Channel channeltmp = channelRepository.findUniqueBy("id", authorChannelId, Channel.class);
+            channeltmp = channelRepository.findUniqueBy("id", authorChannelId, Channel.class);
+        }
+        news.setAuthorChannel(channeltmp);
+        news = newsRepository.save(news);
+        
+        if (channeltmp != null)
+        {
             NewsChannel newsChannel = new NewsChannel();
             newsChannel.setNews(news);
             newsChannel.setChannel(channeltmp);
@@ -895,6 +933,8 @@ public class GroupNewsController extends BaseController
                 nc.setNews(news);
                 nc.setChannel(channeltmp);
                 newsChannelRepository.save(nc);
+                
+                news.setAuthorChannel(channeltmp);
             }
         }
         

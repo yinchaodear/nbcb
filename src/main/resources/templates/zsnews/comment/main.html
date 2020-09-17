@@ -10,13 +10,29 @@
 <body class="pear-container">
 	<div class="layui-card">
 		<div class="layui-card-body">
+			<div class="layui-tab layui-tab-brief" lay-filter="component-tabs-brief">
+				<ul class="layui-tab-title">
+					<li onclick="redicttosqxz()">社区小组管理</li>
+					<li onclick="redicttosqwt()">社区问题管理</li>
+					<li class="layui-this">社区回复管理</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="layui-card">
+		<div class="layui-card-body">
 			<form class="layui-form" action="">
-
 				<div class="layui-form-item">
 					<div class="layui-form-item layui-inline">
 						<label class="layui-form-label">问题标题</label>
 						<div class="layui-input-inline">
 							<input type="text" name="title" placeholder="请输入问题标题或者内容" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item layui-inline">
+						<label class="layui-form-label">回复内容</label>
+						<div class="layui-input-inline">
+							<input type="text" name="content" placeholder="请输入回复内容" class="layui-input">
 						</div>
 					</div>
 					<div class="layui-form-item layui-inline">
@@ -52,7 +68,7 @@
 							</select>
 						</div>
 					</div>
-					<button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="news-query">
+					<button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="comment-query">
 						<i class="layui-icon layui-icon-search"></i>
 						查询
 					</button>
@@ -66,15 +82,15 @@
 	</div>
 	<div class="layui-card">
 		<div class="layui-card-body">
-			<table id="news-table" lay-filter="news-table"></table>
+			<table id="comment-table" lay-filter="comment-table"></table>
 		</div>
 	</div>
 </body>
 
-<script type="text/html" id="news-toolbar">
+<script type="text/html" id="comment-toolbar">
     <button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">
         <i class="layui-icon layui-icon-add-1"></i>
-        新增
+        新增评论
     </button>
     <button class="pear-btn pear-btn-danger pear-btn-md" lay-event="batchRemove">
         <i class="layui-icon layui-icon-delete"></i>
@@ -82,12 +98,9 @@
     </button>
 </script>
 
-<script type="text/html" id="news-bar">
-<button class="layui-btn layui-btn-sm layui-btn-primary" lay-event="edit" title="查看">查看</button>
-{{#  if(d.status === 3){ }}
-	<button class="layui-btn layui-btn-sm layui-btn-normal" title="通过"  onclick="check({{d.id}},0)" >通过</button>
-	<button class="layui-btn layui-btn-sm layui-btn-danger" title="不通过"  onclick="check({{d.id}},4)" >不通过</button>
-{{#  } }}
+<script type="text/html" id="comment-bar">
+    <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i></button>
+    <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i class="layui-icon layui-icon-delete"></i></button>
 </script>
 
 <script src="../../component/layui/layui.js"></script>
@@ -97,15 +110,10 @@
 		let form = layui.form;
 		let $ = layui.jquery;
 
-		let MODULE_PATH = "/zsnews/groupnews/";
+		let MODULE_PATH = "/zsnews/comment/";
 
 		let cols = [ [ {
 			type : 'checkbox'
-		}, {
-			title : '序号',
-			type : 'numbers',
-			align : 'center',
-			width : 80
 		}, {
 			title : '小组名称',
 			field : 'channeltitle',
@@ -115,23 +123,30 @@
 			title : '小组分类',
 			field : 'categorys',
 			align : 'center',
-			width : 200
+			width : 100
 		}, {
 			title : '问题标题',
-			field : 'title',
+			field : 'news',
 			align : 'center',
-			width : 200
+			width : 200,
+			templet : function(d) {return '<div>'+d.news.title+'</div>'}
 		}, {
-			title : '问题内容',
+			title : '回复内容',
 			field : 'content',
 			align : 'center',
-			width : 200
+			width : 250
 		}, {
-			title : '回复数量',
-			field : 'commentcnt',
+			title : '追评内容',
+			field : 'comment',
 			align : 'center',
-			width : 100
-		},{
+			width : 250,
+			templet : function(d) {
+				if (d.comment == null)
+					return '';
+				else
+					return '<div>' + d.comment.content + '</div>';
+			}
+		}, {
 			title : '状态',
 			field : 'status',
 			align : 'center',
@@ -158,26 +173,24 @@
 			templet : "<div>{{layui.util.toDateString(d.created, 'yyyy-MM-dd HH:mm:ss')}}</div>"
 		}, {
 			title : '操作',
-			toolbar : '#news-bar',
+			toolbar : '#comment-bar',
 			align : 'center'
 		} ] ]
 
 		table.render({
-			elem : '#news-table',
+			elem : '#comment-table',
 			url : MODULE_PATH + 'data',
 			page : true,
 			cols : cols,
 			skin : 'line',
-			toolbar : '#news-toolbar',
+			toolbar : '#comment-toolbar',
 			defaultToolbar : [ {
 				layEvent : 'refresh',
 				icon : 'layui-icon-refresh',
-			}, 'filter', 'print', 'exports' ],
-			done : function() {
-			}
+			}, 'filter', 'print', 'exports' ]
 		});
 
-		table.on('tool(news-table)', function(obj) {
+		table.on('tool(comment-table)', function(obj) {
 			if (obj.event === 'remove') {
 				window.remove(obj);
 			} else if (obj.event === 'edit') {
@@ -187,7 +200,7 @@
 			}
 		});
 
-		table.on('toolbar(news-table)', function(obj) {
+		table.on('toolbar(comment-table)', function(obj) {
 			if (obj.event === 'add') {
 				window.add();
 			} else if (obj.event === 'refresh') {
@@ -197,8 +210,8 @@
 			}
 		});
 
-		form.on('submit(news-query)', function(data) {
-			table.reload('news-table', {
+		form.on('submit(comment-query)', function(data) {
+			table.reload('comment-table', {
 				where : data.field
 			})
 			return false;
@@ -209,8 +222,7 @@
 				type : 2,
 				title : '新增',
 				shade : 0.1,
-				area : [ '1200px', '80%' ],
-				maxmin : true,
+				area : [ '800px', '80%' ],
 				content : MODULE_PATH + 'add'
 			});
 		}
@@ -218,11 +230,10 @@
 		window.edit = function(obj) {
 			layer.open({
 				type : 2,
-				title : '查看',
+				title : '修改',
 				shade : 0.1,
-				area : [ '1200px', '80%' ],
-				maxmin : true,
-				content : MODULE_PATH + 'show?id=' + obj.data['id']
+				area : [ '800px', '80%' ],
+				content : MODULE_PATH + 'edit?id=' + obj.data['id']
 			});
 		}
 
@@ -288,7 +299,7 @@
 								icon : 1,
 								time : 1000
 							}, function() {
-								table.reload('news-table');
+								table.reload('comment-table');
 							});
 						} else {
 							layer.msg(result.msg, {
@@ -302,54 +313,16 @@
 		}
 
 		window.refresh = function() {
-			table.reload('news-table');
-		}
-		
-		window.check = function(uid, status) {
-			if (status == 0) {
-				//审核通过
-				checktmp(uid, status, '');
-			} else {
-				layer.prompt({
-					title : '审核意见',
-					formType : 2
-				}, function(text, index) {
-					layer.close(index);
-					checktmp(uid, status, text);
-				});
-			}
-		}
-
-		window.checktmp = function(uid, status, msg) {
-			$.ajax({
-				url : MODULE_PATH + "check/" + uid + "?status=" + status + "&msg=" + msg,
-				dataType : 'json',
-				type : 'get',
-				success : function(result) {
-					if (result.success) {
-						layer.msg('审核完成', {
-							icon : 1,
-							time : 5000
-						}, function() {
-							table.reload('news-table');
-						});
-					} else {
-						layer.msg(result.msg, {
-							icon : 2,
-							time : 5000
-						});
-					}
-				}
-			})
+			table.reload('comment-table');
 		}
 	})
 
-	function redicttozsh() {
-		window.location.href = '/zsnews/zshchannel/main';
+	function redicttosqwt() {
+		window.location.href = '/zsnews/groupnews/main';
 	}
 
-	function redicttozshnr() {
-		window.location.href = '/zsnews/news/main';
+	function redicttosqxz() {
+		window.location.href = '/zsnews/group/main';
 	}
 </script>
 </html>

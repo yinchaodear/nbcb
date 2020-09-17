@@ -67,6 +67,10 @@
 	<input type="checkbox" value="{{d.id}}" lay-skin="switch" lay-text="已上架|已下架"  lay-filter="status-enable" {{ d.status == 0 ? 'checked' : '' }}>
 </script>
 
+<script type="text/html" id="show-enable">
+	<input type="checkbox" value="{{d.id}}" lay-skin="switch" lay-text="显示|不显示"  lay-filter="show-enable" {{ d.showtag == 0 ? 'checked' : '' }}>
+</script>
+
 <script src="../../component/layui/layui.js"></script>
 <script>
 	layui.use([ 'table', 'form', 'jquery' ], function() {
@@ -103,7 +107,7 @@
 			title : '栏目描述',
 			field : 'remark',
 			align : 'center',
-			width : 500
+			width : 300
 		}, {
 			title : '展示顺序',
 			field : 'displayOrder',
@@ -115,6 +119,12 @@
 			align : 'center',
 			width : 200,
 			templet : '#status-enable'
+		},{
+			title : '默认显示',
+			field : 'showtag',
+			align : 'center',
+			width : 200,
+			templet : '#show-enable'
 		}, {
 			title : '创建时间',
 			field : 'created',
@@ -191,6 +201,36 @@
 						layer.msg('状态更新失败', {
 							icon : 2,
 							time : 1000
+						});
+					}
+				}
+			})
+		});
+		
+		form.on('switch(show-enable)', function(obj) {
+			let loading = layer.load();
+			$.ajax({
+				url : MODULE_PATH + "show/" + this.value,
+				dataType : 'json',
+				type : 'get',
+				success : function(result) {
+					layer.close(loading);
+					if (result.success) {
+						if (obj.elem.checked) {
+							layer.msg('显示成功', {
+								icon : 1,
+								time : 5000
+							});
+						} else {
+							layer.msg('隐藏成功', {
+								icon : 1,
+								time : 5000
+							});
+						}
+					} else {
+						layer.msg('默认显示更新失败', {
+							icon : 2,
+							time : 2000
 						});
 					}
 				}

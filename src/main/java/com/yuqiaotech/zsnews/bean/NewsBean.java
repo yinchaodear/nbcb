@@ -30,6 +30,8 @@ public class NewsBean extends News
     
     private String topcheck;
     
+    private Integer commentcnt;//回复数
+    
     public String getColumns()
     {
         return columns;
@@ -158,5 +160,15 @@ public class NewsBean extends News
     public void setChanneltitle(String channeltitle)
     {
         this.channeltitle = channeltitle;
+    }
+    
+    public Integer getCommentcnt()
+    {
+        return commentcnt;
+    }
+    
+    public void setCommentcnt(Integer commentcnt)
+    {
+        this.commentcnt = commentcnt;
     }
 }

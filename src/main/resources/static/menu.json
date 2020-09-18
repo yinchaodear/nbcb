@@ -69,6 +69,15 @@
 				"icon": "layui-icon layui-icon-vercode",
 				"href": "/zsnews/sysnotice/main",
 				"children": []
+			},
+			{
+				"id": "1018",
+				"title": "常见问题",
+				"type": "1",
+				"openType": null,
+				"icon": "layui-icon layui-icon-vercode",
+				"href": "/zsnews/faq/main",
+				"children": []
 			}
 		]
 	},

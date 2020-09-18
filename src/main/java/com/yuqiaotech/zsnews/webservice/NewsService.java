@@ -72,8 +72,8 @@ public class NewsService extends BaseController {
 		if (type.equals("推荐")) {
 
 		} else if (type.equals("关注")) {
-			wheresql += " and t.f_author_channel_id  in  ( select f_channel_id from t_channel_follower where f_user_info_id ="
-					+ getCurrentUserInfoId() + " )";
+//			wheresql += " and t.f_author_channel_id  in  ( select f_channel_id from t_channel_follower where f_user_info_id ="
+//					+ getCurrentUserInfoId() + " )";
 		} else {
 			wheresql += " and c1.f_id =" + id;
 		}
@@ -401,26 +401,28 @@ public class NewsService extends BaseController {
 	@GetMapping("querynewsByKewords")
 	public Result AppNewsByKewords(@RequestParam String keyword) {
 
-		System.out.println("NewsService.AppNewsByKewords()" + keyword);
-		String sqlquery = "SELECT * FROM t_history_search_record where f_user_info_id =  " + getCurrentUserInfoId()
-				+ " and f_content ='" + keyword + "' ";
-		List query = historySearchRecordRepository.findMapByNativeSql(sqlquery);
-		if (query.isEmpty()) {
-			String sqlupdate = "insert into  t_history_search_record (f_user_info_id,f_content ) values ("
-					+ getCurrentUserInfoId() + ",'" + keyword + "')";
-			historySearchRecordRepository.executeUpdateByNativeSql(sqlupdate, null);
+		System.out.println("NewsService.AppNewsByKewords()" + keyword+getCurrentUserInfoId());
+		if (getCurrentUserInfoId()!=null) {
+			String sqlquery = "SELECT * FROM t_history_search_record where f_user_info_id =  " + getCurrentUserInfoId()
+					+ " and f_content ='" + keyword + "' ";
+			List query = historySearchRecordRepository.findMapByNativeSql(sqlquery);
+			if (query.isEmpty()) {
+				String sqlupdate = "insert into  t_history_search_record (f_user_info_id,f_content ) values ("
+						+ getCurrentUserInfoId() + ",'" + keyword + "')";
+				historySearchRecordRepository.executeUpdateByNativeSql(sqlupdate, null);
+			}
 		}
+
 		String wheresql = " where t.f_title like '%" + keyword + "%'" + " or t.f_content like '%" + keyword + "%'"
 				+ "or c.f_title like '%" + keyword + "%'";
 		String sql = "SELECT t.*  ,c.f_kind as channelkind,c.f_type as channeltype, pm1.imgs, b.apprisecount as  apprisecount ,b1.agreecount,"
 				+ " d.f_title as channelname FROM t_news t " + " left join  ( SELECT f_news_id  as id2, count(1) "
 				+ " as apprisecount FROM t_comment cm where cm.f_type ='回答' or cm.f_type ='评论' group by f_news_id ) b on b.id2 =t.f_id left join "
 				+ " ( SELECT f_news_id  as id3, count(1)  as agreecount FROM t_comment cm1 where cm1.f_type ='点赞' group by f_news_id ) "
-				+ " b1 on b1.id3 =t.f_id" + " left join t_channel  c on  c.f_id = t.f_channel_id left join t_channel  d on  d.f_id = t.f_channel_id " 
+				+ " b1 on b1.id3 =t.f_id"
+				+ " left join t_channel  c on  c.f_id = t.f_channel_id left join t_channel  d on  d.f_id = t.f_channel_id "
 				+ " left join  (select pm.f_news_id as pmid , group_concat(f_picpath) as imgs from t_pic_mapping pm group by pm.f_news_id )"
-				+ " pm1 on pm1.pmid = t.f_id"
-				+ wheresql
-				+ " order by f_display_order asc ";
+				+ " pm1 on pm1.pmid = t.f_id" + wheresql + " order by f_display_order asc ";
 		System.err.println(sql);
 		List news = newsRepository.findMapByNativeSql(sql);
 		Map result = new HashMap<>();

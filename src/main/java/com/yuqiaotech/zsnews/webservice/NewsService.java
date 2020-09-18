@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.yuqiaotech.zsnews.NewsDicConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -265,8 +266,6 @@ public class NewsService extends BaseController {
 	@PostMapping("saveapp")
 	public Result saveapp(@RequestBody Map<String, Object> params) {
 		System.out.println("NewsService.save()");
-		Long userId = getCurrentUserInfoId();
-		String userType = getCurrentUserType();
 		Long columnId = params.get("columnId") != null ? Long.valueOf((String) params.get("columnId")) : null;
 		String title = (String) params.get("title");
 		String content = (String) params.get("content");
@@ -282,16 +281,21 @@ public class NewsService extends BaseController {
 		if (true) {
 			News news = new News();
 			news.setType(type);
-			news.setDeltag(0);
-			news.setStatus(0);
+			news.setDeltag(NewsDicConstants.ICommon.DELETE_NO);
+			news.setStatus(NewsDicConstants.INews.Status.DOING);
+			news.setFrom("个人");
+			news.setUserinfo(getCurrentUserInfo());
 			if (!StringUtils.isEmpty(kind)) {
 				news.setKind(kind);
 			}
 
 			Channel channel = null;
+			String userType = getCurrentUserType();
 			if (!StringUtils.isEmpty(userType) && userType.equals(SysConstants.SECURITY_USERTYPE_FRONT)) {
-				channel = channelRepository.queryUniqueResult("from Channel where userinfo.id = " + userId, null);
+				Long userInfoId = getCurrentUserInfoId();
+				channel = channelRepository.queryUniqueResult("from Channel where userinfo.id = " + userInfoId, null);
 			} else {
+				Long userId = getCurrentUserId();
 				channel = channelRepository.queryUniqueResult("from Channel where user.id = " + userId, null);
 			}
 			if (columnId != null) {
@@ -315,7 +319,7 @@ public class NewsService extends BaseController {
 					news.setContent(news.getContent().replace("<img>", ""));
 				}
 			}
-			newsRepository.save(news);
+			newsRepository.update(news);
 		}
 
 		return decide(true);

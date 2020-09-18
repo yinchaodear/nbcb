@@ -46,6 +46,9 @@ public class UserSerive extends BaseController implements NewsDicConstants {
     @Autowired
     private BaseRepository<SysNotice, Long> sysNoticeRepository;
 
+    @Autowired
+    private BaseRepository<FAQ, Long> FAQRepository;
+
 
     //获取用户信息、问答数量、收藏数量
     @GetMapping("getUserInfo")
@@ -218,7 +221,7 @@ public class UserSerive extends BaseController implements NewsDicConstants {
     @GetMapping("feedback")
     public Result feedback(String feedbackContent) {
         Map result = new HashMap();
-        if (StringUtils.isNotEmpty(feedbackContent)){
+        if (StringUtils.isNotEmpty(feedbackContent)) {
             UserInfo userInfo = userinfoRepository.get(getCurrentUserInfoId(), UserInfo.class);
             Feedback feedback = new Feedback();
             feedback.setUserInfo(userInfo);
@@ -226,7 +229,7 @@ public class UserSerive extends BaseController implements NewsDicConstants {
             feedback.setStatus(IFeedback.Status.DOING);
             feedback.setFeedbackTime(new Date());
             feedbackBaseRepository.save(feedback);
-        }else {
+        } else {
             result.put("errMsg", "请输入内容");
         }
         return success(result);
@@ -255,14 +258,14 @@ public class UserSerive extends BaseController implements NewsDicConstants {
             signDays = (Integer) historyIntegralList.get(0).get("f_sign_days");
             persentintergral = Long.valueOf(historyIntegralList.get(0).get("f_persentintergral").toString());
             occurTime = historyIntegralList.get(0).get("f_occur_time").toString();
-            if(StringUtils.isNotEmpty(occurTime)){
+            if (StringUtils.isNotEmpty(occurTime)) {
                 occurTime = occurTime.substring(0, 10);
             }
         }
         String now = sdf.format(new Date());
         now = now.substring(0, 10);
         Map result = new HashMap();
-        if (now.equals(occurTime) ) {
+        if (now.equals(occurTime)) {
             result.put("errMsg", "今天已经签过了");
         } else {
             HistoryIntegral historyIntegral = new HistoryIntegral();
@@ -304,6 +307,29 @@ public class UserSerive extends BaseController implements NewsDicConstants {
         result.put("noticeList", noticeList);
         return success(result);
     }
+
+    //常见问题FAQ
+    @GetMapping("getFAQList")
+    public Result getFAQList() {
+        String sql = "SELECT f_id,f_content,f_title FROM t_faq WHERE f_deltag = " + ICommon.DELETE_NO + " ORDER BY f_pub_time DESC";
+        List<Map<String, Object>> FAQList = FAQRepository.findMapByNativeSql(sql);
+        Map result = new HashMap();
+        result.put("FAQList", FAQList);
+        return success(result);
+    }
+
+    //常见详情
+    @GetMapping("getFAQDetail")
+    public Result getFAQDetail(Long FAQId) {
+        Map result = new HashMap();
+        if(FAQId!=null){
+            String sql = "SELECT * FROM t_faq WHERE f_id = " + FAQId ;
+            List<Map<String, Object>> FAQDetail = FAQRepository.findMapByNativeSql(sql);
+            result.put("FAQDetail", FAQDetail);
+        }
+        return success(result);
+    }
+
 
     //今天的积分
     public Long todayIntergral(Integer signDays) {

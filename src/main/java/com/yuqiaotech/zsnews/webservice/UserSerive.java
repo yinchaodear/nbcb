@@ -217,14 +217,19 @@ public class UserSerive extends BaseController implements NewsDicConstants {
     //用户反馈
     @GetMapping("feedback")
     public Result feedback(String feedbackContent) {
-        UserInfo userInfo = userinfoRepository.get(getCurrentUserInfoId(), UserInfo.class);
-        Feedback feedback = new Feedback();
-        feedback.setUserInfo(userInfo);
-        feedback.setContent(feedbackContent);
-        feedback.setStatus(IFeedback.Status.DOING);
-        feedback.setFeedbackTime(new Date());
-        feedbackBaseRepository.save(feedback);
-        return success("success");
+        Map result = new HashMap();
+        if (StringUtils.isNotEmpty(feedbackContent)){
+            UserInfo userInfo = userinfoRepository.get(getCurrentUserInfoId(), UserInfo.class);
+            Feedback feedback = new Feedback();
+            feedback.setUserInfo(userInfo);
+            feedback.setContent(feedbackContent);
+            feedback.setStatus(IFeedback.Status.DOING);
+            feedback.setFeedbackTime(new Date());
+            feedbackBaseRepository.save(feedback);
+        }else {
+            result.put("errMsg", "请输入内容");
+        }
+        return success(result);
     }
 
     //所有反馈信息

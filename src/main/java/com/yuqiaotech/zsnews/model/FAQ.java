@@ -6,6 +6,10 @@ import com.yuqiaotech.sysadmin.model.User;
 import javax.persistence.*;
 import java.util.Date;
 
+/**
+ * 常见问题
+ */
+@Entity
 public class FAQ {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

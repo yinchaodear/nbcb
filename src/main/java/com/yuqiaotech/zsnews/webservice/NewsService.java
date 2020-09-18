@@ -66,16 +66,17 @@ public class NewsService extends BaseController {
 	 */
 	@GetMapping("appListdata")
 	public Result AppNewsData(ModelAndView modelAndView, @RequestParam Long id, @RequestParam String type,
-			@RequestParam Long cid) {
+			@RequestParam Long cid,@RequestParam Long pageNo,@RequestParam Long pageSize) {
 		System.out.println("NewsService.AppNewsData()" + getCurrentUserInfoId());
 		String wheresql = "";
+		String wheresql1 = "";
 		if (type.equals("推荐")) {
 
 		} else if (type.equals("关注")) {
 //			wheresql += " and t.f_author_channel_id  in  ( select f_channel_id from t_channel_follower where f_user_info_id ="
 //					+ getCurrentUserInfoId() + " )";
-		} else {
-			wheresql += " and c1.f_id =" + id;
+		} else if(type.equals("热点")) {
+			wheresql1 += " and t.f_ishot = 1 " ;
 		}
 		String sql = "SELECT    t.* ,  d.f_title as channelname ,pm1.imgs , case when b.apprisecount  >=10000  then "
 				+ " concat(cast(  convert(b.apprisecount/10000,decimal(10,1)) as char),'万' ) "
@@ -83,9 +84,11 @@ public class NewsService extends BaseController {
 				+ "( SELECT f_news_id  as id2, count(1)  as apprisecount FROM t_comment where f_type ='评论'  or f_type ='回答' "
 				+ " group by f_news_id )  b on b.id2 =t.f_id  left  join  t_channel d on d.f_id =t.f_author_channel_id  left join  ("
 				+ " select pm.f_news_id as pmid , group_concat(f_picpath) as imgs from t_pic_mapping pm group by pm.f_news_id )"
-				+ " pm1 on pm1.pmid = t.f_id where t.f_status = 0 and exists ( SELECT  c1.f_title,nc.f_news_id FROM t_news_channel  nc "
+				+ " pm1 on pm1.pmid = t.f_id where t.f_status = 0 "
+				+   wheresql1
+				+ " and exists ( SELECT  c1.f_title,nc.f_news_id FROM t_news_channel  nc "
 				+ " inner join t_channel c1 on nc.f_channel_id = c1.f_id  and c1.f_status = 0 and c1.f_kind ='频道' where  nc.f_news_id =t.f_id "
-				+ wheresql + ") " + " order by f_display_order, f_updated desc ";
+				+ wheresql + ") " + " order by f_display_order, f_updated desc  limit "+pageNo*pageSize+ ", "+pageSize;
 		List news = newsRepository.findMapByNativeSql(sql);
 		Map result = new HashMap<>();
 		result.put("news", news);
@@ -128,7 +131,7 @@ public class NewsService extends BaseController {
 	 */
 	@GetMapping("querynewsByKindAndType")
 	public Result AppNewsData(ModelAndView modelAndView, @RequestParam String kind, @RequestParam String type,
-			@RequestParam String currentstatus, @RequestParam Long cid) {
+			@RequestParam String currentstatus, @RequestParam Long cid,@RequestParam Long pageNo,@RequestParam Long pageSize) {
 
 		System.out.println("NewsController.AppNewsData()" + kind + type + currentstatus + getCurrentUserInfoId());
 		String wheresql = "";
@@ -145,7 +148,7 @@ public class NewsService extends BaseController {
 				+ "inner join t_channel  c on  c.f_id = t.f_author_channel_id "
 				+ "left join  (select pm.f_news_id as pmid , group_concat(f_picpath) as imgs from t_pic_mapping pm group by pm.f_news_id )"
 				+ " pm1 on pm1.pmid = t.f_id " + wheresql + " where c.f_kind ='" + kind + "' and c.f_type ='" + type
-				+ "'" + " and c.f_status = 0  and t.f_status = 0  order by f_display_order asc ";
+				+ "'" + " and c.f_status = 0  and t.f_status = 0  order by f_display_order ,f_updated asc limit "+pageNo*pageSize+ ", "+pageSize;
 		List news = newsRepository.findMapByNativeSql(sql);
 		Map result = new HashMap<>();
 		result.put("news", news);
@@ -180,7 +183,7 @@ public class NewsService extends BaseController {
 
 	// 政务下面的文章 就固定是文章了，没有channel关联 分别为 政务,政务活动，政务通知
 	@GetMapping("querynewsGovernment")
-	public Result AppNewsGovernment(ModelAndView modelAndView, @RequestParam String type, @RequestParam String kind) {
+	public Result AppNewsGovernment(ModelAndView modelAndView, @RequestParam String type, @RequestParam String kind,@RequestParam Long pageNo,@RequestParam Long pageSize) {
 		System.out.println("NewsController.AppNewsGovernment()" + type + kind);
 		String sql = " SELECT t.*  ,c.f_kind as channelkind,pm1.imgs ,c.f_type as channeltype, b.apprisecount as  apprisecount ,b1.agreecount,d.f_title as channelname FROM t_news t  "
 				+ " left join  ( SELECT f_news_id  as id2, count(1) as apprisecount FROM t_comment cm where cm.f_type ='回答' or cm.f_type ='评论' group by f_news_id ) b on b.id2 =t.f_id "
@@ -191,7 +194,7 @@ public class NewsService extends BaseController {
 				+ " t_pic_mapping pm group by pm.f_news_id ) pm1 on pm1.pmid = t.f_id "
 				+ " left join t_channel d on d.f_id = t.f_author_channel_id "
 				+ " where t.f_deltag=0 and t.f_status=0 and  c.f_kind ='"+kind+"' and c.f_title ='"+type+"' "
-				+ " order by f_display_order ,f_updated  desc";
+				+ " order by f_display_order ,f_updated  desc  limit "+pageNo*pageSize+","+pageSize;
 		List news = newsRepository.findMapByNativeSql(sql);
 		Map result = new HashMap<>();
 		result.put("news", news);

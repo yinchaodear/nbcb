@@ -52,7 +52,7 @@ public class UserSerive extends BaseController implements NewsDicConstants {
     public Result getUserInfo() {
         Map result = new HashMap<>();
         UserInfo userInfo = userinfoRepository.get(getCurrentUserInfoId(), UserInfo.class);
-        String sql = "SELECT COUNT(*) FROM t_comment WHERE f_type = '收藏' AND f_news_id IN (SELECT f_id FROM t_news WHERE f_userinfo_id = " + getCurrentUserInfoId() + ")";
+        String sql = "SELECT COUNT(*) FROM t_news_follower WHERE f_user_info_id = " + getCurrentUserInfoId();
         List<Map<String, Object>> collection = commentRepository.findMapByNativeSql(sql);
         result.put("collection", collection.get(0).values());
         //回答总数

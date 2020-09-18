@@ -48,7 +48,7 @@ public class Material extends BaseModel
     @JoinColumn(name = "f_channel_id")
     private Channel channel;
     
-    private Integer type;//类型：1banner；2闪屏
+    private Integer type;//类型：1banner；2闪屏；3：开机闪屏位
     
     public Long getId()
     {

@@ -70,6 +70,8 @@ public class News extends BaseModel
     
     private Integer istop;//是否置顶 0：不置顶，1：置顶
     
+    private Integer ishot;//是否热点
+    
     private Integer deltag;//删除标识
     
     private Integer status;//
@@ -312,5 +314,15 @@ public class News extends BaseModel
     public void setCheckUser(User checkUser)
     {
         this.checkUser = checkUser;
+    }
+    
+    public Integer getIshot()
+    {
+        return ishot;
+    }
+    
+    public void setIshot(Integer ishot)
+    {
+        this.ishot = ishot;
     }
 }

@@ -92,7 +92,8 @@ public class MaterialWindowController extends BaseController
             }
         }
         dc.add(Restrictions.eq("deltag", NewsDicConstants.ICommon.DELETE_NO));
-        dc.add(Restrictions.eq("type", NewsDicConstants.IMaterial.Type.WINDOW));
+        dc.add(Restrictions.or(Restrictions.eq("type", NewsDicConstants.IMaterial.Type.WINDOW),
+            Restrictions.eq("type", NewsDicConstants.IMaterial.Type.APP)));
         return dc;
     }
     
@@ -106,9 +107,10 @@ public class MaterialWindowController extends BaseController
             if (material.getStatus() == null || material.getStatus() == NewsDicConstants.ICommon.STATUS_DOWN)
             {
                 //如果是从下架变上架，要看同一个资源位有无已经上架的素材
-                String checkOne = "from Material where column.id=" + material.getColumn().getId() + " and type="
-                    + NewsDicConstants.IMaterial.Type.WINDOW + " and status=" + NewsDicConstants.ICommon.STATUS_UP
-                    + " and deltag=" + NewsDicConstants.ICommon.DELETE_NO + " and id != " + mid;
+                String checkOne = "from Material where column.id=" + material.getColumn().getId() + " and (type="
+                    + NewsDicConstants.IMaterial.Type.WINDOW + " or type=" + NewsDicConstants.IMaterial.Type.APP
+                    + ") and status=" + NewsDicConstants.ICommon.STATUS_UP + " and deltag="
+                    + NewsDicConstants.ICommon.DELETE_NO + " and id != " + mid;
                 List<Material> dblist = materialRepository.findByHql(checkOne);
                 if (CollectionUtils.isNotEmpty(dblist))
                 {
@@ -141,9 +143,19 @@ public class MaterialWindowController extends BaseController
     public Result save(@RequestBody MaterialBean materialBean)
     {
         //这里增加一个逻辑：同一个资源位，只能有一个上架的素材存在
-        String checkOne = "from Material where column.id=" + materialBean.getColumnId() + " and type="
-            + NewsDicConstants.IMaterial.Type.WINDOW + " and status=" + NewsDicConstants.ICommon.STATUS_UP
-            + " and deltag=" + NewsDicConstants.ICommon.DELETE_NO;
+        String checkOne;
+        if (materialBean.getColumnId() != null)
+        {
+            checkOne = "from Material where column.id=" + materialBean.getColumnId() + " and type="
+                + NewsDicConstants.IMaterial.Type.WINDOW + " and status=" + NewsDicConstants.ICommon.STATUS_UP
+                + " and deltag=" + NewsDicConstants.ICommon.DELETE_NO;
+        }
+        else
+        {
+            //找开机
+            checkOne = "from Material where  type=" + NewsDicConstants.IMaterial.Type.APP + " and status="
+                + NewsDicConstants.ICommon.STATUS_UP + " and deltag=" + NewsDicConstants.ICommon.DELETE_NO;
+        }
         List<Material> dblist = materialRepository.findByHql(checkOne);
         if (CollectionUtils.isNotEmpty(dblist))
         {
@@ -156,11 +168,15 @@ public class MaterialWindowController extends BaseController
         {
             Column column = columnRepository.findUniqueBy("id", materialBean.getColumnId(), Column.class);
             material.setColumn(column);
+            material.setType(NewsDicConstants.IMaterial.Type.WINDOW);
+        }
+        else
+        {
+            material.setType(NewsDicConstants.IMaterial.Type.APP);
         }
         
         material.setStatus(NewsDicConstants.ICommon.STATUS_UP);//默认上架
         material.setDeltag(NewsDicConstants.ICommon.DELETE_NO);//默认未删除
-        material.setType(NewsDicConstants.IMaterial.Type.WINDOW);
         material.setUser(getCurrentUser());
         material = materialRepository.save(material);
         
@@ -303,7 +319,14 @@ public class MaterialWindowController extends BaseController
             materialdb.setStatus(NewsDicConstants.ICommon.STATUS_UP);
         }
         
-        materialdb.setType(NewsDicConstants.IMaterial.Type.WINDOW);
+        if (materialBean.getColumnId() != null)
+        {
+            materialdb.setType(NewsDicConstants.IMaterial.Type.WINDOW);
+        }
+        else
+        {
+            materialdb.setType(NewsDicConstants.IMaterial.Type.APP);
+        }
         materialdb.setUser(getCurrentUser());
         
         materialRepository.update(materialdb);

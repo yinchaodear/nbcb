@@ -106,6 +106,11 @@ public interface NewsDicConstants
                                  * 闪屏
              */
             Integer WINDOW = 2;
+            
+            /**
+             * 开机
+             */
+            Integer APP = 3;
         }
     }
     
@@ -158,6 +163,17 @@ public interface NewsDicConstants
             /**
              * 不置顶，默认
              */
+            Integer NO = 0;
+        }
+        
+        /**
+         * 热点
+         *
+         */
+        interface Hot
+        {
+            Integer YES = 1;
+            
             Integer NO = 0;
         }
     }

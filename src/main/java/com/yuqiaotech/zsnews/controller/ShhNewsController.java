@@ -641,6 +641,39 @@ public class ShhNewsController extends BaseController
         return success();
     }
     
+    /**
+     * 设置热点
+     * @param nid
+     * @param status
+     * @param msg
+     * @return
+     */
+    @GetMapping("sethot/{nid}")
+    public Result sethot(@PathVariable Long nid)
+    {
+        News news = newsRepository.findUniqueBy("id", nid, News.class);
+        if (news.getIshot() == null)
+        {
+            news.setIshot(NewsDicConstants.INews.Hot.NO);
+        }
+        
+        if (news.getIshot() == NewsDicConstants.INews.Hot.YES)
+        {
+            news.setIshot(NewsDicConstants.INews.Hot.NO);
+            newsRepository.update(news);
+        }
+        else if (news.getIshot() == NewsDicConstants.INews.Hot.NO)
+        {
+            news.setIshot(NewsDicConstants.INews.Hot.YES);
+            newsRepository.update(news);
+        }
+        else
+        {
+            return decide(false, null, "异常状态码");
+        }
+        return success();
+    }
+    
     private String abstractImg(String s, News news)
     {
         String key = "data:image/png;base64,";

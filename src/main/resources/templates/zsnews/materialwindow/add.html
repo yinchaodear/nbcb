@@ -42,8 +42,8 @@
 					<div class="layui-form-item">
 						<label class="layui-form-label">展示栏目</label>
 						<div class="layui-input-block">
-							<select name="columnId" lay-verify="required" lay-search >
-								<option></option>
+							<select name="columnId" lay-search >
+								<option value="">开机闪屏位</option>
 								<option th:each="c : ${columnlist}" th:value="${c.id}" th:text="${c.title}"></option>
 							</select>
 						</div>

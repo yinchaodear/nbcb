@@ -105,6 +105,12 @@
 {{#  } }}
 </script>
 
+
+<script type="text/html" id="table-hot">
+	<input type="checkbox" name="ishot" title="热点"  lay-filter="table-hot" data-json="{{ encodeURIComponent(JSON.stringify(d)) }}" value="{{d.id}}" {{ d.ishot == 1 ? 'checked' : '' }}>
+</script>
+
+
 <script src="../../component/layui/layui.js"></script>
 <script>
 	layui.use([ 'table', 'form', 'jquery' ], function() {
@@ -161,6 +167,12 @@
 					return '';
 			}
 		}, {
+			field : 'ishot',
+			title : '热点文章',
+			width : 120,
+			templet : '#table-hot',
+			unresize : true
+		}, {
 			title : '创建时间',
 			field : 'created',
 			align : 'center',
@@ -212,6 +224,41 @@
 				where : data.field
 			})
 			return false;
+		});
+
+		form.on('checkbox(table-hot)', function(obj) {
+			var json = JSON.parse(decodeURIComponent($(this).data('json')));
+			json = table.clearCacheKey(json);
+			var status = json.status;
+			var nid=  json.id;
+			if(status != 0){
+				$(obj.elem).prop("checked", false);
+				
+				form.render();
+				layer.msg('资源没有上架，不可以设置为热点', {
+					icon : 2,
+					time : 3000
+				});
+			}else{
+				$.ajax({
+					url : MODULE_PATH + "sethot/" + nid ,
+					dataType : 'json',
+					type : 'get',
+					success : function(result) {
+						if (result.success) {
+							layer.msg('操作成功', {
+								icon : 1,
+								time : 5000
+							});
+						} else {
+							layer.msg(result.msg, {
+								icon : 2,
+								time : 5000
+							});
+						}
+					}
+				})
+			}
 		});
 
 		window.add = function() {
@@ -314,21 +361,21 @@
 		window.refresh = function() {
 			table.reload('news-table');
 		}
-		
+
 		window.updown = function(uid, status) {
-			if(status == 1){
+			if (status == 1) {
 				layer.confirm('确定要下架该资源', {
 					icon : 3,
 					title : '提示'
 				}, function(index) {
 					layer.close(index);
-					updowntmp(uid,status);
+					updowntmp(uid, status);
 				});
-			}else{
-				updowntmp(uid,status);
+			} else {
+				updowntmp(uid, status);
 			}
 		}
-		
+
 		window.updowntmp = function(uid, status) {
 			$.ajax({
 				url : MODULE_PATH + "updown/" + uid + "?status=" + status,

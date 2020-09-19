@@ -52,13 +52,14 @@ public class INewsServiceImpl implements INewsService {
 
 			Long teamId = params.get("teamId") != null ? Long.valueOf((String) params.get("teamId")) : null;
 			if (teamId != null) {
-				wheresql += " and t.f_channel_id = " + teamId;
+				wheresql += " and newsc.f_channel_id = " + teamId;
 			}
 
 			String sql = " select concat(t.f_id,'') newsId, ifnull(zanNum, 0) zanNum,ifnull(pinglunNum, 0) pinglunNum, ifnull(shoucangNum, 0) shoucangNum,  \n" +
 					" ifnull(uc.userTotalNum, 0) userTotalNum,ui.f_username userName, t.f_title title, t.f_content content\n" +
-					"from t_news t\n" +
-					"left join t_channel nc on t.f_channel_id = nc.f_id and nc.f_kind = '小组' \n" +
+					"from t_news_channel newsc \n" +
+					"left join t_news t on t.f_id=newsc.f_news_id \n" +
+					"left join t_channel nc on newsc.f_channel_id = nc.f_id and nc.f_kind = '小组' \n" +
 					"left join t_channel c on t.f_author_channel_id = c.f_id \n" +
 					"left join t_user_info ui on c.f_userinfo_id = ui.f_id\n" +
 					"left join (\n" +

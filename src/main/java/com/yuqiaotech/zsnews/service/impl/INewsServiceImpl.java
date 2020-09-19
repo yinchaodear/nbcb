@@ -55,21 +55,13 @@ public class INewsServiceImpl implements INewsService {
 				wheresql += " and newsc.f_channel_id = " + teamId;
 			}
 
-			String sql = " select concat(t.f_id,'') newsId, ifnull(zanNum, 0) zanNum,ifnull(pinglunNum, 0) pinglunNum, ifnull(shoucangNum, 0) shoucangNum,  \n" +
-					" ifnull(uc.userTotalNum, 0) userTotalNum,ui.f_username userName, t.f_title title, t.f_content content\n" +
+			String sql = " select concat(t.f_id,'') newsId, ifnull(t.f_likes, 0) zanNum,ifnull(t.f_comments, 0) pinglunNum, ifnull(t.f_collects, 0) shoucangNum,  \n" +
+					" ifnull(ui.f_likes, 0) userTotalNum,ui.f_username userName, t.f_title title, t.f_content content\n" +
 					"from t_news_channel newsc \n" +
 					"left join t_news t on t.f_id=newsc.f_news_id \n" +
 					"left join t_channel nc on newsc.f_channel_id = nc.f_id and nc.f_kind = '小组' \n" +
 					"left join t_channel c on t.f_author_channel_id = c.f_id \n" +
 					"left join t_user_info ui on c.f_userinfo_id = ui.f_id\n" +
-					"left join (\n" +
-					"	select f_user_info_id userInfoId, sum(case when f_type = '点赞' then 1 else 0 end) userTotalNum\n" +
-					"	from t_comment\n" +
-					"	group by f_user_info_id) uc on uc.userInfoId = ui.f_id\n" +
-					"left join (\n" +
-					"	select f_news_id newsId,sum(case when f_type = '点赞' then 1 else 0 end) zanNum, sum(case when f_type = '评论' then 1 else 0 end) pinglunNum, sum(case when f_type = '收藏' then 1 else 0 end) shoucangNum\n" +
-					"	from t_comment\n" +
-					"	group by f_news_id) ni on ni.newsId = t.f_id \n" +
 					wheresql + "\n" +
 					"order by t.f_id desc \n" +
 					limitStr;
@@ -89,19 +81,11 @@ public class INewsServiceImpl implements INewsService {
 			if (newsId != null) {
 				String sql = " select case when (select 1 from t_comment com where com.f_type='点赞' and f_news_id = t.f_id and f_user_info_id = " + userInfoId + ") then 1 else 0 end as agreeFlag,\n" +
 						"case when (select 1 from t_comment com where com.f_type='收藏' and f_news_id = t.f_id and f_user_info_id = " + userInfoId + ") then 1 else 0 end as collectFlag,\n" +
-						"concat(t.f_id,'') newsId, ifnull(zanNum, 0) zanNum,ifnull(pinglunNum, 0) pinglunNum, ifnull(shoucangNum, 0) shoucangNum,  \n" +
-						" ifnull(uc.userTotalNum, 0) userTotalNum,c.f_title authorChannelName,ui.f_username userName, t.f_title title, t.f_content content\n" +
+						"concat(t.f_id,'') newsId, ifnull(t.f_likes, 0) zanNum,ifnull(t.f_comments, 0) pinglunNum, ifnull(t.f_collects, 0) shoucangNum,  \n" +
+						" ifnull(ui.f_likes, 0) userTotalNum,c.f_title authorChannelName,ui.f_username userName, t.f_title title, t.f_content content\n" +
 						"from t_news t\n" +
 						"left join t_channel c on t.f_author_channel_id = c.f_id \n" +
 						"left join t_user_info ui on c.f_userinfo_id = ui.f_id\n" +
-						"left join (\n" +
-						"	select f_user_info_id userInfoId, sum(case when f_type = '点赞' then 1 else 0 end) userTotalNum\n" +
-						"	from t_comment\n" +
-						"	group by f_user_info_id) uc on uc.userInfoId = ui.f_id\n" +
-						"left join (\n" +
-						"	select f_news_id newsId,sum(case when f_type = '点赞' then 1 else 0 end) zanNum, sum(case when f_type = '评论' then 1 else 0 end) pinglunNum, sum(case when f_type = '收藏' then 1 else 0 end) shoucangNum\n" +
-						"	from t_comment\n" +
-						"	group by f_news_id) ni on ni.newsId = t.f_id \n" +
 						" where t.f_id = " + newsId;
 				List<Map<String, Object>> news = newsRepository.findMapByNativeSql(sql);
 				if (news != null && news.size() > 0) {
@@ -143,6 +127,7 @@ public class INewsServiceImpl implements INewsService {
 						commentRepository.save(comment);
 					}
 				}
+				updateNewsFollowStat(newsId);
 			} else {
 				throw new RuntimeException("newsId 或者 type 参数缺失");
 			}
@@ -154,6 +139,42 @@ public class INewsServiceImpl implements INewsService {
 		}
 	}
 
+	/**
+	 * 更新新闻的点赞，评论，收藏等数据，更新文章发表者的点赞总数。
+	 * @param newsId
+	 */
+	private void updateNewsFollowStat(long newsId){
+		String sql = "select f_type,count(*) cnt from t_commnet where f_news_id="+newsId;
+		List<Map<String,Object>> rs = commentRepository.findMapByNativeSql(sql);
+
+		int likes = 0,collects = 0, comments = 0;
+		for(int i =0; i < rs.size(); i++){
+			Map<String,Object> m = rs.get(i);
+			String type = (String)m.get("f_type");
+			Number cnt = (Number)m.get("cnt");
+			if("点赞".equals(type)){
+				likes = cnt.intValue();
+			}else
+			if("评论".equals(type)){
+				comments = cnt.intValue();
+			}else
+			if("收藏".equals(type)){
+				collects = cnt.intValue();
+			}
+		}
+		News n = newsRepository.get(newsId,News.class);
+		n.setCollects(collects);
+		n.setLikes(likes);
+		n.setComments(comments);
+		newsRepository.save(n);
+		if(n.getUserinfo() == null)return;
+		long userId = n.getUserinfo().getId();
+		String sqlForUserInfo = "update t_user_info u set " +
+				"f_likes =(select count(*) from t_comment t " +
+				"	left join t_news n on n.f_id=t.f_news_id " +
+				"	where n.f_userinfo_id=u.f_id and t.f_type='点赞') where f_id="+userId;
+		commentRepository.executeUpdateByNativeSql(sqlForUserInfo,null);
+	}
 	@Transactional
 	@Override
 	public Map makeComment(Long userInfoId, Map<String, Object> params) {
@@ -198,6 +219,7 @@ public class INewsServiceImpl implements INewsService {
 				}
 
 				commentRepository.save(comment);
+				updateNewsFollowStat(newsId);
 			} else {
 				throw new RuntimeException("type 为空，请确认!");
 			}

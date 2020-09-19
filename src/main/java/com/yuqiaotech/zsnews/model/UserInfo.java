@@ -58,6 +58,8 @@ public class UserInfo extends BaseModel
 
     private Integer push;//推送
 
+    private Integer likes;//点赞数
+
     public Integer getPush() {
         return push;
     }
@@ -270,4 +272,8 @@ public class UserInfo extends BaseModel
     {
         this.deltag = deltag;
     }
+
+    public Integer getLikes() {  return likes; }
+
+    public void setLikes(Integer likes) { this.likes = likes; }
 }

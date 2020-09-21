@@ -112,6 +112,13 @@ public class UserSerive extends BaseController implements NewsDicConstants {
                 case "push":
                     userInfo.setPush(Integer.parseInt(value));
                     break;
+                case "pwd":
+                    if (StringUtils.isNotEmpty(value)){
+                        userInfo.setPwd(value);
+                    }else {
+                        errMsg="新密码为空";
+                    }
+                    break;
             }
         }
         userinfoRepository.update(userInfo);
@@ -123,17 +130,12 @@ public class UserSerive extends BaseController implements NewsDicConstants {
     //获取收藏文章列表
     @GetMapping("getCollection")
     public Result getCollection() {
-//        String sql = "SELECT f_id,f_title,f_content FROM t_news WHERE f_id IN (SELECT f_news_id FROM t_comment WHERE f_type = '收藏' AND f_user_info_id = " + getCurrentUserInfoId() + ")";
-        String sql = "SELECT f_id,f_news_id,f_user_info_id FROM t_news_follower WHERE f_user_info_id = " + getCurrentUserInfoId();
-        List<Map<String, Object>> collectionList = newsFollowerRepository.findMapByNativeSql(sql);
+//        String sql = "SELECT f_id,f_news_id,f_user_info_id FROM t_news_follower WHERE f_user_info_id = " + getCurrentUserInfoId();
+        String sql = "SELECT t.* ,  d.f_title as channelname ,pm1.imgs , case when b.apprisecount  >=10000  then  concat(cast(  convert(b.apprisecount/10000,decimal(10,1)) as char),'万' )  else cast(b.apprisecount  as char)  end as apprisecount  FROM t_news t left join\t( SELECT f_news_id  as id2, count(1)  as apprisecount FROM t_comment where f_type ='评论' or f_type ='回答' group by f_news_id )  b on b.id2 =t.f_id left  join  t_channel d on d.f_id =t.f_author_channel_id left join  (select pm.f_news_id as pmid , group_concat(f_picpath) as imgs from t_pic_mapping pm group by pm.f_news_id ) pm1 on pm1.pmid = t.f_id where t.f_id IN (SELECT f_news_id FROM t_news_follower WHERE f_user_info_id = "+getCurrentUserInfoId()+") AND t.f_status = 0 order by f_display_order, f_updated desc";
+        List<Map<String, Object>> collectionList = newsRepository.findMapByNativeSql(sql);
         Map result = new HashMap();
         result.put("collectionList", collectionList);
         return success(result);
-    }
-
-    //获取收藏文章详情
-    public Result getNewsDetail() {
-        return success();
     }
 
     //取消收藏
@@ -291,6 +293,12 @@ public class UserSerive extends BaseController implements NewsDicConstants {
         List<Map<String, Object>> historyIntegralList = historyIntegralRepository.findMapByNativeSql(sql);
         Map result = new HashMap();
         if (historyIntegralList != null && !historyIntegralList.isEmpty()) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String occurTime = historyIntegralList.get(0).get("f_occur_time").toString().substring(0,10);
+            String now = sdf.format(new Date()).substring(0,10);
+            if (now.equals(occurTime)) {
+                result.put("isOk", "今天已经签过了");
+            }
             result.put("historyIntegralList", historyIntegralList);
             result.put("lastIntegral", historyIntegralList.get(0));
         }
@@ -322,8 +330,8 @@ public class UserSerive extends BaseController implements NewsDicConstants {
     @GetMapping("getFAQDetail")
     public Result getFAQDetail(Long FAQId) {
         Map result = new HashMap();
-        if(FAQId!=null){
-            String sql = "SELECT * FROM t_faq WHERE f_id = " + FAQId ;
+        if (FAQId != null) {
+            String sql = "SELECT * FROM t_faq WHERE f_id = " + FAQId;
             List<Map<String, Object>> FAQDetail = FAQRepository.findMapByNativeSql(sql);
             result.put("FAQDetail", FAQDetail);
         }

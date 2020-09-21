@@ -119,6 +119,17 @@ public class UserSerive extends BaseController implements NewsDicConstants {
                         errMsg="新密码为空";
                     }
                     break;
+                case "headImg":
+                    if(StringUtils.isNotEmpty(value)){
+                        if (userInfo.getStatus() == IUserInfo.Status.CHECKING) {
+                            errMsg="用户信息正在审核";
+                        }else {
+                            userInfo.setNewAvatar(value);
+                        }
+                    }else {
+                        errMsg="头像是空的";
+                    }
+                    break;
             }
         }
         userinfoRepository.update(userInfo);

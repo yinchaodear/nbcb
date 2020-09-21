@@ -117,7 +117,7 @@ public class IChannelServiceImpl implements IChannelService {
 		try {
 			Long teamId = params.get("teamId") != null ? Long.valueOf((String) params.get("teamId")) : null;
 			if (teamId != null) {
-				String sql = " select ifnull(t.joinNum, 0) joinNum,ifnull(nt.questionNum,0) questionNum,c.f_title title,\n" +
+				String sql = " select  convert(c.f_Logo using utf8) as logo, ifnull(t.joinNum, 0) joinNum,ifnull(nt.questionNum,0) questionNum,c.f_title title,\n" +
 						"case when (select 1 from t_channel_follower cf where cf.f_channel_id = c.f_id and cf.f_user_info_id = " + userInfoId + ") then 1 else 0 end as joinFlag\n" +
 						"from t_channel c\n" +
 						"left join (\n" +

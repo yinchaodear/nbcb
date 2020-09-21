@@ -129,7 +129,7 @@ public class ChannelService extends BaseController
         		+ " on t.f_id =m.f_channel_id inner join t_category c on c.f_id =m.f_category_id  "
         		+ " where t.f_kind = '"+kind+"' and t.f_type ='"+type+"' group by c.f_title";
         List categorygroup = channelRepository.findMapByNativeSql(sql);
-        String sqlgroup = "SELECT  distinct t.* , b.* , case when c.number >=10000  then  concat(cast(  convert(c.number/10000,decimal(10,1)) as char),'万' )"
+        String sqlgroup = "SELECT  distinct t.* , convert(t.f_Logo using utf8) as logo, b.* , case when c.number >=10000  then  concat(cast(  convert(c.number/10000,decimal(10,1)) as char),'万' )"
                 + " else cast(c.number  as char)  end as number  FROM  t_channel t  left  join (select cf.f_id as cfid ,cf.f_channel_id as chid "
                 + ",cf.f_user_info_id as cid from t_channel_follower cf inner join t_channel c  on c.f_id = "
                 + "cf.f_channel_id  where f_user_info_id = " + getCurrentUserInfoId() + " and " + wherekindandtype
@@ -165,7 +165,7 @@ public class ChannelService extends BaseController
         		+ " on t.f_id =m.f_channel_id inner join t_category c on c.f_id =m.f_category_id  "
         		+ " where t.f_kind = '"+kind+"'  group by c.f_title";
         List categorygroup = channelRepository.findMapByNativeSql(sql);
-        String sqlgroup = "SELECT  distinct t.* , b.* , case when c.number >=10000  then  concat(cast(  convert(c.number/10000,decimal(10,1)) as char),'万' )"
+        String sqlgroup = "SELECT  distinct t.* , convert(t.f_Logo using utf8) as logo, b.* , case when c.number >=10000  then  concat(cast(  convert(c.number/10000,decimal(10,1)) as char),'万' )"
                 + " else cast(c.number  as char)  end as number,  "
                 + " case when chan.questionnumber >=10000  then "
                 + "concat(cast(  convert(chan.questionnumber/10000,decimal(10,1)) as char),'万' )"
@@ -205,7 +205,7 @@ public class ChannelService extends BaseController
     {
         
         String sql =
-            "SELECT  t.* , b.* ,case when c.number >=10000  then  concat(cast(  convert(c.number/10000,decimal(10,1)) as char),'万' ) else cast(c.number  as char)  end as number "
+            "SELECT  t.* , convert(t.f_Logo using utf8) as logo, b.* ,case when c.number >=10000  then  concat(cast(  convert(c.number/10000,decimal(10,1)) as char),'万' ) else cast(c.number  as char)  end as number "
                 + "FROM  t_channel t  left  join (select cf.f_id as cfid ,cf.f_channel_id as chid ,cf.f_user_info_id "
                 + "as cid from t_channel_follower cf inner join t_channel c  on c.f_id = cf.f_channel_id "
                 + "where f_user_info_id = " + getCurrentUserInfoId() + ") b on t.f_id = b.chid "

@@ -81,7 +81,7 @@
 								detailobj.f_content = parseContent(detailobj.f_content);
 								var authorchannel = detailobj.channeltitle;
 								if(authorchannel == null || authorchannel == ''){
-									mui.ajax('http://192.168.1.102:9292/zsnews/platform/platform', {
+									mui.ajax(baseUrl+'/zsnews/platform/platform', {
 										dataType: 'json', //服务器返回json格式数据
 										type: 'get', //HTTP请求类型
 										timeout: 100000, //超时时间设置为10秒；

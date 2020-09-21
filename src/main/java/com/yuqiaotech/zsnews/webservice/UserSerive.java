@@ -71,10 +71,11 @@ public class UserSerive extends BaseController implements NewsDicConstants {
     }
 
     //保存、修改用户信息
-    @GetMapping("save")
-    public Result save(String type, String value) throws Exception {
-        UserInfo userInfo = new UserInfo();
-        userInfo = userinfoRepository.get(getCurrentUserInfoId(), UserInfo.class);
+    @PostMapping("save")
+    public Result save(@RequestBody Map<String, Object> params) throws Exception {
+        String type = params.get("type").toString();
+        String value = params.get("value").toString();
+        UserInfo userInfo = userinfoRepository.get(getCurrentUserInfoId(), UserInfo.class);
         String errMsg = null;
         if (StringUtils.isNotEmpty(type) && StringUtils.isNotEmpty(value)) {
             switch (type) {
@@ -125,6 +126,7 @@ public class UserSerive extends BaseController implements NewsDicConstants {
                             errMsg="用户信息正在审核";
                         }else {
                             userInfo.setNewAvatar(value);
+                            userInfo.setStatus(IUserInfo.Status.CHECKING);
                         }
                     }else {
                         errMsg="头像是空的";

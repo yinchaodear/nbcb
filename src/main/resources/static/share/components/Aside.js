@@ -1,0 +1,15 @@
+var vSide = Vue.extend({
+    template: '<div id="offCanvasSideScroll" class="mui-scroll-wrapper">'
+					+ '<div class="mui-scroll">'
+						+ '<div class="llogo"></div>'
+						+ '<div class="mui-card leftmeun">'
+							+ '<ul class="mui-table-view" id="ul-catalog">'
+								+ '<li id="" class="catalog-all mui-table-view-cell" v-on:tap="getCatalog(\'\')\">'
+									+ '<span>所有舆情</span>'
+								+ '</li>'
+//								+ '<li id="{{item.id}}" class="mui-table-view-cell catalog-list" v-for="item in catalogList" v-on:tap="getCatalog(item.id)"><span>{{item.cname}}</span></li>'
+							+ '</ul>'
+						+ '</div>'
+					+ '</div>'
+				+ '</div>'
+});

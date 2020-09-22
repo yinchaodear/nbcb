@@ -78,6 +78,15 @@
 				"icon": "layui-icon layui-icon-vercode",
 				"href": "/zsnews/faq/main",
 				"children": []
+			},
+			{
+				"id": "1019",
+				"title": "平台配置",
+				"type": "1",
+				"openType": null,
+				"icon": "layui-icon layui-icon-vercode",
+				"href": "/zsnews/platform/main",
+				"children": []
 			}
 		]
 	},

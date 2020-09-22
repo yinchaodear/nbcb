@@ -55,7 +55,7 @@ public class INewsServiceImpl implements INewsService {
 				wheresql += " and newsc.f_channel_id = " + teamId;
 			}
 
-			String sql = " select concat(t.f_id,'') newsId, ifnull(t.f_likes, 0) zanNum,ifnull(t.f_comments, 0) pinglunNum, ifnull(t.f_collects, 0) shoucangNum,  \n" +
+			String sql = " select   convert(c.f_Logo using utf8) as logo,concat(t.f_id,'') newsId, ifnull(t.f_likes, 0) zanNum,ifnull(t.f_comments, 0) pinglunNum, ifnull(t.f_collects, 0) shoucangNum,  \n" +
 					" ifnull(ui.f_likes, 0) userTotalNum,ui.f_username userName, t.f_title title, t.f_content content\n" +
 					"from t_news_channel newsc \n" +
 					"left join t_news t on t.f_id=newsc.f_news_id \n" +

@@ -305,9 +305,6 @@ public class NewsService extends BaseController {
 				Column column = columnRepository.queryUniqueResult("from Column  where id = " + columnId, null);
 				// news.setColumn(column);
 			}
-			if (channel != null) {
-				news.setAuthorChannel(channel);
-			}
 			news.setTitle(title);
 			news = newsRepository.save(news);
 			if (!StringUtils.isEmpty(content)) {

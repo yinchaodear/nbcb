@@ -41,7 +41,9 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
         {
             if("third_add_mobile".equals(e.getMessage())){
                 resuBean.setMsg("三方第一次登录，需要补充手机号。");
-                resuBean.setCode(556);
+                System.out.println("========gws===============三方第一次登录，需要补充手机号。");
+                resuBean.setData("gotoRegisterThird");
+                resuBean.setCode(200);
             }else {
                 resuBean.setMsg("用户名不存在");
             }

@@ -108,10 +108,12 @@ public class RegisterService extends BaseController
             if (userInfo == null) {
                 userInfo = new UserInfo();
                 userInfo = userInfoRepository.save(userInfo);
+                System.out.println("======三方登录用户注册=======微信字符串==userInfo.getId(1)=【" + userInfo.getId() + "】==");
             }
             userInfo.setMobile(mobile);
             userInfo.setUsername(mobile);
             userInfo.setPwd(password);
+            System.out.println("======三方登录用户注册=======微信字符串==userInfo.getId(2)=【" + userInfo.getId() + "】==");
             if ("WX".equals(loginType)) {//微信
                 JSONObject thirdJson = JSONObject.parseObject(info);
                 System.out.println("======三方登录用户注册=======微信字符串==thirdJson=【" + thirdJson + "】==");
@@ -123,7 +125,7 @@ public class RegisterService extends BaseController
                     String pathString = attachmentRoot + "/" + objectType + "/" + objectId + "/" + filename;
                     boolean flag = AttachmentService.downloadPicture(profile_image_url, pathString);
                     System.out.println("======三方登录用户注册=======下载图片结果==flag=【" + flag + "】==");
-                    String avatar = ImgBase64Utils.getImgStr(profile_image_url);
+                    String avatar = ImgBase64Utils.getImgStr(pathString);
                     userInfo.setAvatar(avatar);
                 }
                 if (StringUtils.isEmpty(userInfo.getNickName()))
@@ -137,11 +139,14 @@ public class RegisterService extends BaseController
                 userAuths.setInfo(info);
                 userAuths.setUserinfo(userInfo);
                 userAuthsRepository.update(userAuths);
+                System.out.println("======三方登录用户注册=======微信字符串==userInfo.getId(3)=【" + userInfo.getId() + "】==");
             } else {
                 userAuths = new UserAuths();
                 userAuths.setThirdKey(openid);
                 userAuths.setThirdType(loginType);
                 userAuths.setInfo(info);
+                userAuths.setUserinfo(userInfo);
+                System.out.println("======三方登录用户注册=======微信字符串==userInfo.getId(4)=【" + userInfo.getId() + "】==");
                 userAuths = userAuthsRepository.save(userAuths);
             }
             Map<String, String> map = new HashMap<>();

@@ -92,15 +92,17 @@
 			width : 200,
 			templet : "#avatarbar"
 		}, {
-			title : '用户名称',
-			field : 'newUsername',
+			title : '用户昵称',
+			field : 'newNickName',
 			align : 'center',
 			width : 300,
 			templet : function(d) {
-				if (d.newUsername && d.newUsername != '' && d.newUsername != 'null')
-					return '<div style="color:red;">' + d.newUsername + '</div>';
+				if (d.newNickName && d.newNickName != '' && d.newNickName != 'null')
+					return '<div style="color:red;">' + d.newNickName + '</div>';
+				else if (d.nickName && d.nickName != '' && d.nickName != 'null')
+					return '<div>' + d.nickName + '</div>';
 				else
-					return '<div>' + d.username + '</div>';
+					return '';
 			}
 		}, {
 			title : '简介',

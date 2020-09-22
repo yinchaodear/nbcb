@@ -27,6 +27,8 @@ public class UserInfoCheck
     
     private String username;//提交审核的用户名
     
+    private String nickName;//提交审核的昵称
+    
     private String avatar;//提交审核的头像base64
     
     private String remark;//提交审核的个人的一些详细说明
@@ -130,5 +132,15 @@ public class UserInfoCheck
     public void setRemark(String remark)
     {
         this.remark = remark;
+    }
+    
+    public String getNickName()
+    {
+        return nickName;
+    }
+    
+    public void setNickName(String nickName)
+    {
+        this.nickName = nickName;
     }
 }

@@ -39,7 +39,10 @@ public class UserInfo extends BaseModel
     private String newAvatar;//新头像
     
     private String remark;//个人的一些详细说明
+    
     private String nickName;//昵称,（微信，qq，微博的，不唯一）
+    
+    private String newNickName;//新昵称
     
     private String newRemark;//新的用户简介
     
@@ -56,19 +59,21 @@ public class UserInfo extends BaseModel
     private Integer status;//状态，用户的头像和用户名需要审核，存在状态位：审核中，通过，不通过，未提交审核
     
     private Integer deltag;//删除标识
-
+    
     private Integer push;//推送
-
+    
     private Integer likes;//点赞数
-
-    public Integer getPush() {
+    
+    public Integer getPush()
+    {
         return push;
     }
-
-    public void setPush(Integer push) {
+    
+    public void setPush(Integer push)
+    {
         this.push = push;
     }
-
+    
     public String getRegion()
     {
         return region;
@@ -273,20 +278,39 @@ public class UserInfo extends BaseModel
     {
         this.deltag = deltag;
     }
-
-    public Integer getLikes() {  return likes; }
-
-    public void setLikes(Integer likes) { this.likes = likes; }
-
+    
+    public Integer getLikes()
+    {
+        return likes;
+    }
+    
+    public void setLikes(Integer likes)
+    {
+        this.likes = likes;
+    }
+    
     /**
      * 昵称,（微信，qq，微博的，不唯一）
      * @return
      */
-    public String getNickName() {
+    public String getNickName()
+    {
         return nickName;
     }
-
-    public void setNickName(String nickName) {
+    
+    public void setNickName(String nickName)
+    {
         this.nickName = nickName;
     }
+    
+    public String getNewNickName()
+    {
+        return newNickName;
+    }
+    
+    public void setNewNickName(String newNickName)
+    {
+        this.newNickName = newNickName;
+    }
+    
 }

@@ -90,6 +90,7 @@ public class UserInfoCheckController extends BaseController
         uic.setUsername(userInfo.getNewUsername());
         uic.setAvatar(userInfo.getNewAvatar());
         uic.setRemark(userInfo.getNewRemark());
+        uic.setNickName(userInfo.getNewNickName());
         uic.setChecker(getCurrentUser());
         uic.setCheckResult(status);
         uic.setCheckTime(new Date());
@@ -109,6 +110,10 @@ public class UserInfoCheckController extends BaseController
             if (StringUtils.isNotEmpty(userInfo.getNewUsername()))
             {
                 userInfo.setUsername(userInfo.getNewUsername());
+            }
+            if (StringUtils.isNotEmpty(userInfo.getNewNickName()))
+            {
+                userInfo.setNickName(userInfo.getNewNickName());
             }
         }
         userInfo.setStatus(status);

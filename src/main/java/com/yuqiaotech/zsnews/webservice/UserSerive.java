@@ -84,16 +84,11 @@ public class UserSerive extends BaseController implements NewsDicConstants {
                 case "region":
                     userInfo.setRegion(value);
                     break;
-                case "userName":
-                    String sql = "SELECT * FROM t_user_info WHERE f_username = '" + value + "'";
-                    if (userinfoRepository.findMapByNativeSql(sql) != null) {
-                        errMsg = "用户名已存在";
-                        break;
-                    }
+                case "nickName":
                     if (userInfo.getStatus() == IUserInfo.Status.CHECKING) {
                         errMsg = "用户信息正在审核";
                     } else {
-                        userInfo.setNewUsername(value);
+                        userInfo.setNewNickName(value);
                         userInfo.setStatus(IUserInfo.Status.CHECKING);
                     }
                     break;

@@ -78,11 +78,10 @@ public class NewsService extends BaseController {
 		} else if(type.equals("热点")) {
 			wheresql1 += " and t.f_ishot = 1";
 		}
-		String sql = "SELECT    t.* ,  d.f_title as channelname ,pm1.imgs , case when b.apprisecount  >=10000  then "
-				+ " concat(cast(  convert(b.apprisecount/10000,decimal(10,1)) as char),'万' ) "
-				+ " else cast(b.apprisecount  as char)  end as apprisecount  FROM t_news t left join  "
-				+ "( SELECT f_news_id  as id2, count(1)  as apprisecount FROM t_comment where f_type ='评论'  or f_type ='回答' "
-				+ " group by f_news_id )  b on b.id2 =t.f_id  left  join  t_channel d on d.f_id =t.f_author_channel_id  left join  ("
+		String sql = "SELECT    t.* ,  d.f_title as channelname ,pm1.imgs , case when t.f_comments  >=10000  then "
+				+ " concat(cast(  convert(t.f_comments/10000,decimal(10,1)) as char),'万' ) "
+				+ " else cast(t.f_comments   as char)  end as apprisecount  FROM t_news t "
+				+ " left  join  t_channel d on d.f_id =t.f_author_channel_id  left join  ("
 				+ " select pm.f_news_id as pmid , group_concat(f_picpath) as imgs from t_pic_mapping pm group by pm.f_news_id )"
 				+ " pm1 on pm1.pmid = t.f_id where t.f_status = 0 "
 				+   wheresql1
@@ -140,11 +139,10 @@ public class NewsService extends BaseController {
 					+ getCurrentUserInfoId();
 		}
 		String sql = "SELECT t.*  ,c.f_kind as channelkind,c.f_type as channeltype,pm1.imgs , "
-				+ " case when b.apprisecount >=10000  then  "
-				+ " concat(cast(  convert(b.apprisecount/10000,decimal(10,1)) as char),'万' ) else cast(b.apprisecount  as char)  end as apprisecount "
+				+ " case when t.f_comments >=10000  then  "
+				+ " concat(cast(  convert(t.f_comments/10000,decimal(10,1)) as char),'万' ) else cast(t.f_comments as char)  end as apprisecount "
 				+ ",c.f_title as channelname "
-				+ "FROM t_news t left join  ( SELECT  f_news_id  as id1,count(1) as apprisecount FROM t_comment cm1 "
-				+ "where cm1.f_type ='评论' or cm1.f_type='回答' group by f_news_id ) b on b.id1 =t.f_id "
+				+ "FROM t_news t "
 				+ "inner join t_channel  c on  c.f_id = t.f_author_channel_id "
 				+ "left join  (select pm.f_news_id as pmid , group_concat(f_picpath) as imgs from t_pic_mapping pm group by pm.f_news_id )"
 				+ " pm1 on pm1.pmid = t.f_id " + wheresql + " where c.f_kind ='" + kind + "' and c.f_type ='" + type
@@ -160,7 +158,8 @@ public class NewsService extends BaseController {
 	 * 文章的category
 	 */
 	@GetMapping("querynewsByChannelID")
-	public Result AppNewsDataChannel(ModelAndView modelAndView, @RequestParam Long id, @RequestParam String category) {
+	public Result AppNewsDataChannel(ModelAndView modelAndView, @RequestParam Long id, @RequestParam String category,
+			@RequestParam Long pageNo,@RequestParam Long pageSize) {
 
 		System.out.println("NewsController.AppNewsDataChannel()" + category + id);
 		String wheresql = "";
@@ -168,13 +167,14 @@ public class NewsService extends BaseController {
 			wheresql = "inner join t_news_category nc on nc.f_news_id =t.f_id inner"
 					+ " join t_category cate on cate.f_id = nc.f_category_id and cate.f_title ='" + category + "'";
 		}
-		String sql = "SELECT  t.* ,d.f_title as channelname ,b.apprisecount as apprisecount ,pm1.imgs FROM t_news t "
-				+ " left join  ( SELECT f_news_id  as id2, count(1) "
-				+ "as apprisecount FROM t_comment  where f_type ='评论' or f_type ='回答' group by f_news_id ) b on b.id2 =t.f_id "
+		String sql = "SELECT  t.* ,d.f_title as channelname ,"
+				+ "case when t.f_comments >=10000  then  "
+				+ " concat(cast(  convert(t.f_comments/10000,decimal(10,1)) as char),'万' ) else cast(t.f_comments as char)  end as apprisecount "
+				+ " ,pm1.imgs FROM t_news t "
 				+ "left  join t_channel  c on  c.f_id = t.f_channel_id  inner join t_channel d on d.f_id =t.f_author_channel_id  "
 				+ "left join  (select pm.f_news_id as pmid , group_concat(f_picpath) as imgs from t_pic_mapping pm group by pm.f_news_id )"
 				+ " pm1 on pm1.pmid = t.f_id " +  wheresql+ " where t.f_status=0 and t.f_author_channel_id = " + id 
-				+ " order by f_display_order asc ";
+				+ " order by f_display_order asc limit "+pageNo*pageSize+ ", "+pageSize;
 		List news = newsRepository.findMapByNativeSql(sql);
 		Map result = new HashMap<>();
 		result.put("news", news);

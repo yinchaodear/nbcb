@@ -63,6 +63,8 @@ public class Channel extends BaseModel
     
     private Integer showtag;//默认显示（0：显示；1：不显示）
     
+    private Integer collects;//关注人数
+    private Integer newscount;//文章数量
     public Long getId()
     {
         return id;
@@ -232,5 +234,23 @@ public class Channel extends BaseModel
     {
         this.showtag = showtag;
     }
+
+	public Integer getCollects() {
+		return collects;
+	}
+
+	public void setCollects(Integer collects) {
+		this.collects = collects;
+	}
+
+	public Integer getNewscount() {
+		return newscount;
+	}
+
+	public void setNewscount(Integer newscount) {
+		this.newscount = newscount;
+	}
+    
+    
     
 }

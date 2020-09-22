@@ -58,14 +58,9 @@ public class UserSerive extends BaseController implements NewsDicConstants {
         String sql = "SELECT COUNT(*) FROM t_news_follower WHERE f_user_info_id = " + getCurrentUserInfoId();
         List<Map<String, Object>> collection = commentRepository.findMapByNativeSql(sql);
         result.put("collection", collection.get(0).values());
-        //回答总数
-        String sql2 = "SELECT COUNT(*) FROM t_comment WHERE f_type = '评论' AND f_news_id IN (SELECT f_id FROM t_news WHERE f_type='提问' AND f_userinfo_id = " + getCurrentUserInfoId() + ")";
-        List<Map<String, Object>> answer = commentRepository.findMapByNativeSql(sql2);
-        //提问总数
         String sql3 = "SELECT COUNT(*) FROM t_news WHERE f_type = '提问' AND f_userinfo_id = " + getCurrentUserInfoId();
         List<Map<String, Object>> question = newsRepository.findMapByNativeSql(sql3);
-        String a = question.get(0).get("COUNT(*)").toString();
-        result.put("question", Long.valueOf(answer.get(0).get("COUNT(*)").toString()) + Long.valueOf(question.get(0).get("COUNT(*)").toString()));
+        result.put("question", Long.valueOf(question.get(0).get("COUNT(*)").toString()));
         result.put("userInfo", userInfo);
         return success(result);
     }
@@ -166,25 +161,21 @@ public class UserSerive extends BaseController implements NewsDicConstants {
         return success(result);
     }
 
-    //提问列表
+    //问答列表
     @GetMapping("getQuestion")
     public Result getQuestion() {
-        String sql = "SELECT f_id,f_title,f_content FROM t_news WHERE f_type = '提问' AND f_userinfo_id = " + getCurrentUserInfoId();
+//        String sql = "SELECT f_id,f_title,f_content FROM t_news WHERE f_type = '提问' AND f_userinfo_id = " + getCurrentUserInfoId();
+        String sql = "select convert(c.f_Logo using utf8) as logo,concat(t.f_id,'') newsId, ifnull(t.f_likes, 0) zanNum,ifnull(t.f_comments, 0) pinglunNum, ifnull(t.f_collects, 0) shoucangNum, ifnull(ui.f_likes, 0) userTotalNum,ui.f_username userName, t.f_title title, t.f_content content \n" +
+                "from t_news_channel newsc \n" +
+                "left join t_news t on t.f_id=newsc.f_news_id \n" +
+                "left join t_channel nc on newsc.f_channel_id = nc.f_id and nc.f_kind = '小组' \n" +
+                "left join t_channel c on t.f_author_channel_id = c.f_id \n" +
+                "left join t_user_info ui on c.f_userinfo_id = ui.f_id\n" +
+                "WHERE newsc.f_news_id IN (SELECT f_id FROM t_news WHERE f_type = '提问' AND f_userinfo_id = " + getCurrentUserInfoId() + " )\n" +
+                "order by t.f_id desc LIMIT 0,10";
         List<Map<String, Object>> questionList = newsRepository.findMapByNativeSql(sql);
         Map result = new HashMap();
         result.put("questionList", questionList);
-        return success(result);
-    }
-
-    //回答列表
-    @GetMapping("getAnswer")
-    public Result getAnswer(Long newsId) {
-        Map result = new HashMap();
-        if (newsId != null) {
-            String sql = "SELECT f_content FROM t_comment WHERE f_type = '评论' AND f_news_id =" + newsId;
-            List<Map<String, Object>> answerList = commentRepository.findMapByNativeSql(sql);
-            result.put("answerList", answerList);
-        }
         return success(result);
     }
 

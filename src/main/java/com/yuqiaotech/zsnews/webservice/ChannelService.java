@@ -177,8 +177,8 @@ public class ChannelService extends BaseController
         		+ " on t.f_id =m.f_channel_id inner join t_category c on c.f_id =m.f_category_id  "
         		+ " where t.f_kind = '"+kind+"'  group by c.f_title";
         List categorygroup = channelRepository.findMapByNativeSql(sql);
-        String sqlgroup = "SELECT  distinct t.* , convert(t.f_Logo using utf8) as logo, b.* , case when c.number >=10000  then  concat(cast(  convert(c.number/10000,decimal(10,1)) as char),'万' )"
-                + " else cast(c.number  as char)  end as number,  "
+        String sqlgroup = "SELECT  distinct t.* , convert(t.f_Logo using utf8) as logo, b.* , case when t.f_collects >=10000  then  concat(cast(  convert(t.f_collects/10000,decimal(10,1)) as char),'万' )"
+                + " else cast(t.f_collects  as char)  end as number,  "
                 + " case when chan.questionnumber >=10000  then "
                 + "concat(cast(  convert(chan.questionnumber/10000,decimal(10,1)) as char),'万' )"
                 + " else cast(chan.questionnumber  as char)  end as questionnumber "         

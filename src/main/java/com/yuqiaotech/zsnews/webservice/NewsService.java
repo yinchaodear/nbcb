@@ -32,6 +32,7 @@ import com.yuqiaotech.common.web.domain.response.Result;
 import com.yuqiaotech.sysadmin.model.User;
 import com.yuqiaotech.zsnews.model.Channel;
 import com.yuqiaotech.zsnews.model.Column;
+import com.yuqiaotech.zsnews.model.Comment;
 import com.yuqiaotech.zsnews.model.HistorySearchRecord;
 import com.yuqiaotech.zsnews.model.News;
 import com.yuqiaotech.zsnews.model.NewsFollower;
@@ -215,6 +216,7 @@ public class NewsService extends BaseController {
 		String sql = "insert into t_news_follower (f_news_id,f_user_info_id) values (" + nid + ","
 				+ getCurrentUserInfoId() + ")";
 		newsFollowerRepository.executeUpdateByNativeSql(sql, null);
+		updateNewsFollowStat(nid);
 		Map result = new HashMap<>();
 		result.put("msg", "1");
 		return success(result);
@@ -247,11 +249,59 @@ public class NewsService extends BaseController {
 		String sql = "insert into t_comment (f_news_id,f_user_info_id,f_type) values (" + nid + ","
 				+ getCurrentUserInfoId() + ",'点赞')";
 		newsFollowerRepository.executeUpdateByNativeSql(sql, null);
+		updateNewsFollowStat(nid);
 		Map result = new HashMap<>();
 		result.put("msg", "1");
 		return success(result);
 	}
 
+	@Autowired
+	private BaseRepository<Comment, Long> commentRepository;
+
+	/**
+	 * 更新新闻的点赞，评论，收藏等数据，更新文章发表者的点赞总数。
+	 * @param newsId
+	 */
+	private void updateNewsFollowStat(long newsId){
+		String sql = "select f_type,count(*) cnt from t_comment where f_news_id="+newsId +" group by f_type";
+		List<Map<String,Object>> rs = commentRepository.findMapByNativeSql(sql);
+
+		int likes = 0,collects = 0, comments = 0;
+		for(int i =0; i < rs.size(); i++){
+			Map<String,Object> m = rs.get(i);
+			String type = (String)m.get("f_type");
+			Number cnt = (Number)m.get("cnt");
+			if("点赞".equals(type)){
+				likes = cnt.intValue();
+			}else
+			if("评论".equals(type)){
+				comments = cnt.intValue();
+			}
+		}
+		
+		sql = "select count(*) cnt from t_news_follower  where f_news_id= "+newsId;
+		List<Map<String,Object>> rs1 = newsFollowerRepository.findMapByNativeSql(sql);
+		if(!rs1.isEmpty()){
+			collects =((Number)rs1.get(0).get("cnt")).intValue();
+		}
+		
+		News n = newsRepository.get(newsId,News.class);
+		n.setCollects(collects);
+		n.setLikes(likes);
+		n.setComments(comments);
+		newsRepository.save(n);
+		if(n.getUserinfo() == null)return;
+		long userId = n.getUserinfo().getId();
+		String sqlForUserInfo = "update t_user_info u set " +
+				"f_likes =(select count(*) from t_comment t " +
+				"	left join t_news n on n.f_id=t.f_news_id " +
+				"	where n.f_userinfo_id=u.f_id and t.f_type='点赞') where f_id="+userId;
+		commentRepository.executeUpdateByNativeSql(sqlForUserInfo,null);
+	}
+	
+	
+	
+	
 	/*
 	 * 删除文章的点赞 cmid:comment的id
 	 * 

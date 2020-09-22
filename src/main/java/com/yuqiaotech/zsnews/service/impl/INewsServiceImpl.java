@@ -28,7 +28,9 @@ public class INewsServiceImpl implements INewsService {
 
 	@Autowired
 	private BaseRepository<Comment, Long> commentRepository;
-
+	
+	@Autowired
+	private BaseRepository<NewsFollower, Long> newsFollowerRepository;
 	@Override
 	public List selectNews(Long userInfoId, Map<String, Object> params) {
 		List news = null;
@@ -79,14 +81,16 @@ public class INewsServiceImpl implements INewsService {
 		try {
 			Long newsId = params.get("newsId") != null ? Long.valueOf((String) params.get("newsId")) : null;
 			if (newsId != null) {
-				String sql = " select case when (select 1 from t_comment com where com.f_type='点赞' and f_news_id = t.f_id and f_user_info_id = " + userInfoId + ") then 1 else 0 end as agreeFlag,\n" +
-						"case when (select 1 from t_comment com where com.f_type='收藏' and f_news_id = t.f_id and f_user_info_id = " + userInfoId + ") then 1 else 0 end as collectFlag,\n" +
+				String sql = " select case when (select 1 from t_comment com where com.f_type='点赞' and f_news_id = t.f_id and f_user_info_id = " + userInfoId + ") then 1 else 0 end as agreeFlag,\n" +						
+ 						"case when (n.f_id is not null ) then 1 else 0 end as collectFlag,\n" +
 						"concat(t.f_id,'') newsId, ifnull(t.f_likes, 0) zanNum,ifnull(t.f_comments, 0) pinglunNum, ifnull(t.f_collects, 0) shoucangNum,  \n" +
 						" ifnull(ui.f_likes, 0) userTotalNum,c.f_title authorChannelName,ui.f_username userName, t.f_title title, t.f_content content\n" +
 						"from t_news t\n" +
 						"left join t_channel c on t.f_author_channel_id = c.f_id \n" +
 						"left join t_user_info ui on c.f_userinfo_id = ui.f_id\n" +
-						" where t.f_id = " + newsId;
+						" left join t_news_follower n on n.f_news_id = t.f_id and n.f_user_info_id = "+
+						 userInfoId
+						+ " where t.f_id = " + newsId;
 				List<Map<String, Object>> news = newsRepository.findMapByNativeSql(sql);
 				if (news != null && news.size() > 0) {
 					map = news.get(0);
@@ -109,28 +113,46 @@ public class INewsServiceImpl implements INewsService {
 		try {
 			Long newsId = params.get("newsId") != null ? Long.valueOf((String) params.get("newsId")) : null;
 			String type = (String) params.get("type");
-
-			if (newsId != null && !StringUtils.isEmpty(type)) {
-				String sql = "select  * from t_comment where f_type = '" + type + "' and f_news_id =" + newsId + " and f_user_info_id ="
-						+ userInfoId;
-				List<Map<String, Object>> cfs = newsRepository.findMapByNativeSql(sql);
-				if (cfs != null && cfs.size() > 0) {
-					newsRepository.executeUpdateByNativeSql("delete from t_comment where  f_type = '" + type + "' and f_news_id =" + newsId + " and f_user_info_id =" + userInfoId, null);
-				} else {
-					UserInfo userInfo = userInfoRepository.get(userInfoId, UserInfo.class);
-					News news = newsRepository.get(newsId, News.class);
-					if (userInfo != null && news != null) {
-						Comment comment = new Comment();
-						comment.setType(type);
-						comment.setUserInfo(userInfo);
-						comment.setNews(news);
-						commentRepository.save(comment);
-					}
-				}
-				updateNewsFollowStat(newsId);
-			} else {
-				throw new RuntimeException("newsId 或者 type 参数缺失");
-			}
+            if(!"收藏".equals(type)){
+            	if (newsId != null && !StringUtils.isEmpty(type)) {
+    				String sql = "select  * from t_comment where f_type = '" + type + "' and f_news_id =" + newsId + " and f_user_info_id ="
+    						+ userInfoId;
+    				List<Map<String, Object>> cfs = newsRepository.findMapByNativeSql(sql);
+    				if (cfs != null && cfs.size() > 0) {
+    					newsRepository.executeUpdateByNativeSql("delete from t_comment where  f_type = '" + type + "' and f_news_id =" + newsId + " and f_user_info_id =" + userInfoId, null);
+    				} else {
+    					UserInfo userInfo = userInfoRepository.get(userInfoId, UserInfo.class);
+    					News news = newsRepository.get(newsId, News.class);
+    					if (userInfo != null && news != null) {
+    						Comment comment = new Comment();
+    						comment.setType(type);
+    						comment.setUserInfo(userInfo);
+    						comment.setNews(news);
+    						commentRepository.save(comment);
+    					}
+    				}
+    				updateNewsFollowStat(newsId);
+    			} else {
+    				throw new RuntimeException("newsId 或者 type 参数缺失");
+    			}
+            }else{
+            	String sqlexist = "SELECT * FROM t_news_follower where f_news_id = "+newsId+" and f_user_info_id =" +userInfoId;
+            	List result = newsFollowerRepository.findMapByNativeSql(sqlexist);
+            	if(result.isEmpty()){
+            		String sql = "insert into t_news_follower (f_news_id,f_user_info_id) values (" + newsId + ","
+            				+ userInfoId + ")";
+                	newsFollowerRepository.executeUpdateByNativeSql(sql, null);
+                	updateNewsFollowStat(newsId);
+            	}else{
+            		String deletesql ="delete from t_news_follower where f_news_id = "+newsId+" and f_user_info_id = "+userInfoId;
+            		newsFollowerRepository.executeUpdateByNativeSql(deletesql, null);
+            		updateNewsFollowStat(newsId);
+            	}
+            	
+            
+            }
+			
+		
 		} catch (Exception e) {
 			e.printStackTrace();
 			map.put("flag", false);
@@ -144,7 +166,7 @@ public class INewsServiceImpl implements INewsService {
 	 * @param newsId
 	 */
 	private void updateNewsFollowStat(long newsId){
-		String sql = "select f_type,count(*) cnt from t_commnet where f_news_id="+newsId;
+		String sql = "select f_type,count(*) cnt from t_comment where f_news_id="+newsId +" group by f_type";
 		List<Map<String,Object>> rs = commentRepository.findMapByNativeSql(sql);
 
 		int likes = 0,collects = 0, comments = 0;
@@ -163,8 +185,15 @@ public class INewsServiceImpl implements INewsService {
 //				collects = cnt.intValue();
 //			}
 		}
+		
+		sql = "select count(*) cnt from t_news_follower  where f_news_id= "+newsId;
+		List<Map<String,Object>> rs1 = newsFollowerRepository.findMapByNativeSql(sql);
+		if(!rs1.isEmpty()){
+			collects =((Number)rs1.get(0).get("cnt")).intValue();
+		}
+		
 		News n = newsRepository.get(newsId,News.class);
-//		n.setCollects(collects);
+		n.setCollects(collects);
 		n.setLikes(likes);
 		n.setComments(comments);
 		newsRepository.save(n);

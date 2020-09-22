@@ -39,7 +39,12 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
         resuBean.setMsg("登录失败");
         if (e instanceof UsernameNotFoundException)
         {
-            resuBean.setMsg("用户名不存在");
+            if("third_add_mobile".equals(e.getMessage())){
+                resuBean.setMsg("三方第一次登录，需要补充手机号。");
+                resuBean.setCode(556);
+            }else {
+                resuBean.setMsg("用户名不存在");
+            }
             httpServletResponse.getWriter().write(JSON.toJSONString(resuBean));
             return;
         }

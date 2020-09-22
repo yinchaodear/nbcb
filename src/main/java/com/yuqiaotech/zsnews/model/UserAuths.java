@@ -1,6 +1,7 @@
 package com.yuqiaotech.zsnews.model;
 
 import javax.persistence.*;
+import javax.persistence.Column;
 
 /**
  * Created on 2020/9/3 8:06 下午.
@@ -35,6 +36,8 @@ public class UserAuths {
 	/**
 	 * 扩展三方登陆账号相关信息
 	 */
+	@Column(name = "f_info",columnDefinition="text")
+	private String info;
 
 	public Long getId() {
 		return id;
@@ -66,5 +69,13 @@ public class UserAuths {
 
 	public void setThirdKey(String thirdKey) {
 		this.thirdKey = thirdKey;
+	}
+
+	public String getInfo() {
+		return info;
+	}
+
+	public void setInfo(String info) {
+		this.info = info;
 	}
 }

@@ -46,9 +46,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 		Map<String, String> map = new HashMap<>();
 		if (!StringUtils.isEmpty(loginType) && !loginType.equals("COMMON") && !loginType.equals("PHONE")) {
 			username = thirdLoginKey;
-		}
-
-		if (!StringUtils.isEmpty(loginType) && loginType.equals("PHONE")) {
+		}else if (!StringUtils.isEmpty(loginType) && loginType.equals("PHONE")) {
 			username = details.getMobile();
 		}
 

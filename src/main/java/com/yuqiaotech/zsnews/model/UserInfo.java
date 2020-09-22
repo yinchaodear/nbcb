@@ -39,6 +39,7 @@ public class UserInfo extends BaseModel
     private String newAvatar;//新头像
     
     private String remark;//个人的一些详细说明
+    private String nickName;//昵称,（微信，qq，微博的，不唯一）
     
     private String newRemark;//新的用户简介
     
@@ -276,4 +277,16 @@ public class UserInfo extends BaseModel
     public Integer getLikes() {  return likes; }
 
     public void setLikes(Integer likes) { this.likes = likes; }
+
+    /**
+     * 昵称,（微信，qq，微博的，不唯一）
+     * @return
+     */
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
 }

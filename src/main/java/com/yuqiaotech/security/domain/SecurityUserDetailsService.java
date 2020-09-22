@@ -70,7 +70,12 @@ public class SecurityUserDetailsService implements UserDetailsService {
 				if (userAuths != null) {
 					if (userAuths.getUserinfo() != null) {
 						userInfo = userInfoRepository.get(userAuths.getUserinfo().getId(), UserInfo.class);
+					}else{
+						throw new UsernameNotFoundException("third_add_mobile");
 					}
+				}else{
+					//前端跳转到
+					throw new UsernameNotFoundException("third_add_mobile");
 				}
 
 				//三方登陆时这里username 记录的thirdKey

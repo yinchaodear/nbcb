@@ -88,9 +88,20 @@ public class ChannelService extends BaseController
     {
         String sql = "delete from t_channel_follower where f_id=" + cfid;
         channelRepository.executeUpdateByNativeSql(sql, null);
+        checkChannelCollects();
         Map result = new HashMap<>();
         result.put("msg", "1");
         return success(result);
+    }
+    
+    //更新所有的频道的关注人数
+    public void checkChannelCollects(){
+       String sql ="update t_channel ch  inner join ( "
+       		+ " select c.f_id as channelid ,count(1) as number from t_channel_follower cf inner "
+       		+ " join t_channel c  on c.f_id = cf.f_channel_id "
+       		+ " group by  cf.f_channel_id ) b on b.channelid =ch.f_id "
+       		+ " set ch.f_collects =  b.number";
+       channelRepository.executeUpdateByNativeSql(sql, null);
     }
     
     @GetMapping("addselfchannel")
@@ -108,6 +119,7 @@ public class ChannelService extends BaseController
         String sql = "insert into t_channel_follower (f_channel_id,f_user_info_id) values (" + id + ","
             + getCurrentUserInfoId() + ")";
         channelRepository.executeUpdateByNativeSql(sql, null);
+        checkChannelCollects();
         Map result = new HashMap<>();
         result.put("msg", "1");
         return success(result);
@@ -129,14 +141,14 @@ public class ChannelService extends BaseController
         		+ " on t.f_id =m.f_channel_id inner join t_category c on c.f_id =m.f_category_id  "
         		+ " where t.f_kind = '"+kind+"' and t.f_type ='"+type+"' group by c.f_title";
         List categorygroup = channelRepository.findMapByNativeSql(sql);
-        String sqlgroup = "SELECT  distinct t.* , convert(t.f_Logo using utf8) as logo, b.* , case when c.number >=10000  then  concat(cast(  convert(c.number/10000,decimal(10,1)) as char),'万' )"
-                + " else cast(c.number  as char)  end as number  FROM  t_channel t  left  join (select cf.f_id as cfid ,cf.f_channel_id as chid "
+        String sqlgroup = "SELECT  distinct t.* , convert(t.f_Logo using utf8) as logo, b.* , case when t.f_collects >=10000  then  concat(cast(  convert(t.f_collects/10000,decimal(10,1)) as char),'万' )"
+                + " else cast(t.f_collects  as char)  end as number  FROM  t_channel t  left  join (select cf.f_id as cfid ,cf.f_channel_id as chid "
                 + ",cf.f_user_info_id as cid from t_channel_follower cf inner join t_channel c  on c.f_id = "
                 + "cf.f_channel_id  where f_user_info_id = " + getCurrentUserInfoId() + " and " + wherekindandtype
                 + ") b on t.f_id = b.chid "
-                + " left join (select c.f_id as channelid ,count(1) as number from t_channel_follower cf inner"
-                + " join t_channel c  on c.f_id = cf.f_channel_id  where  " + wherekindandtype
-                + " group by  cf.f_channel_id) c on c.channelid  = t.f_id "
+//                + " left join (select c.f_id as channelid ,count(1) as number from t_channel_follower cf inner"
+//                + " join t_channel c  on c.f_id = cf.f_channel_id  where  " + wherekindandtype
+//                + " group by  cf.f_channel_id) c on c.channelid  = t.f_id "
                 + "inner join  t_channe_catego_mappin tcm on t.f_id =tcm.f_channel_id inner join t_category cate "
                 + " on  cate.f_id =tcm.f_category_id  "
                 + " where t.f_status= 0 and t.f_deltag =0  and  t.f_type ='" + type

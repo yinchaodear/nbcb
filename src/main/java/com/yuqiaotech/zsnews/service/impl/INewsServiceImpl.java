@@ -157,13 +157,14 @@ public class INewsServiceImpl implements INewsService {
 			}else
 			if("评论".equals(type)){
 				comments = cnt.intValue();
-			}else
-			if("收藏".equals(type)){
-				collects = cnt.intValue();
 			}
+
+//			if("收藏".equals(type)){
+//				collects = cnt.intValue();
+//			}
 		}
 		News n = newsRepository.get(newsId,News.class);
-		n.setCollects(collects);
+//		n.setCollects(collects);
 		n.setLikes(likes);
 		n.setComments(comments);
 		newsRepository.save(n);

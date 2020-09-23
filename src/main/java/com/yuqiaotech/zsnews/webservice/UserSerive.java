@@ -177,7 +177,7 @@ public class UserSerive extends BaseController implements NewsDicConstants {
     //关注列表
     @GetMapping("getChannelFollower")
     public Result getChannelFollower() {
-        String sql = "SELECT f_id,f_title,f_remark FROM t_channel WHERE f_id IN (SELECT f_channel_id FROM t_channel_follower WHERE f_user_info_id = " + getCurrentUserInfoId() + " )";
+        String sql = "SELECT f_id,f_title,f_remark,convert(f_Logo using utf8) AS logo FROM t_channel WHERE f_id IN (SELECT f_channel_id FROM t_channel_follower WHERE f_user_info_id = " + getCurrentUserInfoId() + " )";
         List<Map<String, Object>> userFollowerList = userinfoRepository.findMapByNativeSql(sql);
         Map result = new HashMap();
         result.put("userFollowerList", userFollowerList);

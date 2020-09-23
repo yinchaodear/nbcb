@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title></title>
+</head>
+<body>
+</body>
+</html>
+<script type="text/javascript">
+	var Terminal = {
+		platform : function() {
+			var u = navigator.userAgent, app = navigator.appVersion;
+			return {
+				android : u.indexOf('Android') > -1 || u.indexOf('Linux') > -1,
+				iPhone : u.indexOf('iPhone') > -1,
+				iPad : u.indexOf('iPad') > -1
+			};
+		}(),
+		language : (navigator.browserLanguage || navigator.language).toLowerCase()
+	}
+	if (Terminal.platform.android) {
+		location.href = "http://www.javaxp.net/app/erp/android/zsapp.apk";
+	} else if (Terminal.platform.iPhone) {
+		location.href = "https://www.pgyer.com/UTUi";
+	}else{
+		alert('请使用手机扫码下载');
+	}
+</script>

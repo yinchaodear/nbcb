@@ -81,7 +81,11 @@ public class NewsService extends BaseController {
 		}
 		String sql = "SELECT    t.* ,  d.f_title as channelname ,pm1.imgs , case when t.f_comments  >=10000  then "
 				+ " concat(cast(  convert(t.f_comments/10000,decimal(10,1)) as char),'万' ) "
-				+ " else cast(t.f_comments   as char)  end as apprisecount  FROM t_news t "
+				+ " else cast(t.f_comments   as char)  end as apprisecount , "
+			    + " case when t.f_collects  >=10000  then "
+			    + " concat(cast(  convert(t.f_collects/10000,decimal(10,1)) as char),'万' ) "
+			    + " else cast(t.f_collects   as char)  end as collects "
+				+ " FROM t_news t "
 				+ " left  join  t_channel d on d.f_id =t.f_author_channel_id  left join  ("
 				+ " select pm.f_news_id as pmid , group_concat(f_picpath) as imgs from t_pic_mapping pm group by pm.f_news_id )"
 				+ " pm1 on pm1.pmid = t.f_id where t.f_status = 0 "

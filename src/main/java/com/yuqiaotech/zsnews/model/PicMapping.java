@@ -39,6 +39,8 @@ public class PicMapping extends BaseModel
     
     private String h5href;//图片对应链接
     
+    private String pictext;//图片描述
+    
     public Long getId()
     {
         return id;
@@ -97,5 +99,15 @@ public class PicMapping extends BaseModel
     public void setH5href(String h5href)
     {
         this.h5href = h5href;
+    }
+    
+    public String getPictext()
+    {
+        return pictext;
+    }
+    
+    public void setPictext(String pictext)
+    {
+        this.pictext = pictext;
     }
 }

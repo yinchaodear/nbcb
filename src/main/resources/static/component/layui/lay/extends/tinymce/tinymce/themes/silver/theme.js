@@ -25027,7 +25027,7 @@
       },
       insert: {
         title: 'Insert',
-        items: 'image link media addcomment pageembed template codesample inserttable | charmap emoticons hr | pagebreak nonbreaking anchor toc | insertdatetime'
+        items: 'image link media addcomment pageembed template codesample code inserttable | charmap emoticons hr | pagebreak nonbreaking anchor toc | insertdatetime'
       },
       format: {
         title: 'Format',

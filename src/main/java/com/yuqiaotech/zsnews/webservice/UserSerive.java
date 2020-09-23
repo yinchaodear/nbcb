@@ -104,22 +104,22 @@ public class UserSerive extends BaseController implements NewsDicConstants {
                     userInfo.setPush(Integer.parseInt(value));
                     break;
                 case "pwd":
-                    if (StringUtils.isNotEmpty(value)){
+                    if (StringUtils.isNotEmpty(value)) {
                         userInfo.setPwd(value);
-                    }else {
-                        errMsg="新密码为空";
+                    } else {
+                        errMsg = "新密码为空";
                     }
                     break;
                 case "headImg":
-                    if(StringUtils.isNotEmpty(value)){
+                    if (StringUtils.isNotEmpty(value)) {
                         if (userInfo.getStatus() == IUserInfo.Status.CHECKING) {
-                            errMsg="用户信息正在审核";
-                        }else {
+                            errMsg = "用户信息正在审核";
+                        } else {
                             userInfo.setNewAvatar(value);
                             userInfo.setStatus(IUserInfo.Status.CHECKING);
                         }
-                    }else {
-                        errMsg="头像是空的";
+                    } else {
+                        errMsg = "头像是空的";
                     }
                     break;
             }
@@ -132,9 +132,16 @@ public class UserSerive extends BaseController implements NewsDicConstants {
 
     //获取收藏文章列表
     @GetMapping("getCollection")
-    public Result getCollection() {
-//        String sql = "SELECT f_id,f_news_id,f_user_info_id FROM t_news_follower WHERE f_user_info_id = " + getCurrentUserInfoId();
-        String sql = "SELECT t.* ,  d.f_title as channelname ,pm1.imgs , case when b.apprisecount  >=10000  then  concat(cast(  convert(b.apprisecount/10000,decimal(10,1)) as char),'万' )  else cast(b.apprisecount  as char)  end as apprisecount  FROM t_news t left join\t( SELECT f_news_id  as id2, count(1)  as apprisecount FROM t_comment where f_type ='评论' or f_type ='回答' group by f_news_id )  b on b.id2 =t.f_id left  join  t_channel d on d.f_id =t.f_author_channel_id left join  (select pm.f_news_id as pmid , group_concat(f_picpath) as imgs from t_pic_mapping pm group by pm.f_news_id ) pm1 on pm1.pmid = t.f_id where t.f_id IN (SELECT f_news_id FROM t_news_follower WHERE f_user_info_id = "+getCurrentUserInfoId()+") AND t.f_status = 0 order by f_display_order, f_updated desc";
+    public Result getCollection(Long pageNo, Long pageSize) {
+        String limitStr = "";
+        if (pageNo != null && pageSize != null) {
+            limitStr = "limit " + pageNo * pageSize + "," + pageSize;
+        }
+        String sql = "SELECT t.* ,  d.f_title as channelname ,pm1.imgs , case when b.apprisecount  >=10000  then  concat(cast(  convert(b.apprisecount/10000,decimal(10,1)) as char),'万' )  else cast(b.apprisecount  as char)  end as apprisecount  FROM t_news t " +
+                "left join\t( SELECT f_news_id  as id2, count(1)  as apprisecount FROM t_comment where f_type ='评论' or f_type ='回答' group by f_news_id )  b on b.id2 =t.f_id " +
+                "left  join  t_channel d on d.f_id =t.f_author_channel_id " +
+                "left join  (select pm.f_news_id as pmid , group_concat(f_picpath) as imgs from t_pic_mapping pm group by pm.f_news_id ) pm1 on pm1.pmid = t.f_id " +
+                "where t.f_id IN (SELECT f_news_id FROM t_news_follower WHERE f_user_info_id = " + getCurrentUserInfoId() + ") AND t.f_status = 0 order by f_display_order, f_updated desc " + limitStr;
         List<Map<String, Object>> collectionList = newsRepository.findMapByNativeSql(sql);
         Map result = new HashMap();
         result.put("collectionList", collectionList);
@@ -158,8 +165,11 @@ public class UserSerive extends BaseController implements NewsDicConstants {
 
     //问答列表
     @GetMapping("getQuestion")
-    public Result getQuestion() {
-//        String sql = "SELECT f_id,f_title,f_content FROM t_news WHERE f_type = '提问' AND f_userinfo_id = " + getCurrentUserInfoId();
+    public Result getQuestion(Long pageNo, Long pageSize) {
+        String limitStr = "";
+        if (pageNo != null && pageSize != null) {
+            limitStr = "limit " + pageNo * pageSize + "," + pageSize;
+        }
         String sql = "select convert(c.f_Logo using utf8) as logo,concat(t.f_id,'') newsId, ifnull(t.f_likes, 0) zanNum,ifnull(t.f_comments, 0) pinglunNum, ifnull(t.f_collects, 0) shoucangNum, ifnull(ui.f_likes, 0) userTotalNum,ui.f_username userName, t.f_title title, t.f_content content \n" +
                 "from t_news_channel newsc \n" +
                 "left join t_news t on t.f_id=newsc.f_news_id \n" +
@@ -167,7 +177,7 @@ public class UserSerive extends BaseController implements NewsDicConstants {
                 "left join t_channel c on t.f_author_channel_id = c.f_id \n" +
                 "left join t_user_info ui on c.f_userinfo_id = ui.f_id\n" +
                 "WHERE newsc.f_news_id IN (SELECT f_id FROM t_news WHERE f_type = '提问' AND f_userinfo_id = " + getCurrentUserInfoId() + " )\n" +
-                "order by t.f_id desc LIMIT 0,10";
+                "order by t.f_id desc " + limitStr;
         List<Map<String, Object>> questionList = newsRepository.findMapByNativeSql(sql);
         Map result = new HashMap();
         result.put("questionList", questionList);
@@ -200,9 +210,12 @@ public class UserSerive extends BaseController implements NewsDicConstants {
 
     //投稿列表
     @GetMapping("tougao")
-    public Result tougao() {
-        String sql = "SELECT f_id,f_title,f_status,f_content,f_check_result  FROM t_news WHERE f_type='投稿' AND f_userinfo_id = " + getCurrentUserInfoId();
-//        String sql = "SELECT * FROM t_channel";
+    public Result tougao(Long pageNo, Long pageSize) {
+        String limitStr = "";
+        if (pageNo != null && pageSize != null) {
+            limitStr = "limit " + pageNo * pageSize + "," + pageSize;
+        }
+        String sql = "SELECT f_id,f_title,f_status,f_content,f_check_result  FROM t_news WHERE f_type='投稿' AND f_userinfo_id = " + getCurrentUserInfoId() + " " + limitStr;
         List<Map<String, Object>> tougaoList = userinfoRepository.findMapByNativeSql(sql, null);
         Map result = new HashMap();
         result.put("tougaoList", tougaoList);
@@ -293,8 +306,8 @@ public class UserSerive extends BaseController implements NewsDicConstants {
         Map result = new HashMap();
         if (historyIntegralList != null && !historyIntegralList.isEmpty()) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            String occurTime = historyIntegralList.get(0).get("f_occur_time").toString().substring(0,10);
-            String now = sdf.format(new Date()).substring(0,10);
+            String occurTime = historyIntegralList.get(0).get("f_occur_time").toString().substring(0, 10);
+            String now = sdf.format(new Date()).substring(0, 10);
             if (now.equals(occurTime)) {
                 result.put("isOk", "今天已经签过了");
             }

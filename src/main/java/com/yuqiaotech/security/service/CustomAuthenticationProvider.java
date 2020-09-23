@@ -41,13 +41,13 @@ public class CustomAuthenticationProvider implements AuthenticationProvider
         String username = (String)authentication.getPrincipal();
         String password = (String)authentication.getCredentials();
         
-        SecurityUserDetails userInfo = (SecurityUserDetails) securityUserDetailsService.loadUserByUsername(username);
-        if (userInfo.getLoginType().equals("COMMON") && !password.equals(userInfo.getPassword()))
+        SecurityUserDetails securityUserDetails = (SecurityUserDetails) securityUserDetailsService.loadUserByUsername(username);
+        if ("COMMON".equals(securityUserDetails.getLoginType()) && !password.equals(securityUserDetails.getPassword()))
         //        if (!passwordEncoder.matches(password, userInfo.getPassword()))
         {
             throw new BadCredentialsException(" Password Not Found ");
         }
-        return new UsernamePasswordAuthenticationToken(userInfo, password, userInfo.getAuthorities());
+        return new UsernamePasswordAuthenticationToken(securityUserDetails, password, securityUserDetails.getAuthorities());
     }
     
     @Override

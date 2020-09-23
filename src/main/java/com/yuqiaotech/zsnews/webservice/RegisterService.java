@@ -62,28 +62,81 @@ public class RegisterService extends BaseController
      * 用户注册
      */
     @RequestMapping("register")
-    public Result register(@RequestBody UserInfo user) {
+    public Result register(@RequestBody UserInfo user, HttpServletResponse response) {
        System.out.println("ChannelService.Register()");
-       Map result = new HashMap<>();   
-       System.out.println(user.getUsername());
+       Map result = new HashMap<>();
        System.out.println(user.getMobile());
        System.out.println(user.getPwd());
-       String sql ="SELECT * FROM t_user_info where f_username ='"+user.getUsername()+"'";
-       List map =  userInfoRepository.findMapByNativeSql(sql);
-       if(!map.isEmpty()){
-    	   result.put("msg", 1); //1 用户名重复
-    	   return success(result);
-       }
-       sql ="SELECT * FROM t_user_info where f_mobile ='"+user.getMobile()+"'";
-       map =  userInfoRepository.findMapByNativeSql(sql);
-       if(!map.isEmpty()){
+       String sql ="SELECT * FROM t_user_info where f_mobile ='"+user.getMobile()+"'";
+       List list =  userInfoRepository.findMapByNativeSql(sql);
+       if(!list.isEmpty()){
     	   result.put("msg", 2); //2 电话重复
     	   return success(result);
        }
        
-       userInfoRepository.save(user);
+       user=userInfoRepository.save(user);
+       if(StringUtils.isEmpty(user.getNickName())) {
+           user.setNickName("新闻访客" + user.getId());
+           userInfoRepository.update(user);
+       }
+
+        Map<String, String> map = new HashMap<>();
+        map.put("username", String.format("%s%s%s%s%s", user.getMobile().trim(),
+                "|", "FRONT", "|", "PHONE"));
+        map.put("password", user.getPwd());
+        String token = JwtUtils.getToken(map, 60 * 60 * 24 * 30);
+        System.out.println("token:" + token);
+        result.put("token",token);
+
+        Cookie cookie=new Cookie("token",token);
+        response.addCookie(cookie);
        result.put("msg", 0); //0 成功
+
        return success(result);
+    }
+
+    /*
+     * 用户手机号注册码登录
+     */
+    @RequestMapping("mobileCodeLogin")
+    public Result mobileCodeLogin(@RequestBody Map params, HttpServletResponse response) {
+        System.out.println("======用户手机号注册码登录=====进入==");
+        Map result = new HashMap<>();
+        result.put("code", 0); //0 成功
+        try {
+            System.out.println("======用户手机号注册码登录=========params=【" + params.toString() + "】==");
+            JSONObject params0 = new JSONObject(params);
+            String mobile = params0.getString("mobile");
+
+            //1.处理用户信息
+            UserInfo userInfo = userInfoRepository.findUniqueBy("mobile", mobile, UserInfo.class);
+            if (userInfo == null) {
+                result.put("msg", "这个手机号没有注册。");
+                result.put("code", 0);
+                return success(result);
+            }else {
+                Map<String, String> map = new HashMap<>();
+                map.put("username", String.format("%s%s%s%s%s", mobile.trim(),
+                        "|", "FRONT", "|", "PHONE"));
+                map.put("password", userInfo.getPwd());
+                String token = JwtUtils.getToken(map, 60 * 60 * 24 * 30);
+                System.out.println("token:" + token);
+                result.put("token", token);
+                result.put("code", 1);
+
+                Cookie cookie = new Cookie("token", token);
+                response.addCookie(cookie);
+
+                System.out.println("======用户手机号注册码登录成功===========");
+                return success(result);
+            }
+        }catch (Exception e){
+            System.out.println("======用户手机号注册码登录失败===========");
+            e.printStackTrace();
+            result.put("code", 1); //1 失败
+            result.put("msg", "服务器后台报错，"+e.getMessage());
+            return success("服务器后台报错，"+e.getMessage());
+        }
     }
 
     /*
@@ -129,7 +182,10 @@ public class RegisterService extends BaseController
                     userInfo.setAvatar(avatar);
                 }
                 if (StringUtils.isEmpty(userInfo.getNickName()))
-                    userInfo.setNickName(thirdJson.getString("name"));
+                    userInfo.setNickName(thirdJson.getString("name"));//微信昵称
+            }
+            if(StringUtils.isEmpty(userInfo.getNickName())) {//如果微信昵称没取到，就自己编一个昵称
+                userInfo.setNickName("新闻访客" + userInfo.getId());
             }
             userInfoRepository.update(userInfo);
 

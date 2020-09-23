@@ -23,6 +23,10 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -517,6 +521,38 @@ public class NewsController extends BaseController
             }
         }
         
+        if ("图片".equals(news.getMediaType()))
+        {
+            picmappinglist.clear();
+            //如果是图片新闻，需要把正文中的图片抽取出来
+            String newscontent = news.getContent();
+            if (StringUtils.isNotEmpty(newscontent))
+            {
+                Document doc = Jsoup.parse(newscontent);
+                Elements es = doc.select("img");
+                if (es != null && !es.isEmpty())
+                {
+                    int idx = 1;
+                    for (Element element : es)
+                    {
+                        String src = element.attr("src");
+                        String alt = element.attr("alt");
+                        if (StringUtils.isNotEmpty(src))
+                        {
+                            String picname = src.substring(src.indexOf("fileName=") + "fileName=".length());
+                            PicMapping pm = new PicMapping();
+                            pm.setNews(news);
+                            pm.setDisplayOrder(idx);
+                            pm.setPicpath(picname);
+                            pm.setPictext(alt);
+                            picmappinglist.add(pm);
+                            idx++;
+                        }
+                    }
+                }
+            }
+        }
+        
         if (CollectionUtils.isNotEmpty(picmappinglist))
         {
             for (PicMapping pm : picmappinglist)
@@ -814,27 +850,30 @@ public class NewsController extends BaseController
         News news = newsRepository.get(id, News.class);
         NewsBean newsBean = new NewsBean();
         BeanUtils.copyProperties(news, newsBean);
-        List<PicMapping> picMappingList =
-            picMappingRepository.findByHql("from PicMapping where news.id=" + id + " order by displayOrder asc");
-        if (CollectionUtils.isNotEmpty(picMappingList))
+        if (!"图片".equals(news.getMediaType()))
         {
-            for (int i = 0; i < picMappingList.size(); i++)
+            List<PicMapping> picMappingList =
+                picMappingRepository.findByHql("from PicMapping where news.id=" + id + " order by displayOrder asc");
+            if (CollectionUtils.isNotEmpty(picMappingList))
             {
-                if (i == 0)
+                for (int i = 0; i < picMappingList.size(); i++)
                 {
-                    newsBean.setPicname1(picMappingList.get(i).getPicpath());
-                }
-                else if (i == 1)
-                {
-                    newsBean.setPicname2(picMappingList.get(i).getPicpath());
-                }
-                else if (i == 2)
-                {
-                    newsBean.setPicname3(picMappingList.get(i).getPicpath());
-                }
-                else
-                {
-                    break;
+                    if (i == 0)
+                    {
+                        newsBean.setPicname1(picMappingList.get(i).getPicpath());
+                    }
+                    else if (i == 1)
+                    {
+                        newsBean.setPicname2(picMappingList.get(i).getPicpath());
+                    }
+                    else if (i == 2)
+                    {
+                        newsBean.setPicname3(picMappingList.get(i).getPicpath());
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
         }
@@ -943,6 +982,38 @@ public class NewsController extends BaseController
             }
         }
         newsRepository.update(news);
+        
+        if ("图片".equals(news.getMediaType()))
+        {
+            picmappinglist.clear();
+            //如果是图片新闻，需要把正文中的图片抽取出来
+            String newscontent = news.getContent();
+            if (StringUtils.isNotEmpty(newscontent))
+            {
+                Document doc = Jsoup.parse(newscontent);
+                Elements es = doc.select("img");
+                if (es != null && !es.isEmpty())
+                {
+                    int idx = 1;
+                    for (Element element : es)
+                    {
+                        String src = element.attr("src");
+                        String alt = element.attr("alt");
+                        if (StringUtils.isNotEmpty(src))
+                        {
+                            String picname = src.substring(src.indexOf("fileName=") + "fileName=".length());
+                            PicMapping pm = new PicMapping();
+                            pm.setNews(news);
+                            pm.setDisplayOrder(idx);
+                            pm.setPicpath(picname);
+                            pm.setPictext(alt);
+                            picmappinglist.add(pm);
+                            idx++;
+                        }
+                    }
+                }
+            }
+        }
         
         if (CollectionUtils.isNotEmpty(picmappinglist))
         {

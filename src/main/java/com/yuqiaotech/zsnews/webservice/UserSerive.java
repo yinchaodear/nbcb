@@ -308,7 +308,7 @@ public class UserSerive extends BaseController implements NewsDicConstants {
     //系统消息
     @GetMapping("getNotice")
     public Result getNotice() {
-        String sql = "SELECT f_id,f_title,f_content FROM t_sys_notice WHERE f_id IN (SELECT f_sys_notice_id FROM t_sys_notice_result WHERE f_user_info_id = " + getCurrentUserInfoId() + " )  ORDER BY f_pubtime DESC";
+        String sql = "SELECT f_id,f_title,f_content FROM t_sys_notice WHERE f_id IN (SELECT f_sys_notice_id FROM t_sys_notice_result )  ORDER BY f_pubtime DESC";
         List<Map<String, Object>> noticeList = sysNoticeRepository.findMapByNativeSql(sql);
         Map result = new HashMap();
         result.put("noticeList", noticeList);

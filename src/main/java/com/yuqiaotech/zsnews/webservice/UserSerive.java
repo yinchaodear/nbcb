@@ -301,7 +301,7 @@ public class UserSerive extends BaseController implements NewsDicConstants {
             result.put("historyIntegralList", historyIntegralList);
             result.put("lastIntegral", historyIntegralList.get(0));
         }
-        result.put("userName", getCurrentUserInfo().getUsername());
+        result.put("nickName", getCurrentUserInfo().getNickName());
         return success(result);
     }
 

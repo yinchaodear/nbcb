@@ -84,12 +84,16 @@ public class News extends BaseModel
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "f_check_user_id")
     private User checkUser;//审核人
-
+    
     private Integer clicks;//浏览数量
+    
     private Integer likes;//点赞数量
+    
     private Integer comments;//评论数量
+    
     private Integer collects;//收藏数量
-
+    
+    private String videoPath;//视频路径，一个资源只能由一个视频
     
     public Long getId()
     {
@@ -331,36 +335,54 @@ public class News extends BaseModel
     {
         this.ishot = ishot;
     }
-
-    public Integer getClicks() {
+    
+    public Integer getClicks()
+    {
         return clicks;
     }
-
-    public void setClicks(Integer clicks) {
+    
+    public void setClicks(Integer clicks)
+    {
         this.clicks = clicks;
     }
-
-    public Integer getLikes() {
+    
+    public Integer getLikes()
+    {
         return likes;
     }
-
-    public void setLikes(Integer likes) {
+    
+    public void setLikes(Integer likes)
+    {
         this.likes = likes;
     }
-
-    public Integer getComments() {
+    
+    public Integer getComments()
+    {
         return comments;
     }
-
-    public void setComments(Integer comments) {
+    
+    public void setComments(Integer comments)
+    {
         this.comments = comments;
     }
-
-    public Integer getCollects() {
+    
+    public Integer getCollects()
+    {
         return collects;
     }
-
-    public void setCollects(Integer collects) {
+    
+    public void setCollects(Integer collects)
+    {
         this.collects = collects;
+    }
+    
+    public String getVideoPath()
+    {
+        return videoPath;
+    }
+    
+    public void setVideoPath(String videoPath)
+    {
+        this.videoPath = videoPath;
     }
 }

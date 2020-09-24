@@ -44,7 +44,7 @@
 						<div class="layui-col-md3">
 							<label class="layui-form-label">资源类型</label>
 							<div class="layui-input-block">
-								<select lay-filter="changemediatype" name="mediaType" readonly>
+								<select lay-filter="changemediatype" name="mediaType" disabled="disabled">
 									<option value="文章" th:selected="${news.mediaType eq '文章'}">文章</option>
 									<option value="链接" th:selected="${news.mediaType eq '链接'}">链接</option>
 									<option value="图片" th:selected="${news.mediaType eq '图片'}">图片</option>
@@ -64,7 +64,7 @@
 						</div>
 					</div>
 
-					<div class="layui-form-item" id="contentdiv" th:style="'display:' + @{(${news.mediaType eq '链接'} ? 'none' : '')} + ''">
+					<div class="layui-form-item" id="contentdiv" th:style="'display:' + @{(${news.mediaType eq '链接' || news.mediaType eq '视频' } ? 'none' : '')} + ''">
 						<label class="layui-form-label">内容</label>
 						<div class="layui-input-block">
 							<textarea name="content2" id="content2" placeholder="请输入内容" class="layui-textarea" maxlength="500" th:text="${ news.content}"></textarea>
@@ -77,6 +77,24 @@
 							<input type="text" name="link" th:value="${ news.link }" autocomplete="off" placeholder="请输入链接地址" class="layui-input" maxlength="200">
 						</div>
 					</div>
+					
+					<div class="layui-form-item" id="videouploaddiv"  th:style="'display:' + @{(${news.mediaType eq '视频'} ? '' : 'none')} + ''">
+						<label class="layui-form-label">上传视频</label>
+						<div class="layui-input-block">
+							<button type="button" class="layui-btn cover" id="control_video_button">上传视频</button>
+							<button type="button" class="layui-btn layui-btn-danger cover" id="control_video_del" style="display: none;">删除视频</button>
+							<input type="hidden" id="videoPath" th:value="${ news.videoPath}" name="videoPath" />
+						</div>
+					</div>
+
+					<div class="layui-form-item" id="videodiv"  style="display:none;">
+						<label class="layui-form-label"></label>
+						<div class="layui-input-block">
+							<video controls="controls" id="control_video_tag"  style="width: 50%;"> 您的浏览器不支持 video 标签。
+							</video>
+						</div>
+					</div>
+					
 					<hql:queryForList hql="from Channel where status=0 and deltag=0 and kind='浙商号'  order by displayOrder" id="channellist" />
 					<div class="layui-form-item ">
 						<label class="layui-form-label">浙商号</label>
@@ -253,6 +271,34 @@
 				}
 			});
 			
+			upload.render({
+				elem : '#control_video_button',
+				url : '/attachment/uploadFile',
+				method : 'POST',
+				accept : 'video',
+				size : 1024 * 50,
+				before : function(obj) {
+					this.data.objectId = news_tid;
+					this.data.objectType = objectType;
+				},
+				done : function(res) {
+					var videopath = '/attachment/showVideo?objectId=' + news_tid + "&objectType=" + objectType + "&fileName=" + res.msg;
+					$("#videoPath").val(res.msg);
+					$("#control_video_button").css("display", "none");
+					$("#control_video_del").css("display", "");
+					$("#videodiv").css("display", "");
+					$("#control_video_tag").attr("src", videopath);
+				}
+			});
+			
+			$('#control_video_del').click(function() {
+				$("#videoPath").val('');
+				$("#control_video_button").css("display", "");
+				$("#control_video_del").css("display", "none");
+				$("#videodiv").css("display", "none");
+				$("#control_video_tag").attr("src", '');
+			})
+			
 			
 			var picname1 = [[${ news.picname1}]];
 			if(picname1 && picname1!=null &&  picname1!=''&&  picname1!='null'){
@@ -269,6 +315,15 @@
 			console.log('picname3:'+picname3);
 			if(picname3 && picname3!=null && picname3!=''&& picname3!='null'){
 				initpic(3,picname3);
+			}
+			
+			var videoPath = [[${ news.videoPath}]];
+			if(videoPath && videoPath!=null && videoPath!=''&& videoPath!='null'){
+				var videopath = '/attachment/showVideo?objectId=' + news_tid + "&objectType=" + objectType + "&fileName=" + videoPath;
+				$("#control_video_button").css("display", "none");
+				$("#control_video_del").css("display", "");
+				$("#videodiv").css("display", "");
+				$("#control_video_tag").attr("src", videopath);
 			}
 			
 			form.on('select(channelfilter)', function(data) {

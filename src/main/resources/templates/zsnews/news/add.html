@@ -69,6 +69,22 @@
 							<input type="text" name="link" autocomplete="off" placeholder="请输入链接地址" class="layui-input" maxlength="200">
 						</div>
 					</div>
+					<div class="layui-form-item" id="videouploaddiv" style="display: none;">
+						<label class="layui-form-label">上传视频</label>
+						<div class="layui-input-block">
+							<button type="button" class="layui-btn cover" id="control_video_button">上传视频</button>
+							<button type="button" class="layui-btn layui-btn-danger cover" id="control_video_del" style="display: none;">删除视频</button>
+							<input type="hidden" id="videoPath" value="" name="videoPath" />
+						</div>
+					</div>
+
+					<div class="layui-form-item" id="videodiv" style="display: none;">
+						<label class="layui-form-label"></label>
+						<div class="layui-input-block">
+							<video controls="controls" id="control_video_tag" style="width: 50%;"> 您的浏览器不支持 video 标签。
+							</video>
+						</div>
+					</div>
 					<hql:queryForList hql="from Channel where status=0 and deltag=0 and kind='浙商号'  order by displayOrder" id="channellist" />
 					<div class="layui-form-item ">
 						<label class="layui-form-label">浙商号</label>
@@ -134,7 +150,6 @@
 			upload = layui.upload;
 			let MODULE_PATH = "/zsnews/news/";
 			$("#objectId").val(news_tid);
-			
 
 			var edit = tinymce.render({
 				elem : "#content2",
@@ -189,6 +204,34 @@
 					$("#picname" + currentidx).val(res.msg);
 				}
 			});
+
+			upload.render({
+				elem : '#control_video_button',
+				url : '/attachment/uploadFile',
+				method : 'POST',
+				accept : 'video',
+				size : 1024 * 50,
+				before : function(obj) {
+					this.data.objectId = news_tid;
+					this.data.objectType = objectType;
+				},
+				done : function(res) {
+					var videopath = '/attachment/showVideo?objectId=' + news_tid + "&objectType=" + objectType + "&fileName=" + res.msg;
+					$("#videoPath").val(res.msg);
+					$("#control_video_button").css("display", "none");
+					$("#control_video_del").css("display", "");
+					$("#videodiv").css("display", "");
+					$("#control_video_tag").attr("src", videopath);
+				}
+			});
+
+			$('#control_video_del').click(function() {
+				$("#videoPath").val('');
+				$("#control_video_button").css("display", "");
+				$("#control_video_del").css("display", "none");
+				$("#videodiv").css("display", "none");
+				$("#control_video_tag").attr("src", '');
+			})
 
 			//基本演示
 			tree.render({
@@ -276,10 +319,14 @@
 					$("#hrefdiv").css("display", "none");
 					$("#contentdiv").css("display", "");
 					$("div[id*=sucaibegindiv]").css("display", "");
+					$("#videouploaddiv").css("display", "none");
+					$("#videodiv").css("display", "none");
 				} else if (mediatype == '链接') {
 					$("#hrefdiv").css("display", "");
 					$("#contentdiv").css("display", "none");
 					$("div[id*=sucaibegindiv]").css("display", "");
+					$("#videouploaddiv").css("display", "none");
+					$("#videodiv").css("display", "none");
 				} else if (mediatype == '图片') {
 					$("#hrefdiv").css("display", "none");
 					$("#contentdiv").css("display", "");
@@ -288,10 +335,13 @@
 						time : 5000
 					});
 					$("div[id*=sucaibegindiv]").css("display", "none");
+					$("#videouploaddiv").css("display", "none");
+					$("#videodiv").css("display", "none");
 				} else if (mediatype == '视频') {
 					$("#hrefdiv").css("display", "none");
-					$("#contentdiv").css("display", "");
+					$("#contentdiv").css("display", "none");
 					$("div[id*=sucaibegindiv]").css("display", "");
+					$("#videouploaddiv").css("display", "");
 				}
 				form.render();
 			})

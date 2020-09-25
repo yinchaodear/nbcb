@@ -3,6 +3,8 @@ server:
   port: 9292
   session:
     tracking-modes: cookie
+  tomcat:
+    max-http-form-post-size: -1
 
 spring:
   # Druid Pool 运行环境

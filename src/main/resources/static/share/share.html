@@ -12,7 +12,6 @@
 <link rel="stylesheet" href="css/app.css">
 <link rel="stylesheet" href="css/news.css" />
 <style type="text/css">
-
 </style>
 
 </head>
@@ -227,8 +226,51 @@
 				}
 		 	
 		 	function parseContent(html){
-		 		html = html.replace(/<p>(.*?)<\/p>/g,"<div>$1</div>");
-		 		return html;
+		 		html = html.replace(/<p>(.*?)<\/p>/g,"$1");
+		 		html = html.replace(/<font.*>(.*?)<\/font>/g,"$1");
+		 		html = html.replace(/\n/g,"");
+		 		try{
+			 		var htmlarr = html.split(/\s{3,}/);
+			 		var newhtml = '';
+			 		var imgReg = /<img.*?(?:>|\/>)/gi;
+			 		var htmltmparr ;
+			 		var srcReg = /src=[\'\"]?([^\'\"]*)[\'\"]?/i;
+			 		for(var i=0;i<htmlarr.length;i++){
+			 			var htmltmp = htmlarr[i];
+	/* 		 			htmltmp = htmltmp.replace(/(^\s+)|(\s+$)/g,''); */
+			 			var imghtml = '';
+			 			var imgarr = htmltmp.match(imgReg);
+			 			if(imgarr && imgarr.length>0){
+			 				htmltmparr = htmltmp.split(imgReg);
+				 			for (var k = 0; k < imgarr.length; k++) {
+				 				if(htmltmparr[k]!=null && htmltmparr[k]!=''){
+				 					newhtml +='<div style="text-indent: 2em;line-height: 30pt;margin-bottom: 10px;margin-top: 10px;">'+htmltmparr[k]+'</div>';
+				 				}
+				 				if(imgarr[k]!=null && imgarr[k]!=''){
+				 					newhtml+='<div style="text-align:center;text-indent: 0em;">'+imgarr[k]+'</div>';
+				 				}
+				 				/*  var src = imgarr[k].match(srcReg);
+				 				 //获取图片地址
+				 				 imghtml += '<img src="'+src[1]+'">';
+				 				 console.log('图片地址'+(i+1)+'：'+src[1]); */
+				 			}
+				 			if(htmltmparr[imgarr.length]!=null && htmltmparr[imgarr.length]!=''){
+				 				newhtml +='<div style="text-indent: 2em;line-height: 30pt;margin-bottom: 10px;margin-top: 10px;">'+htmltmparr[imgarr.length]+'</div>';
+				 			}
+			 			}else{
+			 				newhtml +='<div style="text-indent: 2em;line-height: 30pt;margin-bottom: 10px;margin-top: 10px;">'+htmltmp+'</div>';
+			 			}
+	/* 		 			htmltmp = htmltmp.replace(/<img.*>/g,"");
+			 			htmltmp = '<div style="text-indent: 2em;line-height: 30pt;margin-bottom: 10px;">'+htmltmp+'</div>';
+			 			newhtml+=htmltmp; */
+			 		}
+			 		console.log(newhtml);
+		 		}catch(e){
+		 			console.log(e);
+		 			return html;
+		 		}
+		 		
+		 		return newhtml;
 		 	}
 		</script>
 </body>

@@ -75,7 +75,7 @@ public class MaterialService extends BaseController
      * 开机闪屏图片
      */
     @GetMapping("openImg")
-    public Result openImg()
+    public Result OpenImg()
     {
         String sql ="SELECT  t.f_id  ,f_picpath FROM t_pic_mapping  m inner join t_material t on  m.f_material_id = t.f_id  "
                 + " where t.f_type =3  and t.f_status=0 ";

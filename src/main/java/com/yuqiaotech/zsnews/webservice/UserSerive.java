@@ -304,16 +304,18 @@ public class UserSerive extends BaseController implements NewsDicConstants {
         String sql = "SELECT f_id,f_occur_time,f_sign_days,f_persentintergral FROM historyintegral WHERE f_user_id = " + getCurrentUserInfoId() + " ORDER BY f_occur_time DESC";
         List<Map<String, Object>> historyIntegralList = historyIntegralRepository.findMapByNativeSql(sql);
         Map result = new HashMap();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String now = sdf.format(new Date()).substring(0, 10);
         if (historyIntegralList != null && !historyIntegralList.isEmpty()) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String occurTime = historyIntegralList.get(0).get("f_occur_time").toString().substring(0, 10);
-            String now = sdf.format(new Date()).substring(0, 10);
             if (now.equals(occurTime)) {
                 result.put("isOk", "今天已经签过了");
             }
             result.put("historyIntegralList", historyIntegralList);
             result.put("lastIntegral", historyIntegralList.get(0));
+            result.put("now",now);
         }
+        result.put("now",now);
         result.put("nickName", getCurrentUserInfo().getNickName());
         return success(result);
     }

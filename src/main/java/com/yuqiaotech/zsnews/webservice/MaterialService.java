@@ -42,7 +42,7 @@ public class MaterialService extends BaseController
     
     
 	/*
-	 * 只针对那些固定格式的
+	 * 只针对那些固定格式的 浙商号 (商会号)，推荐，关注 之类的
 	 */	
     @GetMapping("materialswipermerchant")
     public Result MaterialSwiperMerchant(@RequestParam Long columid,@RequestParam String type)

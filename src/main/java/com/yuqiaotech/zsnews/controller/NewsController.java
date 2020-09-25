@@ -483,19 +483,30 @@ public class NewsController extends BaseController
             picmappinglist.add(pm);
         }
         
-        if (CollectionUtils.isEmpty(picmappinglist))
+        if ("图片".equals(news.getMediaType()))
         {
-            news.setDisplaytype("5");
+            news.setDisplaytype("6");
+        }
+        else if ("视频".equals(news.getMediaType()))
+        {
+            news.setDisplaytype("7");
         }
         else
         {
-            if (picmappinglist.size() == 1)
+            if (CollectionUtils.isEmpty(picmappinglist))
             {
-                news.setDisplaytype("2");
+                news.setDisplaytype("5");
             }
             else
             {
-                news.setDisplaytype("1");
+                if (picmappinglist.size() == 1)
+                {
+                    news.setDisplaytype("2");
+                }
+                else
+                {
+                    news.setDisplaytype("1");
+                }
             }
         }
         
@@ -946,20 +957,30 @@ public class NewsController extends BaseController
             pm.setPicpath(newsbean.getPicname3());
             picmappinglist.add(pm);
         }
-        
-        if (CollectionUtils.isEmpty(picmappinglist))
+        if ("图片".equals(news.getMediaType()))
         {
-            news.setDisplaytype("5");
+            news.setDisplaytype("6");
+        }
+        else if ("视频".equals(news.getMediaType()))
+        {
+            news.setDisplaytype("7");
         }
         else
         {
-            if (picmappinglist.size() == 1)
+            if (CollectionUtils.isEmpty(picmappinglist))
             {
-                news.setDisplaytype("2");
+                news.setDisplaytype("5");
             }
             else
             {
-                news.setDisplaytype("1");
+                if (picmappinglist.size() == 1)
+                {
+                    news.setDisplaytype("2");
+                }
+                else
+                {
+                    news.setDisplaytype("1");
+                }
             }
         }
         

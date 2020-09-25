@@ -79,7 +79,7 @@ public class NewsService extends BaseController {
 		} else if(type.equals("热点")) {
 			wheresql1 += " and t.f_ishot = 1";
 		}
-		String sql = "SELECT    t.* ,  d.f_title as channelname ,pm1.imgs , case when t.f_comments  >=10000  then "
+		String sql = "SELECT   t.f_id, t.f_title ,t.f_media_type,t.f_displaytype,t.f_check_date ,t.f_display_order,  d.f_title as channelname ,pm1.imgs , case when t.f_comments  >=10000  then "
 				+ " concat(cast(  convert(t.f_comments/10000,decimal(10,1)) as char),'万' ) "
 				+ " else cast(t.f_comments   as char)  end as apprisecount , "
 			    + " case when t.f_collects  >=10000  then "
@@ -92,7 +92,7 @@ public class NewsService extends BaseController {
 				+   wheresql1
 				+ " and exists ( SELECT  c1.f_title,nc.f_news_id FROM t_news_channel  nc "
 				+ " inner join t_channel c1 on nc.f_channel_id = c1.f_id  and c1.f_status = 0 and c1.f_kind ='频道' where  nc.f_news_id =t.f_id "
-				+ wheresql + ") " + " order by f_display_order, f_updated desc  limit "+pageNo*pageSize+ ", "+pageSize;
+				+ wheresql + ") " + " order by t.f_display_order, t.f_updated desc  limit "+pageNo*pageSize+ ", "+pageSize;
 		List news = newsRepository.findMapByNativeSql(sql);
 		Map result = new HashMap<>();
 		result.put("news", news);

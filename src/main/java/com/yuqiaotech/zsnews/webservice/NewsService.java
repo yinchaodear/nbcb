@@ -79,7 +79,7 @@ public class NewsService extends BaseController {
 		} else if(type.equals("热点")) {
 			wheresql1 += " and t.f_ishot = 1";
 		}
-		String sql = "SELECT   t.f_id, t.f_title ,t.f_media_type,t.f_displaytype,t.f_check_date ,t.f_display_order,  d.f_title as channelname ,pm1.imgs , case when t.f_comments  >=10000  then "
+		String sql = "SELECT  t.f_video_path, t.f_id, t.f_title ,t.f_media_type,t.f_displaytype,t.f_check_date ,t.f_display_order,  d.f_title as channelname ,pm1.imgs , case when t.f_comments  >=10000  then "
 				+ " concat(cast(  convert(t.f_comments/10000,decimal(10,1)) as char),'万' ) "
 				+ " else cast(t.f_comments   as char)  end as apprisecount , "
 			    + " case when t.f_collects  >=10000  then "

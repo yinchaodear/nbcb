@@ -122,10 +122,13 @@ public class NewsService extends BaseController {
 				+ " group by  cm1.f_news_id ) b on b.cm1newsid =t.f_id"
 				+ " left join (select cf.f_channel_id as channelid ,count(1) as number from t_channel_follower cf  group by cf.f_channel_id ) "
 				+ " g on g.channelid = t.f_author_channel_id" + " where t.f_id = " + id;
-		System.out.println(sql);
+		String sqlimg ="SELECT f_pictext, f_picpath  FROM t_pic_mapping where f_news_id = " +id;
+		List pic = newsRepository.findMapByNativeSql(sqlimg);
+		
 		List<Map<String, Object>> news = newsRepository.findMapByNativeSql(sql);
 		Map result = new HashMap<>();
 		result.put("news", news);
+		result.put("pic", pic);
 		return success(result);
 	}
 

@@ -249,6 +249,20 @@ public class ChannelService extends BaseController
         return success(result);
     }
     
+    /*
+     * 获取平台配置的默认背景头像
+     */
+    @GetMapping("platform")
+    public Result Platform()
+    {
+        System.out.println("ChannelService.Platform()");
+        String sql = "SELECT *, convert(f_logo using utf8) as logo FROM  t_platform";
+        List paltfrom = channelRepository.findMapByNativeSql(sql);
+        Map result = new HashMap<>();
+        result.put("platform", paltfrom); 
+        return success(result);
+    }
+    
     
 
 }

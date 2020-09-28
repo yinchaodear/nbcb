@@ -10,7 +10,7 @@ import com.yuqiaotech.sysadmin.model.User;
 public class SecurityUserDetails extends User implements UserDetails {
 	private static final long serialVersionUID = 939884680001558121L;
 
-	//登陆方式 COMMON|PHONE|WX|QQ|XLWB
+	//登陆方式 COMMON|PHONE|WX|QQ|WEIBO
 	private String loginType;
 
 	private String thirdLoginKey;

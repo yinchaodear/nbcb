@@ -10,6 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * 定义什么样的资源需要什么样的授权。
  *
@@ -17,12 +19,11 @@ import javax.persistence.ManyToOne;
 @Entity
 public class ProtectedResourceAuthority implements Serializable
 {
-    
     private Long id;
     
     private ProtectedResource protectedResource;
     
-    private String authority;
+    private Authority authority;
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,6 +41,7 @@ public class ProtectedResourceAuthority implements Serializable
      * 受保护的资源。
      * @return
      */
+    @JsonIgnoreProperties(value = {"hibernateLazyInitializer"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "f_protected_resource_id")
     public ProtectedResource getProtectedResource()
@@ -57,12 +59,15 @@ public class ProtectedResourceAuthority implements Serializable
      * 该字符串可能在Authority里做了定义也可能没做定义。
      * @return
      */
-    public String getAuthority()
+    @JsonIgnoreProperties(value = {"hibernateLazyInitializer"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "f_authority_id")
+    public Authority getAuthority()
     {
         return authority;
     }
     
-    public void setAuthority(String authority)
+    public void setAuthority(Authority authority)
     {
         this.authority = authority;
     }

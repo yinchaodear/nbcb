@@ -1,14 +1,22 @@
 package com.yuqiaotech.sysadmin.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,9 +32,14 @@ import com.yuqiaotech.common.web.base.BaseController;
 import com.yuqiaotech.common.web.base.BaseRepository;
 import com.yuqiaotech.common.web.domain.dao.PaginationSupport;
 import com.yuqiaotech.common.web.domain.request.PageDomain;
+import com.yuqiaotech.common.web.domain.response.ResuTree;
 import com.yuqiaotech.common.web.domain.response.Result;
 import com.yuqiaotech.common.web.domain.response.ResultTable;
+import com.yuqiaotech.sysadmin.bean.ProtectedResourceBean;
 import com.yuqiaotech.sysadmin.model.Authority;
+import com.yuqiaotech.sysadmin.model.ProtectedResource;
+import com.yuqiaotech.sysadmin.model.ProtectedResourceAuthority;
+import com.yuqiaotech.zsnews.NewsDicConstants;
 
 @RestController
 @RequestMapping("system/role")
@@ -44,6 +57,12 @@ public class SysRoleController extends BaseController
     @Autowired
     private BaseRepository<Authority, Long> authorityRepository;
     
+    @Autowired
+    private BaseRepository<ProtectedResource, Long> protectedResourceRepository;
+    
+    @Autowired
+    private BaseRepository<ProtectedResourceAuthority, Long> protectedResourceAuthorityRepository;
+    
     /**
      * Describe: 获取角色列表视图
      * Param ModelAndView
@@ -53,6 +72,85 @@ public class SysRoleController extends BaseController
     public ModelAndView main()
     {
         return JumpPage(MODULE_PATH + "main");
+    }
+    
+    @GetMapping("power")
+    public ModelAndView power(Model model, Long roleId)
+    {
+        model.addAttribute("roleId", roleId);
+        return JumpPage(MODULE_PATH + "power");
+    }
+    
+    @GetMapping("getRolePower")
+    public ResuTree getRolePower(Long roleId)
+    {
+        List<ProtectedResource> prList = protectedResourceRepository.findByHql("from ProtectedResource");
+        List<ProtectedResourceAuthority> pralist = protectedResourceAuthorityRepository
+            .findByHql("from ProtectedResourceAuthority where authority.id=" + roleId);
+        List<ProtectedResourceBean> prbList = new ArrayList<>();
+        Map<String, ProtectedResource> parentMap = new HashMap<>();
+        Set<Long> selectAuthorityIdSet = new HashSet<>();
+        for (ProtectedResourceAuthority protectedResourceAuthority : pralist)
+        {
+            selectAuthorityIdSet.add(protectedResourceAuthority.getProtectedResource().getId());
+        }
+        for (ProtectedResource pr : prList)
+        {
+            if ("0".equals(pr.getType()))
+            {
+                parentMap.put(pr.getPatternStr(), pr);
+            }
+        }
+        for (ProtectedResource pr : prList)
+        {
+            ProtectedResourceBean prb = new ProtectedResourceBean();
+            BeanUtils.copyProperties(pr, prb);
+            if ("1".equals(pr.getType()))
+            {
+                String pid = prb.getPatternStr().substring(0, 3);
+                if (parentMap.containsKey(pid))
+                {
+                    prb.setParentId(parentMap.get(pid).getId());
+                }
+                else
+                {
+                    prb.setParentId(-1L);
+                }
+            }
+            else
+            {
+                prb.setParentId(-1L);
+            }
+            
+            if (selectAuthorityIdSet.contains(prb.getId()))
+            {
+                prb.setCheckArr("1");
+            }
+            prbList.add(prb);
+        }
+        
+        return dataTree(prbList);
+    }
+    
+    @PutMapping("saveRolePower")
+    public Result saveRolePower(String roleId, String powerIds)
+    {
+        List<ProtectedResource> prlist =
+            protectedResourceRepository.findByHql("from ProtectedResource where id in(" + powerIds + ")");
+        Authority role = authorityRepository.findUniqueBy("id", Long.valueOf(roleId), Authority.class);
+        protectedResourceAuthorityRepository
+            .executeUpdate("delete from ProtectedResourceAuthority where authority.id=" + roleId, new HashMap<>());
+        if (CollectionUtils.isNotEmpty(prlist))
+        {
+            for (ProtectedResource protectedResource : prlist)
+            {
+                ProtectedResourceAuthority pra = new ProtectedResourceAuthority();
+                pra.setAuthority(role);
+                pra.setProtectedResource(protectedResource);
+                protectedResourceAuthorityRepository.save(pra);
+            }
+        }
+        return decide(true);
     }
     
     /**
@@ -87,6 +185,7 @@ public class SysRoleController extends BaseController
                 dc.add(Restrictions.ilike("description", authority.getDescription(), MatchMode.ANYWHERE));
             }
         }
+        dc.add(Restrictions.eq("deltag", NewsDicConstants.ICommon.DELETE_NO));
         return dc;
     }
     
@@ -109,6 +208,7 @@ public class SysRoleController extends BaseController
     @PostMapping("save")
     public Result save(@RequestBody Authority authority)
     {
+        authority.setDeltag(NewsDicConstants.ICommon.DELETE_NO);
         authorityRepository.save(authority);
         return decide(true);
     }
@@ -134,7 +234,9 @@ public class SysRoleController extends BaseController
     @PutMapping("update")
     public Result update(@RequestBody Authority authority)
     {
-        authorityRepository.update(authority);
+        Authority authoritydb = authorityRepository.findUniqueBy("id", authority.getId(), Authority.class);
+        BeanUtils.copyProperties(authority, authoritydb, getNullPropertyNames(authority));
+        authorityRepository.update(authoritydb);
         return decide(true);
     }
     
@@ -147,7 +249,12 @@ public class SysRoleController extends BaseController
     @Logging(title = "删除角色")
     public Result remove(@PathVariable Long id)
     {
-        authorityRepository.remove(id, Authority.class);
+        Authority role = authorityRepository.findUniqueBy("id", id, Authority.class);
+        if (role != null)
+        {
+            role.setDeltag(NewsDicConstants.ICommon.DELETE_YES);
+            authorityRepository.update(role);
+        }
         return decide(true);
     }
     
@@ -167,7 +274,11 @@ public class SysRoleController extends BaseController
             DetachedCriteria dc = DetachedCriteria.forClass(Authority.class);
             dc.add(Restrictions.in("id", cdids));
             List<Authority> authorityList = authorityRepository.findByCriteria(dc);
-            authorityList.forEach(authorityRepository::delete);
+            for (Authority authority : authorityList)
+            {
+                authority.setDeltag(NewsDicConstants.ICommon.DELETE_YES);
+                authorityRepository.update(authority);
+            }
             return decide(true);
         }
         return decide(false);

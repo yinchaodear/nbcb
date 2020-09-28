@@ -70,16 +70,16 @@
 			title : '角色名',
 			field : 'authority',
 			align : 'center',
-			width : 100
+			width : '30%'
 		}, {
 			title : '描述',
 			field : 'description',
-			align : 'center'
+			align : 'center',
+			width : '30%'
 		}, {
 			title : '操作',
 			toolbar : '#role-bar',
-			align : 'center',
-			width : 195
+			align : 'center'
 		} ] ]
 
 		table.render({
@@ -137,8 +137,8 @@
 				type : 2,
 				title : '授权',
 				shade : 0.1,
-				area : [ '320px', '400px' ],
-				content : MODULE_PATH + 'power?roleId=' + obj.data["roleId"]
+				area : [ '800px', '80%' ],
+				content : MODULE_PATH + 'power?roleId=' + obj.data["id"]
 			});
 		}
 

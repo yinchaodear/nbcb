@@ -28,7 +28,7 @@
 		</div>
 		<div class="bottom">
 			<div class="button-container">
-				<button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="role-save">
+				<button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="role-save" id="submitbtn">
 					<i class="layui-icon layui-icon-ok"></i>
 					提交
 				</button>
@@ -46,6 +46,10 @@
 			let $ = layui.jquery;
 
 			form.on('submit(role-save)', function(data) {
+				var DISABLED = 'layui-btn-disabled';
+				$('#submitbtn').addClass(DISABLED);
+				$('#submitbtn').attr('disabled', 'disabled');
+				
 				$.ajax({
 					url : '/system/role/save',
 					data : JSON.stringify(data.field),
@@ -56,8 +60,10 @@
 						if (result.success) {
 							layer.msg(result.msg, {
 								icon : 1,
-								time : 1000
+								time : 5000
 							}, function() {
+								$('#submitbtn').removeClass(DISABLED);
+								$('#submitbtn').removeAttr('disabled');
 								parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
 								parent.layui.table.reload("role-table");
 							});
@@ -65,6 +71,9 @@
 							layer.msg(result.msg, {
 								icon : 2,
 								time : 1000
+							}, function() {
+								$('#submitbtn').removeClass(DISABLED);
+								$('#submitbtn').removeAttr('disabled');
 							});
 						}
 					}

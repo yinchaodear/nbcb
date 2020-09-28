@@ -3,9 +3,14 @@ package com.yuqiaotech.sysadmin.model;
 import java.io.Serializable;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * 用户和授权的关联表。
@@ -20,15 +25,22 @@ import javax.persistence.Id;
 @Entity
 public class UserAuthority implements Serializable
 {
-    
-    private Long id;
-    
-    private String username;
-    
-    private String authority;
+    private static final long serialVersionUID = -1754150892633693726L;
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @JsonIgnoreProperties(value = {"hibernateLazyInitializer"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "f_user_id")
+    private User user;
+    
+    @JsonIgnoreProperties(value = {"hibernateLazyInitializer"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "f_authority_id")
+    private Authority authority;
+    
     public Long getId()
     {
         return id;
@@ -39,32 +51,23 @@ public class UserAuthority implements Serializable
         this.id = id;
     }
     
-    /**
-     * 用户。
-     * @return
-     */
-    public String getUsername()
+    public User getUser()
     {
-        return username;
+        return user;
     }
     
-    public void setUsername(String username)
+    public void setUser(User user)
     {
-        this.username = username;
+        this.user = user;
     }
     
-    /**
-     * 授权。
-     * @return
-     */
-    public String getAuthority()
+    public Authority getAuthority()
     {
         return authority;
     }
     
-    public void setAuthority(String authority)
+    public void setAuthority(Authority authority)
     {
         this.authority = authority;
     }
-    
 }

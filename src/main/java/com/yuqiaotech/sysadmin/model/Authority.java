@@ -23,9 +23,11 @@ public class Authority implements GrantedAuthority, Serializable
     
     private String category3;
     
-    private String authority;
+    private String authority;//角色名称
     
-    private String description;
+    private String description;//描述
+    
+    private Integer deltag;//删除标识
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -96,4 +98,13 @@ public class Authority implements GrantedAuthority, Serializable
         this.category3 = category3;
     }
     
+    public Integer getDeltag()
+    {
+        return deltag;
+    }
+    
+    public void setDeltag(Integer deltag)
+    {
+        this.deltag = deltag;
+    }
 }

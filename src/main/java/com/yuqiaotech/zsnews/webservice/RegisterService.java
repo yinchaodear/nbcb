@@ -183,6 +183,24 @@ public class RegisterService extends BaseController
                 }
                 if (StringUtils.isEmpty(userInfo.getNickName()))
                     userInfo.setNickName(thirdJson.getString("name"));//微信昵称
+            }else if("QQ".equals(loginType)){//qq
+                JSONObject thirdJson = JSONObject.parseObject(info);
+                System.out.println("======三方登录用户注册=======qq字符串==thirdJson=【" + thirdJson + "】==");
+                if (StringUtils.isEmpty(userInfo.getAvatar())) {
+                    String profile_image_url = thirdJson.getString("profile_image_url");
+                    //unicode解码
+                    profile_image_url= unicodetoString(profile_image_url);
+                    String objectType = "userInfo";
+                    String objectId = userInfo.getId().toString();
+                    String filename = "head.jpg";
+                    String pathString = attachmentRoot + "/" + objectType + "/" + objectId + "/" + filename;
+                    boolean flag = AttachmentService.downloadPicture(profile_image_url, pathString);
+                    System.out.println("======三方登录用户注册=======qq下载图片结果==flag=【" + flag + "】==");
+                    String avatar = ImgBase64Utils.getImgStr(pathString);
+                    userInfo.setAvatar(avatar);
+                }
+                if (StringUtils.isEmpty(userInfo.getNickName()))
+                    userInfo.setNickName(thirdJson.getString("name"));//qq昵称
             }
             if(StringUtils.isEmpty(userInfo.getNickName())) {//如果微信昵称没取到，就自己编一个昵称
                 userInfo.setNickName("新闻访客" + userInfo.getId());
@@ -265,8 +283,24 @@ public class RegisterService extends BaseController
 			return success(result);
 		}
     }
-    
-   
+
+    //解码
+    public static String unicodetoString(String unicode) {
+        if (unicode == null || "".equals(unicode)) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        int i = -1;
+        int pos = 0;
+        while ((i = unicode.indexOf("\\u", pos)) != -1) {
+            sb.append(unicode.substring(pos, i));
+            if (i + 5 < unicode.length()) {
+                pos = i + 6;
+                sb.append((char) Integer.parseInt(unicode.substring(i + 2, i + 6), 16));
+            }
+        }
+        return sb.toString();
+    }
 
 	private String generateNumber() {
 		int x = (int) (1 + Math.random() * (9999 - 1 + 1));

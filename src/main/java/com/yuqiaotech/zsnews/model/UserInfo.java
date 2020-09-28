@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.yuqiaotech.common.web.base.BaseModel;
 
 /**
@@ -16,6 +17,7 @@ import com.yuqiaotech.common.web.base.BaseModel;
  * 同时，前台控制下，状态为审核中的不可以再修改
  */
 @Entity
+@JsonIgnoreProperties(value = { "hibernateLazyInitializer","handler"})
 public class UserInfo extends BaseModel
 {
     private static final long serialVersionUID = 9038438776598900321L;

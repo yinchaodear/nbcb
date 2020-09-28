@@ -10,10 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping(value = {"zsapp/user", "ws/user"})
@@ -278,23 +275,34 @@ public class UserSerive extends BaseController implements NewsDicConstants {
         }
         String now = sdf.format(new Date());
         now = now.substring(0, 10);
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(new Date());
+        calendar.add(calendar.DATE,-1);
+        String yesterday= sdf.format(calendar.getTime()).substring(0,10);
         Map result = new HashMap();
+        HistoryIntegral historyIntegral = new HistoryIntegral();
+        UserInfo userInfo = userinfoRepository.get(getCurrentUserInfoId(), UserInfo.class);
+
         if (now.equals(occurTime)) {
             result.put("errMsg", "今天已经签过了");
-        } else {
-            HistoryIntegral historyIntegral = new HistoryIntegral();
-            UserInfo userInfo = userinfoRepository.get(getCurrentUserInfoId(), UserInfo.class);
-            historyIntegral.setUserInfo(userInfo);
-            historyIntegral.setType("1");
+        } else if(yesterday.equals(occurTime)) {//判断连续签到
             historyIntegral.setSignDays(signDays + 1);
             historyIntegral.setIntegral(todayIntergral(signDays));
-            historyIntegral.setOccurTime(new Date());
-            historyIntegral.setOriginalintegral(persentintergral);
             historyIntegral.setPersentintergral(persentintergral + todayIntergral(signDays));
-            historyIntegralRepository.save(historyIntegral);
             result.put("integral", persentintergral + todayIntergral(signDays));
             result.put("signDays", signDays + 1);
+        }else {
+            historyIntegral.setSignDays(1);
+            historyIntegral.setIntegral(todayIntergral(0));
+            historyIntegral.setPersentintergral(persentintergral + todayIntergral(0));
+            result.put("integral", persentintergral + todayIntergral(0));
+            result.put("signDays", 1);
         }
+        historyIntegral.setUserInfo(userInfo);
+        historyIntegral.setType("1");
+        historyIntegral.setOccurTime(new Date());
+        historyIntegral.setOriginalintegral(persentintergral);
+        historyIntegralRepository.save(historyIntegral);
         return success(result);
     }
 
@@ -306,17 +314,21 @@ public class UserSerive extends BaseController implements NewsDicConstants {
         Map result = new HashMap();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String now = sdf.format(new Date()).substring(0, 10);
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(new Date());
+        calendar.add(calendar.DATE,-1);
+        String yesterday= sdf.format(calendar.getTime()).substring(0,10);
         if (historyIntegralList != null && !historyIntegralList.isEmpty()) {
             String occurTime = historyIntegralList.get(0).get("f_occur_time").toString().substring(0, 10);
             if (now.equals(occurTime)) {
                 result.put("isOk", "今天已经签过了");
+            }else if(!yesterday.equals(occurTime)){
+                result.put("signDays",0);
             }
             result.put("historyIntegralList", historyIntegralList);
             result.put("lastIntegral", historyIntegralList.get(0));
-            result.put("now",now);
         }
         result.put("now",now);
-        result.put("nickName", getCurrentUserInfo().getNickName());
         return success(result);
     }
 

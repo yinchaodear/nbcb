@@ -78,6 +78,8 @@ public class NewsService extends BaseController {
 //					+ getCurrentUserInfoId() + " )";
 		} else if(type.equals("热点")) {
 			wheresql1 += " and t.f_ishot = 1";
+		}else{
+			wheresql =" and c1.f_id= "+id;
 		}
 		String sql = "SELECT  t.f_video_path, t.f_id, t.f_title ,t.f_media_type,t.f_displaytype,t.f_check_date ,t.f_display_order,  d.f_title as channelname ,pm1.imgs , case when t.f_comments  >=10000  then "
 				+ " concat(cast(  convert(t.f_comments/10000,decimal(10,1)) as char),'万' ) "

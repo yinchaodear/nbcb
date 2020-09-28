@@ -44,7 +44,7 @@
 						<div class="layui-col-md3">
 							<label class="layui-form-label">资源类型</label>
 							<div class="layui-input-block">
-								<select lay-filter="changemediatype" name="mediaType" disabled="disabled">
+								<select lay-filter="changemediatype" name="mediaType" id="mediaType" disabled="disabled">
 									<option value="文章" th:selected="${news.mediaType eq '文章'}">文章</option>
 									<option value="链接" th:selected="${news.mediaType eq '链接'}">链接</option>
 									<option value="图片" th:selected="${news.mediaType eq '图片'}">图片</option>
@@ -141,6 +141,7 @@
 			</div>
 		</div>
 	</form>
+	<canvas id="canvas" style="display:none;"></canvas>
 	<script src="../../component/layui/layui.js"></script>
 	<script th:inline="javascript">
 		var data = [];
@@ -149,6 +150,12 @@
 		var form;
 		var $;
 		var objectType = 'news';
+		
+		
+		var $canvas ;
+		var $video ;
+		var ctx ;
+		
 		layui.use([ 'form', 'jquery', 'tinymce', 'util', 'tree', 'upload'  ], function() {
 			form = layui.form;
 			$ = layui.jquery;
@@ -157,6 +164,14 @@
 			let tree = layui.tree;
 			upload = layui.upload;
 			let MODULE_PATH = "/zsnews/news/";
+			
+			$canvas = $('#canvas');
+			$video = $('#control_video_tag');
+			$canvas.attr({
+			    width: $video.width(),
+			    height: $video.height(),
+			});
+			ctx = $canvas[0].getContext('2d');
 
 			
 			var edit = tinymce.render({
@@ -288,6 +303,8 @@
 					$("#control_video_del").css("display", "");
 					$("#videodiv").css("display", "");
 					$("#control_video_tag").attr("src", videopath);
+					
+					setTimeout('doCapture()', 1000);
 				}
 			});
 			
@@ -298,6 +315,11 @@
 				$("#videodiv").css("display", "none");
 				$("#control_video_tag").attr("src", '');
 			})
+			
+			if($("#mediaType").val()=='视频'){
+				$("#sucaibegindiv2").css("display","none");
+				$("#sucaibegindiv3").css("display","none");
+			}
 			
 			
 			var picname1 = [[${ news.picname1}]];
@@ -383,6 +405,48 @@
 					$("#picname" + idx).val('');
 				}
 			});
+		}
+		
+		
+		function doCapture(){
+			 var w = $video[0].videoWidth;//视频原有尺寸
+		    var h = $video[0].videoHeight;//视频原有尺寸
+		    $canvas.attr({
+		        width: w/2,
+		        height: h/2,
+		    });
+		    ctx.drawImage($video[0], 0, 0, w/2, h/2);
+		    var base64 = $canvas[0].toDataURL('images/png');
+		    
+		    if(base64 && base64!=''){
+			    var form = new FormData();
+				form.append('objectId', news_tid);
+				form.append('objectType', objectType);
+				form.append('imgBase64', base64);
+				form.append('imgBase64Name', 'videoshot.jpg');
+				$.ajax({
+					url : "/attachment/uploadFile",
+					type : "post",
+					data : form,
+					processData : false,
+					contentType : false,
+					success : function(res) {
+						console.log(res);
+						res = JSON.parse(res);
+						var imgsrc = '/attachment/showImage?objectId=' + news_tid + "&objectType=" + objectType + "&fileName=" + res.msg;
+						var currentidx = 1;
+						$('#previewImg' + currentidx).css('width', '30%');
+						$('#previewImg' + currentidx).css('height', '100%');
+						$('#previewImg' + currentidx).attr('src', imgsrc);
+						$("#upload-drag" + currentidx).css("display", "none");
+						$("#delbtn" + currentidx).css("display", "");
+						$("#picname" + currentidx).val(res.msg);
+					},
+					error : function(e) {
+						layer.msg("图片上传失败");
+					}
+				});
+		    }
 		}
 	</script>
 </body>

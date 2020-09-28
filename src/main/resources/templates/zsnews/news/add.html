@@ -127,9 +127,15 @@
 					<i class="layui-icon layui-icon-refresh"></i>
 					重置
 				</button>
+				
+				<button type="reset" class="layui-btn layui-btn-primary layui-btn-sm" onclick="doCapture()">
+					<i class="layui-icon layui-icon-refresh"></i>
+					重置
+				</button>
 			</div>
 		</div>
 	</form>
+	<canvas id="canvas" style="display:none;"></canvas>
 	<script src="../../component/layui/layui.js"></script>
 	<script th:inline="javascript">
 		var data = [];
@@ -141,6 +147,11 @@
 		var form;
 		var $;
 		var objectType = 'news';
+		
+		var $canvas ;
+		var $video ;
+		var ctx ;
+		
 		layui.use([ 'form', 'jquery', 'tinymce', 'util', 'tree', 'upload' ], function() {
 			form = layui.form;
 			$ = layui.jquery;
@@ -150,6 +161,14 @@
 			upload = layui.upload;
 			let MODULE_PATH = "/zsnews/news/";
 			$("#objectId").val(news_tid);
+			
+			$canvas = $('#canvas');
+			$video = $('#control_video_tag');
+			$canvas.attr({
+			    width: $video.width(),
+			    height: $video.height(),
+			});
+			ctx = $canvas[0].getContext('2d');
 
 			var edit = tinymce.render({
 				elem : "#content2",
@@ -222,9 +241,12 @@
 					$("#control_video_del").css("display", "");
 					$("#videodiv").css("display", "");
 					$("#control_video_tag").attr("src", videopath);
+					$("#control_video_tag").attr("autoplay", "autoplay");
+					
+					setTimeout('doCapture()', 1000);
 				}
 			});
-
+			
 			$('#control_video_del').click(function() {
 				$("#videoPath").val('');
 				$("#control_video_button").css("display", "");
@@ -342,6 +364,9 @@
 					$("#contentdiv").css("display", "none");
 					$("div[id*=sucaibegindiv]").css("display", "");
 					$("#videouploaddiv").css("display", "");
+					
+					$("#sucaibegindiv2").css("display","none");
+					$("#sucaibegindiv3").css("display","none");
 				}
 				form.render();
 			})
@@ -390,6 +415,47 @@
 					$("#picname" + idx).val('');
 				}
 			});
+		}
+		
+		function doCapture(){
+			 var w = $video[0].videoWidth;//视频原有尺寸
+		    var h = $video[0].videoHeight;//视频原有尺寸
+		    $canvas.attr({
+		        width: w/2,
+		        height: h/2,
+		    });
+		    ctx.drawImage($video[0], 0, 0, w/2, h/2);
+		    var base64 = $canvas[0].toDataURL('images/png');
+		    
+		    if(base64 && base64!=''){
+			    var form = new FormData();
+				form.append('objectId', news_tid);
+				form.append('objectType', objectType);
+				form.append('imgBase64', base64);
+				form.append('imgBase64Name', 'videoshot.jpg');
+				$.ajax({
+					url : "/attachment/uploadFile",
+					type : "post",
+					data : form,
+					processData : false,
+					contentType : false,
+					success : function(res) {
+						console.log(res);
+						res = JSON.parse(res);
+						var imgsrc = '/attachment/showImage?objectId=' + news_tid + "&objectType=" + objectType + "&fileName=" + res.msg;
+						var currentidx = 1;
+						$('#previewImg' + currentidx).css('width', '30%');
+						$('#previewImg' + currentidx).css('height', '100%');
+						$('#previewImg' + currentidx).attr('src', imgsrc);
+						$("#upload-drag" + currentidx).css("display", "none");
+						$("#delbtn" + currentidx).css("display", "");
+						$("#picname" + currentidx).val(res.msg);
+					},
+					error : function(e) {
+						layer.msg("图片上传失败");
+					}
+				});
+		    }
 		}
 	</script>
 </body>

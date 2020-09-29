@@ -192,7 +192,7 @@ layui.define(['table', 'jquery', 'element', 'form', 'pearAuth', 'pearTab', 'pear
 					$(".loader-main").fadeOut(option.done);
 
 					// 设 置 关 闭 时 间
-				}, 5000)
+				}, 3000)
 			}
 
 

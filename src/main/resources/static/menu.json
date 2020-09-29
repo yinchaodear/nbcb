@@ -211,6 +211,25 @@
 		]
 	},
 	{
+		"id": "106",
+		"title": "活动统计",
+		"type": "0",
+		"openType": null,
+		"icon": "../admin/images/khfk.png",
+		"href": "",
+		"children": [
+			{
+				"id": "1061",
+				"title": "活动统计",
+				"type": "1",
+				"openType": null,
+				"icon": "layui-icon layui-icon-user",
+				"href": "/zsnews/newsform/main",
+				"children": []
+			}
+		]
+	},
+	{
 		"id": "105",
 		"title": "个人中心",
 		"type": "0",

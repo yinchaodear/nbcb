@@ -1,0 +1,9 @@
+{
+	"id": "1012",
+	"title": "活动报名管理",
+	"type": "1",
+	"openType": null,
+	"icon": "layui-icon layui-icon-vercode",
+	"href": "/zsnews/newsform/main",
+	"children": []
+}

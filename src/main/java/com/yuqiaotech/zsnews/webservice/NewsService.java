@@ -36,6 +36,8 @@ import com.yuqiaotech.zsnews.model.Comment;
 import com.yuqiaotech.zsnews.model.HistorySearchRecord;
 import com.yuqiaotech.zsnews.model.News;
 import com.yuqiaotech.zsnews.model.NewsFollower;
+import com.yuqiaotech.zsnews.model.NewsForm;
+import com.yuqiaotech.zsnews.model.UserInfo;
 
 import sun.misc.BASE64Decoder;
 
@@ -51,6 +53,9 @@ public class NewsService extends BaseController {
 	private BaseRepository<User, Long> userRepository;
 
 	@Autowired
+	private BaseRepository<UserInfo, Long> userInfoRepository;
+	
+	@Autowired
 	private BaseRepository<Channel, Long> channelRepository;
 
 	@Autowired
@@ -62,6 +67,9 @@ public class NewsService extends BaseController {
 	@Autowired
 	private BaseRepository<HistorySearchRecord, Long> historySearchRecordRepository;
 
+	
+	@Autowired
+	private BaseRepository<NewsForm, Long> newsFormRepository;
 	/*
 	 * 这里是首页进来的时候 判断的 推荐的目前就是所有的, 关注的就是自己关注的channel的 现在关注的 都是 authchannel 文章里面是
 	 */
@@ -195,7 +203,7 @@ public class NewsService extends BaseController {
 	@GetMapping("querynewsGovernment")
 	public Result AppNewsGovernment(ModelAndView modelAndView, @RequestParam String type, @RequestParam String kind,@RequestParam Long pageNo,@RequestParam Long pageSize) {
 		System.out.println("NewsController.AppNewsGovernment()" + type + kind);
-		String sql = " SELECT t.f_video_path, t.f_id, t.f_title ,t.f_media_type,t.f_displaytype,t.f_check_date ,t.f_display_order  ,c.f_kind as channelkind,pm1.imgs ,c.f_type as channeltype, b.apprisecount as  apprisecount ,b1.agreecount,d.f_title as channelname FROM t_news t  "
+		String sql = " SELECT t.f_video_path, t.f_id, t.f_title ,t.f_media_type,t.f_displaytype,t.f_check_date ,t.f_display_order ,t.f_isform  ,c.f_kind as channelkind,pm1.imgs ,c.f_type as channeltype, b.apprisecount as  apprisecount ,b1.agreecount,d.f_title as channelname FROM t_news t  "
 				+ " left join  ( SELECT f_news_id  as id2, count(1) as apprisecount FROM t_comment cm where cm.f_type ='回答' or cm.f_type ='评论' group by f_news_id ) b on b.id2 =t.f_id "
 				+ " left join ( SELECT f_news_id  as id3, count(1)  as agreecount FROM t_comment cm1 where cm1.f_type ='点赞' group by f_news_id ) b1 on b1.id3 =t.f_id"
 				+ " inner join t_news_channel nc on nc.f_news_id = t.f_id "
@@ -488,5 +496,42 @@ public class NewsService extends BaseController {
 		result.put("news", news);
 		return success(result);
 	}
+	
+	/*
+	 * 搜索页面的内容
+	 */
+	@RequestMapping("submitnewform")
+	public Result submitNewForm(@RequestBody NewsForm newForm) {
+         
+		System.out.println("NewsService.submitNewForm()");
+	    UserInfo U = userInfoRepository.get(getCurrentUserInfoId(), UserInfo.class);
+	    newForm.setUserInfo(U);
+		newsFormRepository.save(newForm);
+		Map result = new HashMap<>();
+		result.put("msg", 1);
+		return success(result);
+	}
 
+	
+
+	/*
+	 * 搜索页面的内容
+	 */
+	@RequestMapping("querynewform")
+	public Result queryNewForm(@RequestParam Long newsID) {
+         
+		System.out.println("NewsService.queryNewForm()");
+		Map result = new HashMap<>();
+	    String sql ="SELECT * FROM t_news_form where f_news_id = "+newsID+" and f_userinfo_id = " +getCurrentUserInfoId();
+	    List l = newsFormRepository.findMapByNativeSql(sql);
+	    if(l.isEmpty()){
+	    	result.put("msg", 1);//没参加过
+	    }else{
+	    	result.put("msg", 2);//参加过了
+	    }
+	  
+	
+		
+		return success(result);
+	}
 }

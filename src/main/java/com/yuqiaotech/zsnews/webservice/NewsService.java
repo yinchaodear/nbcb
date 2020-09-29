@@ -506,6 +506,7 @@ public class NewsService extends BaseController {
 		System.out.println("NewsService.submitNewForm()");
 	    UserInfo U = userInfoRepository.get(getCurrentUserInfoId(), UserInfo.class);
 	    newForm.setUserInfo(U);
+		newForm.setDeltag(NewsDicConstants.ICommon.DELETE_NO);
 		newsFormRepository.save(newForm);
 		Map result = new HashMap<>();
 		result.put("msg", 1);

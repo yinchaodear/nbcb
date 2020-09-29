@@ -49,6 +49,8 @@ public class NewsForm extends BaseModel
     
     private String mobile2;
     
+    private Integer deltag;//删除标识
+    
     public Long getId()
     {
         return id;
@@ -157,5 +159,15 @@ public class NewsForm extends BaseModel
     public void setMobile2(String mobile2)
     {
         this.mobile2 = mobile2;
+    }
+    
+    public Integer getDeltag()
+    {
+        return deltag;
+    }
+    
+    public void setDeltag(Integer deltag)
+    {
+        this.deltag = deltag;
     }
 }

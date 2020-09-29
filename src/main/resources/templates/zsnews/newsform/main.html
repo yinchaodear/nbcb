@@ -12,6 +12,24 @@
 		<div class="layui-card-body">
 			<form class="layui-form" action="">
 				<div class="layui-form-item">
+
+					<hql:queryForList hql="from News where status=0 and deltag=0 and kind='政务' and isform=1 " id="newslist" />
+					<div class="layui-form-item layui-inline">
+						<label class="layui-form-label">活动资源</label>
+						<div class="layui-input-inline">
+							<select name="newsid" lay-search>
+								<option value=""></option>
+								<option th:each="n : ${newslist}" th:value="${n.id}" th:text="${n.title}"></option>
+							</select>
+						</div>
+					</div>
+
+					<div class="layui-form-item layui-inline">
+						<label class="layui-form-label">报名信息</label>
+						<div class="layui-input-inline">
+							<input type="text" name="title" placeholder="请输入报名信息" class="layui-input">
+						</div>
+					</div>
 					<button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="newsForm-query">
 						<i class="layui-icon layui-icon-search"></i>
 						查询
@@ -58,68 +76,44 @@
 
 		let cols = [ [ {
 			type : 'checkbox'
-		}, 
-																						{
-					title : 'userInfo',
-					field : 'userInfo',
-					align : 'center',
-					width : 100
-				},
-																				{
-					title : 'news',
-					field : 'news',
-					align : 'center',
-					width : 100
-				},
-																				{
-					title : 'companyname',
-					field : 'companyname',
-					align : 'center',
-					width : 100
-				},
-																				{
-					title : 'fullname1',
-					field : 'fullname1',
-					align : 'center',
-					width : 100
-				},
-																				{
-					title : 'title',
-					field : 'title',
-					align : 'center',
-					width : 100
-				},
-																				{
-					title : 'mobile1',
-					field : 'mobile1',
-					align : 'center',
-					width : 100
-				},
-																				{
-					title : 'transportation',
-					field : 'transportation',
-					align : 'center',
-					width : 100
-				},
-																				{
-					title : 'carno',
-					field : 'carno',
-					align : 'center',
-					width : 100
-				},
-																				{
-					title : 'fullname2',
-					field : 'fullname2',
-					align : 'center',
-					width : 100
-				},
-																				{
-					title : 'mobile2',
-					field : 'mobile2',
-					align : 'center',
-					width : 100
-				},
-							 {
+		}, {
+			title : '序号',
+			type : 'numbers',
+			align : 'center',
+			width : 80
+		}, {
+			title : '活动名称',
+			field : 'news',
+			align : 'center',
+			width : 100,
+			templet : "<div>d.news.title</div>"
+		}, {
+			title : '企业名称',
+			field : 'companyname',
+			align : 'center',
+			width : 100
+		}, {
+			title : '参会人',
+			field : 'fullname1',
+			align : 'center',
+			width : 100
+		}, {
+			title : '参会人职务',
+			field : 'title',
+			align : 'center',
+			width : 100
+		}, {
+			title : '联系电话',
+			field : 'mobile1',
+			align : 'center',
+			width : 100
+		}, {
+			title : '报名时间',
+			field : 'created',
+			align : 'center',
+			width : 300,
+			templet : "<div>{{layui.util.toDateString(d.created, 'yyyy-MM-dd HH:mm:ss')}}</div>"
+		}, {
 			title : '操作',
 			toolbar : '#newsForm-bar',
 			align : 'center',

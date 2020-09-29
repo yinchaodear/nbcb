@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +27,8 @@ import com.yuqiaotech.common.web.domain.dao.PaginationSupport;
 import com.yuqiaotech.common.web.domain.request.PageDomain;
 import com.yuqiaotech.common.web.domain.response.Result;
 import com.yuqiaotech.common.web.domain.response.ResultTable;
-
+import com.yuqiaotech.zsnews.NewsDicConstants;
+import com.yuqiaotech.zsnews.bean.NewsFormBean;
 import com.yuqiaotech.zsnews.model.NewsForm;
 
 @RestController
@@ -47,16 +47,21 @@ public class NewsFormController extends BaseController
     }
     
     @GetMapping("data")
-    public ResultTable data(NewsForm newsForm, PageDomain pageDomain)
+    public ResultTable data(NewsFormBean newsFormBean, PageDomain pageDomain)
     {
-        DetachedCriteria dc = composeDetachedCriteria(newsForm);
+        DetachedCriteria dc = composeDetachedCriteria(newsFormBean);
         PaginationSupport ps = newsFormRepository.paginateByCriteria(dc, pageDomain.getPage(), pageDomain.getLimit());
         return pageTable(ps.getItems(), ps.getTotalCount());
     }
     
-    public DetachedCriteria composeDetachedCriteria(NewsForm newsForm)
+    public DetachedCriteria composeDetachedCriteria(NewsFormBean newsFormBean)
     {
         DetachedCriteria dc = DetachedCriteria.forClass(NewsForm.class);
+        if (StringUtils.isNotEmpty(newsFormBean.getTitle()))
+        {
+            
+        }
+        dc.add(Restrictions.eq("deltag", NewsDicConstants.ICommon.DELETE_NO));
         return dc;
     }
     

@@ -529,9 +529,7 @@ public class NewsService extends BaseController {
 	    }else{
 	    	result.put("msg", 2);//参加过了
 	    }
-	  
-	
-		
+	 	
 		return success(result);
 	}
 }

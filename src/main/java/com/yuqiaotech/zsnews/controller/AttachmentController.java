@@ -7,8 +7,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.Map;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -240,6 +242,86 @@ public class AttachmentController extends BaseController
         }
         return result;
     }
+//    
+//    @ResponseBody
+//    @RequestMapping("/showVideo")
+//    public void getVideo(@RequestParam Map<String, Object> params, HttpServletRequest request,
+//        HttpServletResponse response)
+//    {
+//        String objectId = (String)params.get("objectId");
+//        String objectType = (String)params.get("objectType");
+//        String fileName = (String)params.get("fileName");
+//        String filePath = attachmentRoot + "/" + objectType + "/" + objectId + "/" + fileName;
+//        
+//        response.reset();
+//        //获取从那个字节开始读取文件
+//        String rangeString = request.getHeader("Range");
+//        
+//        try
+//        {
+//            //获取响应的输出流
+//            OutputStream outputStream = response.getOutputStream();
+//            File file = new File(filePath);
+//            if (file.exists())
+//            {
+//                RandomAccessFile targetFile = new RandomAccessFile(file, "r");
+//                long fileLength = targetFile.length();
+//                //播放
+//                if (rangeString != null)
+//                {
+//                    
+//                    long range =
+//                        Long.valueOf(rangeString.substring(rangeString.indexOf("=") + 1, rangeString.indexOf("-")));
+//                    //设置内容类型
+//                    response.setHeader("Content-Type", "video/mp4");
+//                    //设置此次相应返回的数据长度
+//                    response.setHeader("Content-Length", String.valueOf(fileLength - range));
+//                    //设置此次相应返回的数据范围
+//                    response.setHeader("Content-Range", "bytes " + range + "-" + (fileLength - 1) + "/" + fileLength);
+//                    //返回码需要为206，而不是200
+//                    response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+//                    //设定文件读取开始位置（以字节为单位）
+//                    targetFile.seek(range);
+//                }
+//                else
+//                {//下载
+//                    
+//                    //设置响应头，把文件名字设置好
+//                    response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+//                    //设置文件长度
+//                    response.setHeader("Content-Length", String.valueOf(fileLength));
+//                    //解决编码问题
+//                    response.setHeader("Content-Type", "application/octet-stream");
+//                }
+//                
+//                byte[] cache = new byte[1024 * 300];
+//                int flag;
+//                while ((flag = targetFile.read(cache)) != -1)
+//                {
+//                    outputStream.write(cache, 0, flag);
+//                }
+//            }
+//            else
+//            {
+//                String message = "file:" + fileName + " not exists";
+//                //解决编码问题
+//                response.setHeader("Content-Type", "application/json");
+//                outputStream.write(message.getBytes(StandardCharsets.UTF_8));
+//            }
+//            
+//            outputStream.flush();
+//            outputStream.close();
+//            
+//        }
+//        catch (FileNotFoundException e)
+//        {
+//            e.printStackTrace();
+//        }
+//        catch (IOException e)
+//        {
+//            e.printStackTrace();
+//        }
+//    }
     
     @ResponseBody
     @RequestMapping("/showVideo")
@@ -260,55 +342,7 @@ public class AttachmentController extends BaseController
             //获取响应的输出流
             OutputStream outputStream = response.getOutputStream();
             File file = new File(filePath);
-            if (file.exists())
-            {
-                RandomAccessFile targetFile = new RandomAccessFile(file, "r");
-                long fileLength = targetFile.length();
-                //播放
-                if (rangeString != null)
-                {
-                    
-                    long range =
-                        Long.valueOf(rangeString.substring(rangeString.indexOf("=") + 1, rangeString.indexOf("-")));
-                    //设置内容类型
-                    response.setHeader("Content-Type", "video/mp4");
-                    //设置此次相应返回的数据长度
-                    response.setHeader("Content-Length", String.valueOf(fileLength - range));
-                    //设置此次相应返回的数据范围
-                    response.setHeader("Content-Range", "bytes " + range + "-" + (fileLength - 1) + "/" + fileLength);
-                    //返回码需要为206，而不是200
-                    response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-                    //设定文件读取开始位置（以字节为单位）
-                    targetFile.seek(range);
-                }
-                else
-                {//下载
-                    
-                    //设置响应头，把文件名字设置好
-                    response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-                    //设置文件长度
-                    response.setHeader("Content-Length", String.valueOf(fileLength));
-                    //解决编码问题
-                    response.setHeader("Content-Type", "application/octet-stream");
-                }
-                
-                byte[] cache = new byte[1024 * 300];
-                int flag;
-                while ((flag = targetFile.read(cache)) != -1)
-                {
-                    outputStream.write(cache, 0, flag);
-                }
-            }
-            else
-            {
-                String message = "file:" + fileName + " not exists";
-                //解决编码问题
-                response.setHeader("Content-Type", "application/json");
-                outputStream.write(message.getBytes(StandardCharsets.UTF_8));
-            }
-            
-            outputStream.flush();
-            outputStream.close();
+            sendVideo(request, response, file, fileName);
             
         }
         catch (FileNotFoundException e)
@@ -320,6 +354,80 @@ public class AttachmentController extends BaseController
             e.printStackTrace();
         }
     }
+    
+    
+    
+    private void sendVideo(HttpServletRequest request, HttpServletResponse response, File file, String fileName) throws FileNotFoundException, IOException {
+		System.out.println("AttachmentController.sendVideo()");
+    	RandomAccessFile randomFile = new RandomAccessFile(file, "r");//只读模式
+		long contentLength = randomFile.length();
+        String range = request.getHeader("Range");
+        int start = 0, end = 0;
+        if(range != null && range.startsWith("bytes=")){
+            String[] values = range.split("=")[1].split("-");
+            start = Integer.parseInt(values[0]);
+            if(values.length > 1){
+                end = Integer.parseInt(values[1]);
+            }
+        }
+        int requestSize = 0;
+        if(end != 0 && end > start){
+            requestSize = end - start + 1;
+        } else {
+            requestSize = Integer.MAX_VALUE;
+        }
+ 
+        response.setContentType("video/mp4");
+        response.setHeader("Accept-Ranges", "bytes");
+        response.setHeader("ETag", fileName);
+        response.setHeader("Last-Modified", new Date().toString());
+        //第一次请求只返回content length来让客户端请求多次实际数据
+        if(range == null){
+            response.setHeader("Content-length", contentLength + "");
+        }else{
+        	//以后的多次以断点续传的方式来返回视频数据
+            response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);//206
+            long requestStart = 0, requestEnd = 0;
+            String[] ranges = range.split("=");
+            if(ranges.length > 1){
+                String[] rangeDatas = ranges[1].split("-");
+                requestStart = Integer.parseInt(rangeDatas[0]);
+                if(rangeDatas.length > 1){
+                    requestEnd = Integer.parseInt(rangeDatas[1]);
+                }
+            }
+            long length = 0;
+            if(requestEnd > 0){
+                length = requestEnd - requestStart + 1;
+                response.setHeader("Content-length", "" + length);
+                response.setHeader("Content-Range", "bytes " + requestStart + "-" + requestEnd + "/" + contentLength);
+            }else{
+                length = contentLength - requestStart;
+                response.setHeader("Content-length", "" + length);
+                response.setHeader("Content-Range", "bytes "+ requestStart + "-" + (contentLength - 1) + "/" + contentLength);
+            }
+        }
+        ServletOutputStream out = response.getOutputStream();
+        int needSize = requestSize;
+        randomFile.seek(start);
+        while(needSize > 0){
+            byte[] buffer = new byte[4096];
+            int len = randomFile.read(buffer);
+            if(needSize < buffer.length){
+                out.write(buffer, 0, needSize);
+            } else {
+                out.write(buffer, 0, len);
+                if(len < buffer.length){
+                    break;
+                }
+            }
+            needSize -= buffer.length;
+        }
+        randomFile.close();
+        out.close();
+		
+	}
+
     
     private String GenerateNumber()
     {

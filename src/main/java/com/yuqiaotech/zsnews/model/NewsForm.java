@@ -45,9 +45,9 @@ public class NewsForm extends BaseModel
     
     private String carno;//车牌号
     
-    private String fullname2;
+    private String fullname2;//企业联系人
     
-    private String mobile2;
+    private String mobile2;//企业联系人手机号码
     
     private Integer deltag;//删除标识
     

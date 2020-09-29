@@ -5,6 +5,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.alibaba.fastjson.JSONObject;
 import com.yuqiaotech.common.tools.common.ImgBase64Utils;
@@ -155,6 +157,7 @@ public class RegisterService extends BaseController
             String openid = params0.getString("openid");
             String info = params0.getString("info");
             String loginType = params0.getString("loginType");
+            Boolean isIPhone = params0.getBoolean("isIPhone");
 
             //1.处理用户信息
             UserInfo userInfo = userInfoRepository.findUniqueBy("mobile", mobile, UserInfo.class);
@@ -168,39 +171,54 @@ public class RegisterService extends BaseController
             userInfo.setPwd(password);
             System.out.println("======三方登录用户注册=======微信字符串==userInfo.getId(2)=【" + userInfo.getId() + "】==");
             if ("WX".equals(loginType)) {//微信
-                JSONObject thirdJson = JSONObject.parseObject(info);
-                System.out.println("======三方登录用户注册=======微信字符串==thirdJson=【" + thirdJson + "】==");
-                if (StringUtils.isEmpty(userInfo.getAvatar())) {
-                    String profile_image_url = thirdJson.getString("profile_image_url");
-                    String objectType = "userInfo";
-                    String objectId = userInfo.getId().toString();
-                    String filename = "head.jpg";
-                    String pathString = attachmentRoot + "/" + objectType + "/" + objectId + "/" + filename;
-                    boolean flag = AttachmentService.downloadPicture(profile_image_url, pathString);
-                    System.out.println("======三方登录用户注册=======下载图片结果==flag=【" + flag + "】==");
-                    String avatar = ImgBase64Utils.getImgStr(pathString);
-                    userInfo.setAvatar(avatar);
+                if(isIPhone!=null && isIPhone){//ios微信
+                    info=RegisterService.replaceBlank(info);
+                    JSONObject thirdJson = JSONObject.parseObject(info);
+                    System.out.println("======三方登录用户注册=======ios微信字符串==thirdJson=【" + thirdJson + "】==");
+                    if (StringUtils.isEmpty(userInfo.getAvatar())) {
+                        String profile_image_url = thirdJson.getString("headimgurl");
+                        profile_image_url=profile_image_url.replaceAll("\\\\","");
+                        String avatar = downloadHeadImg(  userInfo,  profile_image_url);
+                        userInfo.setAvatar(avatar);
+                    }
+                    if (StringUtils.isEmpty(userInfo.getNickName()))
+                        userInfo.setNickName(thirdJson.getString("nickname"));//ios微信昵称
+                }else {//安卓微信
+                    JSONObject thirdJson = JSONObject.parseObject(info);
+                    System.out.println("======三方登录用户注册=======微信字符串==thirdJson=【" + thirdJson + "】==");
+                    if (StringUtils.isEmpty(userInfo.getAvatar())) {
+                        String profile_image_url = thirdJson.getString("profile_image_url");
+                        String avatar = downloadHeadImg(  userInfo,  profile_image_url);
+                        userInfo.setAvatar(avatar);
+                    }
+                    if (StringUtils.isEmpty(userInfo.getNickName()))
+                        userInfo.setNickName(thirdJson.getString("name"));//微信昵称
                 }
-                if (StringUtils.isEmpty(userInfo.getNickName()))
-                    userInfo.setNickName(thirdJson.getString("name"));//微信昵称
             }else if("QQ".equals(loginType)){//qq
-                JSONObject thirdJson = JSONObject.parseObject(info);
-                System.out.println("======三方登录用户注册=======qq字符串==thirdJson=【" + thirdJson + "】==");
-                if (StringUtils.isEmpty(userInfo.getAvatar())) {
-                    String profile_image_url = thirdJson.getString("profile_image_url");
-                    //unicode解码
-                    profile_image_url= unicodetoString(profile_image_url);
-                    String objectType = "userInfo";
-                    String objectId = userInfo.getId().toString();
-                    String filename = "head.jpg";
-                    String pathString = attachmentRoot + "/" + objectType + "/" + objectId + "/" + filename;
-                    boolean flag = AttachmentService.downloadPicture(profile_image_url, pathString);
-                    System.out.println("======三方登录用户注册=======qq下载图片结果==flag=【" + flag + "】==");
-                    String avatar = ImgBase64Utils.getImgStr(pathString);
-                    userInfo.setAvatar(avatar);
+                if(isIPhone!=null && isIPhone){//ios--qq
+                    JSONObject thirdJson = JSONObject.parseObject(info);
+                    System.out.println("======三方登录用户注册=======ios--qq字符串==thirdJson=【" + thirdJson + "】==");
+                    if (StringUtils.isEmpty(userInfo.getAvatar())) {
+                        String profile_image_url = thirdJson.getString("headimgurl");
+                        profile_image_url=profile_image_url.replaceAll("\\\\","");
+                        String avatar = downloadHeadImg(  userInfo,  profile_image_url);
+                        userInfo.setAvatar(avatar);
+                    }
+                    if (StringUtils.isEmpty(userInfo.getNickName()))
+                        userInfo.setNickName(thirdJson.getString("nickname"));//ios--qq昵称
+                }else {//安卓--qq
+                    JSONObject thirdJson = JSONObject.parseObject(info);
+                    System.out.println("======三方登录用户注册=======qq字符串==thirdJson=【" + thirdJson + "】==");
+                    if (StringUtils.isEmpty(userInfo.getAvatar())) {
+                        String profile_image_url = thirdJson.getString("profile_image_url");
+                        //unicode解码
+                        profile_image_url = unicodetoString(profile_image_url);
+                        String avatar = downloadHeadImg(  userInfo,  profile_image_url);
+                        userInfo.setAvatar(avatar);
+                    }
+                    if (StringUtils.isEmpty(userInfo.getNickName()))
+                        userInfo.setNickName(thirdJson.getString("name"));//qq昵称
                 }
-                if (StringUtils.isEmpty(userInfo.getNickName()))
-                    userInfo.setNickName(thirdJson.getString("name"));//qq昵称
             }
             if(StringUtils.isEmpty(userInfo.getNickName())) {//如果微信昵称没取到，就自己编一个昵称
                 userInfo.setNickName("新闻访客" + userInfo.getId());
@@ -244,7 +262,23 @@ public class RegisterService extends BaseController
             return success("服务器后台报错，"+e.getMessage());
         }
     }
-    
+
+    public String downloadHeadImg(UserInfo userInfo,String profile_image_url){
+        String avatar =null;
+        try {
+            String objectType = "userInfo";
+            String objectId = userInfo.getId().toString();
+            String filename = "head.jpg";
+            String pathString = attachmentRoot + "/" + objectType + "/" + objectId + "/" + filename;
+            boolean flag = AttachmentService.downloadPicture(profile_image_url, pathString);
+            System.out.println("======三方登录用户注册=======qq下载图片结果==flag=【" + flag + "】==");
+            avatar = ImgBase64Utils.getImgStr(pathString);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return avatar;
+    }
+
     /*
      * 用户注册
      */
@@ -284,6 +318,21 @@ public class RegisterService extends BaseController
 		}
     }
 
+    /***
+     * java去除字符串中的空格、回车、换行符、制表符
+     * @param str
+     * @return
+     */
+    public static String replaceBlank(String str) {
+        String dest = "";
+        if (str!=null) {
+            Pattern p = Pattern.compile("\\s*|\t|\r|\n");
+            Matcher m = p.matcher(str);
+            dest = m.replaceAll("");
+        }
+        return dest;
+    }
+
     //解码
     public static String unicodetoString(String unicode) {
         if (unicode == null || "".equals(unicode)) {
@@ -299,7 +348,10 @@ public class RegisterService extends BaseController
                 sb.append((char) Integer.parseInt(unicode.substring(i + 2, i + 6), 16));
             }
         }
-        return sb.toString();
+        if("".equals(sb.toString())){
+            return unicode;
+        }else
+            return sb.toString();
     }
 
 	private String generateNumber() {

@@ -191,12 +191,12 @@
 						if (obj.elem.checked) {
 							layer.msg('启用成功', {
 								icon : 1,
-								time : 5000
+								time : 3000
 							});
 						} else {
 							layer.msg('停用成功', {
 								icon : 1,
-								time : 5000
+								time : 3000
 							});
 						}
 					} else {
@@ -207,7 +207,7 @@
 						}
 						layer.msg(result.msg, {
 							icon : 2,
-							time : 5000
+							time : 3000
 						});
 					}
 				}
@@ -250,14 +250,14 @@
 						if (result.success) {
 							layer.msg(result.msg, {
 								icon : 1,
-								time : 5000
+								time : 3000
 							}, function() {
 								obj.del();
 							});
 						} else {
 							layer.msg(result.msg, {
 								icon : 2,
-								time : 5000
+								time : 3000
 							});
 						}
 					}
@@ -270,7 +270,7 @@
 			if (data.length === 0) {
 				layer.msg("未选中数据", {
 					icon : 3,
-					time : 1000
+					time : 3000
 				});
 				return false;
 			}
@@ -294,14 +294,14 @@
 						if (result.success) {
 							layer.msg(result.msg, {
 								icon : 1,
-								time : 5000
+								time : 3000
 							}, function() {
 								table.reload('material-table');
 							});
 						} else {
 							layer.msg(result.msg, {
 								icon : 2,
-								time : 5000
+								time : 3000
 							});
 						}
 					}

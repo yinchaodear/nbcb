@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang="en"  xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
 <head>
 <meta charset="UTF-8">
 <title>新增</title>
@@ -12,55 +12,55 @@
 		<div class="mainBox">
 			<div class="main-container">
 				<div class="main-container">
-																																				<div class="layui-form-item">
-								<label class="layui-form-label">反馈内容</label>
-								<div class="layui-input-block">
-									<input type="text" name="content"  autocomplete="off" placeholder="请输入反馈内容" class="layui-input">
-								</div>
-							</div>
-																															<div class="layui-form-item">
-								<label class="layui-form-label">回复内容</label>
-								<div class="layui-input-block">
-									<input type="text" name="replyContent"  autocomplete="off" placeholder="请输入回复内容" class="layui-input">
-								</div>
-							</div>
-																															<div class="layui-form-item">
-								<label class="layui-form-label">反馈时间</label>
-								<div class="layui-input-block">
-									<input type="text" name="feedbackTime"  autocomplete="off" placeholder="请输入反馈时间" class="layui-input">
-								</div>
-							</div>
-																															<div class="layui-form-item">
-								<label class="layui-form-label">回复时间</label>
-								<div class="layui-input-block">
-									<input type="text" name="replyTime"  autocomplete="off" placeholder="请输入回复时间" class="layui-input">
-								</div>
-							</div>
-																															<div class="layui-form-item">
-								<label class="layui-form-label">反馈人</label>
-								<div class="layui-input-block">
-									<input type="text" name="userInfo"  autocomplete="off" placeholder="请输入反馈人" class="layui-input">
-								</div>
-							</div>
-																															<div class="layui-form-item">
-								<label class="layui-form-label">回复人</label>
-								<div class="layui-input-block">
-									<input type="text" name="user"  autocomplete="off" placeholder="请输入回复人" class="layui-input">
-								</div>
-							</div>
-																															<div class="layui-form-item">
-								<label class="layui-form-label">删除标识</label>
-								<div class="layui-input-block">
-									<input type="text" name="deltag"  autocomplete="off" placeholder="请输入删除标识" class="layui-input">
-								</div>
-							</div>
-																															<div class="layui-form-item">
-								<label class="layui-form-label">状态</label>
-								<div class="layui-input-block">
-									<input type="text" name="status"  autocomplete="off" placeholder="请输入状态" class="layui-input">
-								</div>
-							</div>
-															</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">反馈内容</label>
+						<div class="layui-input-block">
+							<input type="text" name="content" autocomplete="off" placeholder="请输入反馈内容" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">回复内容</label>
+						<div class="layui-input-block">
+							<input type="text" name="replyContent" autocomplete="off" placeholder="请输入回复内容" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">反馈时间</label>
+						<div class="layui-input-block">
+							<input type="text" name="feedbackTime" autocomplete="off" placeholder="请输入反馈时间" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">回复时间</label>
+						<div class="layui-input-block">
+							<input type="text" name="replyTime" autocomplete="off" placeholder="请输入回复时间" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">反馈人</label>
+						<div class="layui-input-block">
+							<input type="text" name="userInfo" autocomplete="off" placeholder="请输入反馈人" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">回复人</label>
+						<div class="layui-input-block">
+							<input type="text" name="user" autocomplete="off" placeholder="请输入回复人" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">删除标识</label>
+						<div class="layui-input-block">
+							<input type="text" name="deltag" autocomplete="off" placeholder="请输入删除标识" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">状态</label>
+						<div class="layui-input-block">
+							<input type="text" name="status" autocomplete="off" placeholder="请输入状态" class="layui-input">
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="bottom">
@@ -68,10 +68,6 @@
 				<button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="feedback-save" id="submitbtn">
 					<i class="layui-icon layui-icon-ok"></i>
 					提交
-				</button>
-				<button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">
-					<i class="layui-icon layui-icon-refresh"></i>
-					重置
 				</button>
 			</div>
 		</div>
@@ -82,13 +78,13 @@
 			let form = layui.form;
 			let $ = layui.jquery;
 			let MODULE_PATH = "/zsnews/feedback/";
-			
+
 			form.on('submit(feedback-save)', function(data) {
 				var DISABLED = 'layui-btn-disabled';
 				$('#submitbtn').addClass(DISABLED);
 				$('#submitbtn').attr('disabled', 'disabled');
 				$.ajax({
-					url : MODULE_PATH+'save',
+					url : MODULE_PATH + 'save',
 					data : JSON.stringify(data.field),
 					dataType : 'json',
 					contentType : 'application/json',
@@ -97,26 +93,26 @@
 						if (result.success) {
 							layer.msg(result.msg, {
 								icon : 1,
-								time : 5000
+								time : 3000
 							}, function() {
 								$('#submitbtn').removeClass(DISABLED);
-		                        $('#submitbtn').removeAttr('disabled');
+								$('#submitbtn').removeAttr('disabled');
 								parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
 								parent.layui.table.reload("feedback-table");
 							});
 						} else {
 							layer.msg(result.msg, {
 								icon : 2,
-								time : 5000
+								time : 3000
 							}, function() {
 								$('#submitbtn').removeClass(DISABLED);
-		                        $('#submitbtn').removeAttr('disabled');
+								$('#submitbtn').removeAttr('disabled');
 							});
 						}
 					},
-					error : function(XMLHttpRequest, textStatus, errorThrown){
+					error : function(XMLHttpRequest, textStatus, errorThrown) {
 						$('#submitbtn').removeClass(DISABLED);
-		               	$('#submitbtn').removeAttr('disabled');
+						$('#submitbtn').removeAttr('disabled');
 					}
 				})
 				return false;

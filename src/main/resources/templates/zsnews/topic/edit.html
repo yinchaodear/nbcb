@@ -49,10 +49,6 @@
 					<i class="layui-icon layui-icon-ok"></i>
 					提交
 				</button>
-				<button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">
-					<i class="layui-icon layui-icon-refresh"></i>
-					重置
-				</button>
 			</div>
 		</div>
 	</form>
@@ -74,7 +70,7 @@
 						if (result.success) {
 							layer.msg(result.msg, {
 								icon : 1,
-								time : 1000
+								time : 3000
 							}, function() {
 								parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
 								parent.layui.table.reload("topic-table");
@@ -82,7 +78,7 @@
 						} else {
 							layer.msg(result.msg, {
 								icon : 2,
-								time : 1000
+								time : 3000
 							});
 						}
 					}

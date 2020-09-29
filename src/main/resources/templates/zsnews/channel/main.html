@@ -189,18 +189,18 @@
 						if (obj.elem.checked) {
 							layer.msg('启用成功', {
 								icon : 1,
-								time : 5000
+								time : 3000
 							});
 						} else {
 							layer.msg('停用成功', {
 								icon : 1,
-								time : 5000
+								time : 3000
 							});
 						}
 					} else {
 						layer.msg('状态更新失败', {
 							icon : 2,
-							time : 1000
+							time : 3000
 						});
 					}
 				}
@@ -219,18 +219,18 @@
 						if (obj.elem.checked) {
 							layer.msg('显示成功', {
 								icon : 1,
-								time : 5000
+								time : 3000
 							});
 						} else {
 							layer.msg('隐藏成功', {
 								icon : 1,
-								time : 5000
+								time : 3000
 							});
 						}
 					} else {
 						layer.msg('默认显示更新失败', {
 							icon : 2,
-							time : 2000
+							time : 3000
 						});
 					}
 				}
@@ -273,14 +273,14 @@
 						if (result.success) {
 							layer.msg(result.msg, {
 								icon : 1,
-								time : 1000
+								time : 3000
 							}, function() {
 								obj.del();
 							});
 						} else {
 							layer.msg(result.msg, {
 								icon : 2,
-								time : 1000
+								time : 3000
 							});
 						}
 					}
@@ -317,14 +317,14 @@
 						if (result.success) {
 							layer.msg(result.msg, {
 								icon : 1,
-								time : 1000
+								time : 3000
 							}, function() {
 								table.reload('channel-table');
 							});
 						} else {
 							layer.msg(result.msg, {
 								icon : 2,
-								time : 1000
+								time : 3000
 							});
 						}
 					}

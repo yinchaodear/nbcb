@@ -33,9 +33,9 @@
 			<div class="main-container">
 				<div class="main-container">
 					<div class="layui-form-item ">
-						<label class="layui-form-label">标题</label>
+						<label class="layui-form-label">活动名称</label>
 						<div class="layui-input-block">
-							<input type="text" name="title" autocomplete="off" placeholder="请输入标题" class="layui-input" maxlength="50" lay-verify="required">
+							<input type="text" name="title" autocomplete="off" placeholder="请输入活动名称" class="layui-input" maxlength="50" lay-verify="required">
 						</div>
 					</div>
 					<hql:queryForList hql="from Channel where status=0 and deltag=0 and kind='政务'  order by displayOrder" id="channellist" />
@@ -49,18 +49,14 @@
 						</div>
 					</div>
 					<div class="layui-form-item">
-						<label class="layui-form-label">所属类型</label>
+						<label class="layui-form-label">活动描述</label>
 						<div class="layui-input-block">
-							<select name="type" lay-verify="required">
-								<option value=""></option>
-								<option value="自有">平台自有活动</option>
-								<option value="外部">外部接入活动</option>
-							</select>
+							<textarea name="content" placeholder="请输入活动描述" class="layui-textarea" maxlength="500"></textarea>
 						</div>
 					</div>
-					<div class="layui-form-item" th:id="'sucaibegindiv'+${i}" th:each="i:${#numbers.sequence(1, 1)}">
+					<div class="layui-form-item" th:id="'sucaibegindiv'+${i}" th:each="i:${#numbers.sequence(1, 2)}">
 						<input type="hidden" th:name="'picname'+${i}" th:id="'picname'+${i}" />
-						<label class="layui-form-label" th:text="${i==1?'素材图':''}">素材图</label>
+						<label class="layui-form-label" th:text="${i==1?'首页图':'素材底图'}">首页图</label>
 						<div class="layui-input-block">
 							<div class="layui-upload-drag" th:id="'upload-drag'+${i}" th:attr="idx=${i}">
 								<span class="icon pear-icon" style="font-size: 32px; color: #333;">&#xe669;</span>
@@ -69,18 +65,6 @@
 								<img class="layui-upload-img" th:id="'previewImg'+${i}">
 								<span class="icon pear-icon delbtn" title="删除素材" th:onclick="delsucai([[${i}]])" th:id="'delbtn'+${i}" style="display: none;">&#xe66e;</span>
 							</div>
-						</div>
-					</div>
-					<div class="layui-form-item" id="hrefdiv">
-						<label class="layui-form-label">服务地址</label>
-						<div class="layui-input-block">
-							<input type="text" name="link" autocomplete="off" placeholder="请输入服务地址"  class="layui-input" maxlength="500">
-						</div>
-					</div>
-					<div class="layui-form-item">
-						<label class="layui-form-label">描述</label>
-						<div class="layui-input-block">
-							<textarea name="content" placeholder="请输入描述" class="layui-textarea" maxlength="500"></textarea>
 						</div>
 					</div>
 				</div>
@@ -113,7 +97,7 @@
 			let util = layui.util;
 			let tree = layui.tree;
 			upload = layui.upload;
-			let MODULE_PATH = "/zsnews/zwnews/";
+			let MODULE_PATH = "/zsnews/hdnews/";
 			$("#objectId").val(news_tid);
 
 			upload.render({

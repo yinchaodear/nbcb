@@ -176,6 +176,18 @@ public interface NewsDicConstants
             
             Integer NO = 0;
         }
+        
+        /**
+         * 表单标记：政务活动里面是否表单的标记
+         * @author Admin
+         *
+         */
+        interface Form
+        {
+            Integer YES = 1;
+            
+            Integer NO = 0;
+        }
     }
     
     /**

@@ -72,6 +72,8 @@ public class News extends BaseModel
     
     private Integer ishot;//是否热点
     
+    private Integer isform;//是否表单
+    
     private Integer deltag;//删除标识
     
     private Integer status;//
@@ -94,6 +96,8 @@ public class News extends BaseModel
     private Integer collects;//收藏数量
     
     private String videoPath;//视频路径，一个资源只能由一个视频
+    
+    private String bgpicPath;//文章详情背景图片，存路径
     
     public Long getId()
     {
@@ -384,5 +388,25 @@ public class News extends BaseModel
     public void setVideoPath(String videoPath)
     {
         this.videoPath = videoPath;
+    }
+    
+    public String getBgpicPath()
+    {
+        return bgpicPath;
+    }
+    
+    public void setBgpicPath(String bgpicPath)
+    {
+        this.bgpicPath = bgpicPath;
+    }
+    
+    public Integer getIsform()
+    {
+        return isform;
+    }
+    
+    public void setIsform(Integer isform)
+    {
+        this.isform = isform;
     }
 }

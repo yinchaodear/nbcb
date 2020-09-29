@@ -133,6 +133,15 @@
 				"icon": "layui-icon layui-icon-vercode",
 				"href": "/zsnews/group/main",
 				"children": []
+			},
+			{
+				"id": "1025",
+				"title": "活动资源管理",
+				"type": "1",
+				"openType": null,
+				"icon": "layui-icon layui-icon-vercode",
+				"href": "/zsnews/hdnews/main",
+				"children": []
 			}
 		]
 	},
@@ -215,7 +224,7 @@
 		"title": "活动统计",
 		"type": "0",
 		"openType": null,
-		"icon": "../admin/images/khfk.png",
+		"icon": "../admin/images/hdtj.png",
 		"href": "",
 		"children": [
 			{

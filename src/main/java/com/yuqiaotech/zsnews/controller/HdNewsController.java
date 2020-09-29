@@ -70,10 +70,10 @@ import sun.misc.BASE64Decoder;
  * 政务资源
  */
 @RestController
-@RequestMapping(value = {"zsnews/zwnews", "ws/zwnews"})
-public class ZwNewsController extends BaseController
+@RequestMapping(value = {"zsnews/hdnews", "ws/hdnews"})
+public class HdNewsController extends BaseController
 {
-    private static String MODULE_PATH = "zsnews/zwnews/";
+    private static String MODULE_PATH = "zsnews/hdnews/";
     
     @Autowired
     private BaseRepository<News, Long> newsRepository;
@@ -412,6 +412,7 @@ public class ZwNewsController extends BaseController
         {
             condition += " and n.type = '" + news.getType() + "'";
         }
+        condition += " and n.isform=" + NewsDicConstants.INews.Form.YES;//活动资源标记
         condition += " and n.deltag=" + NewsDicConstants.ICommon.DELETE_NO + " and n.kind='政务'";
         condition += " order by n.created desc";
         return hql + condition;
@@ -433,7 +434,7 @@ public class ZwNewsController extends BaseController
         news.setUser(getCurrentUser());
         news.setFrom("平台");
         news.setKind("政务");
-        news.setIsform(NewsDicConstants.INews.Form.NO);//政务活动不是表单，如果需要表单，在活动资源管理中创建
+        news.setIsform(NewsDicConstants.INews.Form.YES);
         news.setDeltag(NewsDicConstants.ICommon.DELETE_NO);
         news.setStatus(NewsDicConstants.INews.Status.UP);//新增保存默认上架
         
@@ -445,6 +446,11 @@ public class ZwNewsController extends BaseController
             pm.setDisplayOrder(1);
             pm.setPicpath(newsbean.getPicname1());
             picmappinglist.add(pm);
+        }
+        
+        if (StringUtils.isNotEmpty(newsbean.getPicname2()))
+        {
+            news.setBgpicPath(newsbean.getPicname2());
         }
         
         news = newsRepository.save(news);
@@ -724,6 +730,7 @@ public class ZwNewsController extends BaseController
         news.setUser(getCurrentUser());
         news.setFrom("平台");
         news.setKind("政务");
+        news.setIsform(NewsDicConstants.INews.Form.YES);
         news.setDeltag(NewsDicConstants.ICommon.DELETE_NO);
         news.setStatus(NewsDicConstants.INews.Status.UP);//新增保存默认上架
         
@@ -739,6 +746,8 @@ public class ZwNewsController extends BaseController
             pm.setPicpath(newsbean.getPicname1());
             picmappinglist.add(pm);
         }
+        
+        news.setBgpicPath(newsbean.getPicname2());
         
         newsChannelRepository.executeUpdate("delete from NewsChannel where news.id=" + news.getId(), new HashMap<>());
         if (StringUtils.isNotEmpty(newsbean.getChannelid()))

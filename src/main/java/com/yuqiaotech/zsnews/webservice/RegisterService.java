@@ -196,6 +196,7 @@ public class RegisterService extends BaseController
                 }
             }else if("QQ".equals(loginType)){//qq
                 if(isIPhone!=null && isIPhone){//ios--qq
+                    info=RegisterService.replaceBlank(info);
                     JSONObject thirdJson = JSONObject.parseObject(info);
                     System.out.println("======三方登录用户注册=======ios--qq字符串==thirdJson=【" + thirdJson + "】==");
                     if (StringUtils.isEmpty(userInfo.getAvatar())) {
@@ -219,6 +220,11 @@ public class RegisterService extends BaseController
                     if (StringUtils.isEmpty(userInfo.getNickName()))
                         userInfo.setNickName(thirdJson.getString("name"));//qq昵称
                 }
+            }else if("APPLE".equals(loginType)){//苹果
+                info=RegisterService.replaceBlank(info);
+                JSONObject thirdJson = JSONObject.parseObject(info);
+                if (StringUtils.isEmpty(userInfo.getNickName()))
+                    userInfo.setNickName(thirdJson.getString("nickname"));//苹果昵称
             }
             if(StringUtils.isEmpty(userInfo.getNickName())) {//如果微信昵称没取到，就自己编一个昵称
                 userInfo.setNickName("新闻访客" + userInfo.getId());

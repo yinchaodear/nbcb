@@ -24,7 +24,7 @@ public class UserAuths {
 	private UserInfo userinfo;
 
 	/**
-	 * 三方登陆类型（wx:微信，qq:QQ登陆，wb:微博）
+	 * 三方登陆类型（WX:微信，QQ:QQ登陆，WEIBO:微博，APPLE:苹果帐号）
 	 */
 	private String thirdType;
 

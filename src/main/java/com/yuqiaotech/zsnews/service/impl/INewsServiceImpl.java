@@ -50,7 +50,7 @@ public class INewsServiceImpl implements INewsService {
 			String type = params.get("type") != null ? (String) params.get("type") : "";
 			//调整为查询channel
 //			String wheresql = "where 1 =1 and t.f_kind ='" + kind + "'";
-			String wheresql = "where 1 =1 and nc.f_id is not null ";
+			String wheresql = "where t.f_id is not null and nc.f_id is not null ";
 
 			Long teamId = params.get("teamId") != null ? Long.valueOf((String) params.get("teamId")) : null;
 			if (teamId != null) {

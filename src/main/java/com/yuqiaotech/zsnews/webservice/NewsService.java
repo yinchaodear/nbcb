@@ -115,7 +115,7 @@ public class NewsService extends BaseController {
 	@GetMapping("newsDetail")
 	public Result newsDetail(ModelAndView modelAndView, @RequestParam Long id, @RequestParam Long cid) {
 
-		String sql = "select t.* ,convert(c.f_Logo using utf8) as logo, c.f_title as channeltitle , c.f_remark as channelremark,cf.f_id as cfid ,n.f_id as nfid , a.cmid "
+		String sql = "select t.*, convert(c.f_Logo using utf8) as logo, c.f_title as channeltitle , c.f_remark as channelremark,cf.f_id as cfid ,n.f_id as nfid , a.cmid "
 				+ " , case when b.agreecount  >=10000  then  concat(cast(  convert(b.agreecount/10000,decimal(10,1)) as char),'万' )"
 				+ " else cast(b.agreecount   as char)  end as agreecount , "
 				+ " case when g.number  >=10000  then  concat(cast(  convert( g.number/10000,decimal(10,1)) as char),'万' )"

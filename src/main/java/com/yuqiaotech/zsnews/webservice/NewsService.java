@@ -156,7 +156,11 @@ public class NewsService extends BaseController {
 			wheresql = "inner join t_channel_follower cf on cf.f_channel_id = t.f_author_channel_id and cf.f_user_info_id = "
 					+ getCurrentUserInfoId();
 		}
-		String sql = "SELECT t.f_video_path, t.f_id, t.f_title ,t.f_media_type,t.f_displaytype,t.f_check_date ,t.f_display_order ,c.f_kind as channelkind,c.f_type as channeltype,pm1.imgs , "
+		String sql = "SELECT "
+				+ " case when t.f_collects  >=10000  then "
+				+ " concat(cast(  convert(t.f_collects/10000,decimal(10,1)) as char),'万' ) "
+				+ " else cast(t.f_collects   as char)  end as collects , "
+				+ "  t.f_video_path, t.f_id, t.f_title ,t.f_media_type,t.f_displaytype,t.f_check_date ,t.f_display_order ,c.f_kind as channelkind,c.f_type as channeltype,pm1.imgs , "
 				+ " case when t.f_comments >=10000  then  "
 				+ " concat(cast(  convert(t.f_comments/10000,decimal(10,1)) as char),'万' ) else cast(t.f_comments as char)  end as apprisecount "
 				+ ",c.f_title as channelname "
@@ -185,7 +189,11 @@ public class NewsService extends BaseController {
 			wheresql = "inner join t_news_category nc on nc.f_news_id =t.f_id inner"
 					+ " join t_category cate on cate.f_id = nc.f_category_id and cate.f_title ='" + category + "'";
 		}
-		String sql = "SELECT  t.f_video_path, t.f_id, t.f_title ,t.f_media_type,t.f_displaytype,t.f_check_date ,t.f_display_order  ,d.f_title as channelname ,"
+		String sql = "SELECT "
+				+ " case when t.f_collects  >=10000  then "
+				+ " concat(cast(  convert(t.f_collects/10000,decimal(10,1)) as char),'万' ) "
+				+ " else cast(t.f_collects   as char)  end as collects , "
+				+ " t.f_video_path, t.f_id, t.f_title ,t.f_media_type,t.f_displaytype,t.f_check_date ,t.f_display_order  ,d.f_title as channelname ,"
 				+ "case when t.f_comments >=10000  then  "
 				+ " concat(cast(  convert(t.f_comments/10000,decimal(10,1)) as char),'万' ) else cast(t.f_comments as char)  end as apprisecount "
 				+ " ,pm1.imgs FROM t_news t "

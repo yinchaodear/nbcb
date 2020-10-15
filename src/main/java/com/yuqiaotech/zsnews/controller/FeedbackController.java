@@ -68,7 +68,8 @@ public class FeedbackController extends BaseController
         {
             dc.add(Restrictions.eq("status", feedback.getStatus()));
         }
-        dc.add(Restrictions.eq("deltag", NewsDicConstants.ICommon.DELETE_NO));
+        dc.add(Restrictions.or(Restrictions.isNull("deltag"),
+            Restrictions.eq("deltag", NewsDicConstants.ICommon.DELETE_NO)));
         dc.addOrder(Order.desc("feedbackTime"));
         return dc;
     }
@@ -102,6 +103,7 @@ public class FeedbackController extends BaseController
         feedbackdb.setStatus(NewsDicConstants.IFeedback.Status.END);
         feedbackdb.setReplyTime(new Date());
         feedbackdb.setUser(getCurrentUser());
+        feedbackdb.setDeltag(NewsDicConstants.ICommon.DELETE_NO);
         
         feedbackRepository.update(feedbackdb);
         return decide(true);

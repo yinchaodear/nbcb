@@ -397,11 +397,12 @@ public class ZwNewsController extends BaseController
         String condition = " where 1=1";
         if (StringUtils.isNotEmpty(news.getTitle()))
         {
-            condition += " and (title like '%" + news.getTitle() + "%' or content like '%" + news.getTitle() + "%')";
+            condition +=
+                " and (n.title like '%" + news.getTitle() + "%' or n.content like '%" + news.getTitle() + "%')";
         }
         if (news.getStatus() != null)
         {
-            condition += " and status = " + news.getStatus();
+            condition += " and n.status = " + news.getStatus();
         }
         if (StringUtils.isNotEmpty(news.getChannelid()))
         {

@@ -50,18 +50,10 @@
 </body>
 
 <script type="text/html" id="newsForm-toolbar">
-    <button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">
-        <i class="layui-icon layui-icon-add-1"></i>
-        新增
-    </button>
-    <button class="pear-btn pear-btn-danger pear-btn-md" lay-event="batchRemove">
-        <i class="layui-icon layui-icon-delete"></i>
-        删除
-    </button>
 </script>
 
 <script type="text/html" id="newsForm-bar">
-    <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i></button>
+    <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-search"></i></button>
     <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i class="layui-icon layui-icon-delete"></i></button>
 </script>
 
@@ -85,28 +77,30 @@
 			title : '活动名称',
 			field : 'news',
 			align : 'center',
-			width : 100,
-			templet : "<div>d.news.title</div>"
+			width : 300,
+			templet : function(d) {
+				return d.news.title;
+			}
 		}, {
 			title : '企业名称',
 			field : 'companyname',
 			align : 'center',
-			width : 100
+			width : 200
 		}, {
 			title : '参会人',
 			field : 'fullname1',
 			align : 'center',
-			width : 100
+			width : 150
 		}, {
 			title : '参会人职务',
 			field : 'title',
 			align : 'center',
-			width : 100
+			width : 150
 		}, {
 			title : '联系电话',
 			field : 'mobile1',
 			align : 'center',
-			width : 100
+			width : 150
 		}, {
 			title : '报名时间',
 			field : 'created',
@@ -116,8 +110,7 @@
 		}, {
 			title : '操作',
 			toolbar : '#newsForm-bar',
-			align : 'center',
-			width : 195
+			align : 'center'
 		} ] ]
 
 		table.render({
@@ -165,7 +158,7 @@
 				type : 2,
 				title : '新增',
 				shade : 0.1,
-				area : [ '800px', '80%' ],
+				area : [ '1200px', '80%' ],
 				content : MODULE_PATH + 'add'
 			});
 		}
@@ -173,9 +166,9 @@
 		window.edit = function(obj) {
 			layer.open({
 				type : 2,
-				title : '修改',
+				title : '报名信息查看',
 				shade : 0.1,
-				area : [ '800px', '80%' ],
+				area : [ '1200px', '80%' ],
 				content : MODULE_PATH + 'edit?id=' + obj.data['id']
 			});
 		}

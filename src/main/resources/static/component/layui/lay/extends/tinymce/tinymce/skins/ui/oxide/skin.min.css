@@ -1134,8 +1134,8 @@ button::-moz-focus-inner {
   background-color: rgba(32, 122, 183, 0.1);
 }
 .tox .tox-dialog__body-nav-item--active {
-  border-bottom: 2px solid #207ab7;
-  color: #207ab7;
+	border: 2px solid rgb(30, 159, 255);
+    color: rgb(30, 159, 255);
 }
 .tox .tox-dialog__body-content {
   box-sizing: border-box;

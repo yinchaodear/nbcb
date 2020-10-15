@@ -104,7 +104,7 @@ layui.define(['table', 'jquery', 'element', 'form', 'pearAuth', 'pearTab', 'pear
 						data: [{
 							id: '474356363552755712',
 							url: option.index,
-							title: '首页',
+							title: option.indextitle,
 							close: false
 						}] //初始化数据
 					});

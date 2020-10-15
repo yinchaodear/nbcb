@@ -85,7 +85,7 @@
 							</video>
 						</div>
 					</div>
-					<hql:queryForList hql="from Channel where status=0 and deltag=0 and kind='浙商号'  order by displayOrder" id="channellist" />
+					<!-- <hql:queryForList hql="from Channel where status=0 and deltag=0 and kind='浙商号'  order by displayOrder" id="channellist" />
 					<div class="layui-form-item ">
 						<label class="layui-form-label">浙商号</label>
 						<div class="layui-input-block">
@@ -94,7 +94,7 @@
 								<option th:each="c : ${channellist}" th:value="${c.id}" th:text="${c.title}"></option>
 							</select>
 						</div>
-					</div>
+					</div> -->
 					<div class="layui-form-item">
 						<label class="layui-form-label">发布频道</label>
 						<div class="layui-input-block">
@@ -126,7 +126,7 @@
 			</div>
 		</div>
 	</form>
-	<canvas id="canvas" style="display:none;"></canvas>
+	<canvas id="canvas" style="display: none;"></canvas>
 	<script src="../../component/layui/layui.js"></script>
 	<script th:inline="javascript">
 		var data = [];
@@ -164,6 +164,48 @@
 			var edit = tinymce.render({
 				elem : "#content2",
 				height : 500,
+				file_picker_types: 'media',
+				file_picker_callback: function(callback, value, meta) {
+					var input = document.createElement('input');
+		            input.setAttribute('type', 'file');
+		            input.onchange = function() {
+			            var file = this.files[0];
+			            var xhr, formData;
+			            console.log(file.name);
+			            xhr = new XMLHttpRequest();
+			            xhr.withCredentials = false;
+			            xhr.open('POST', '/attachment/uploadFile');
+			            xhr.onload = function() {
+			                var json;
+			                if (xhr.status != 200) {
+			                    failure('HTTP Error: ' + xhr.status);
+			                    return;
+			                }
+			                json = JSON.parse(xhr.responseText);
+			                var videopath = '/attachment/showVideo?objectId=' + news_tid + "&objectType=" + objectType + "&fileName=" + json.msg;
+			                callback(videopath, { title: file.name });
+			            };
+			            xhr.upload.onprogress = function (e) {
+			            	   let percent=e.loaded / e.total * 100;
+			            	   if(percent<100){
+			            	         tinymce.activeEditor.setProgressState(true);//是否显示loading状态：1（显示）0（隐藏）
+			            	   }else{
+			            	         tinymce.activeEditor.setProgressState(false);
+			            	   }
+			            	};
+			            	xhr.onerror = function () {
+			            	   console.log(xhr.status);
+			            	   tinymce.activeEditor.setProgressState(false);
+			            	   return;
+			            	};
+			            formData = new FormData();
+			            formData.append('file', file, file.name );
+			            formData.append('objectId', news_tid);
+			            formData.append('objectType', objectType);
+			            xhr.send(formData);
+			        };
+			        input.click();
+				},
 				images_upload_handler : function(blobInfo, success, failure) {
 					var form = new FormData();
 					form.append('file', blobInfo.blob(), blobInfo.filename());

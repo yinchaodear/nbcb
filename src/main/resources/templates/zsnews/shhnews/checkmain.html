@@ -24,8 +24,8 @@
 						<div class="layui-input-inline">
 							<select name="status">
 								<option value=""></option>
-								<option value="0">已上架</option>
-								<option value="1">已下架</option>
+								<option value="0">已发布</option>
+								<option value="1">未发布</option>
 								<option value="2">处理中</option>
 								<option value="3">审核中</option>
 								<option value="4">已失败</option>
@@ -72,14 +72,6 @@
 </body>
 
 <script type="text/html" id="news-toolbar">
-    <button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">
-        <i class="layui-icon layui-icon-add-1"></i>
-        新增
-    </button>
-    <button class="pear-btn pear-btn-danger pear-btn-md" lay-event="batchRemove">
-        <i class="layui-icon layui-icon-delete"></i>
-        删除
-    </button>
 </script>
 
 <script type="text/html" id="news-bar">
@@ -134,9 +126,9 @@
 			width : 200,
 			templet : function(d) {
 				if (d.status == 0)
-					return '<div>已上架</div>';
+					return '<div>已发布</div>';
 				else if (d.status == 1)
-					return '<div>已下架</div>';
+					return '<div>未发布</div>';
 				else if (d.status == 2)
 					return '<div>处理中</div>';
 				else if (d.status == 3)

@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,9 +51,32 @@ public class NewsFormController extends BaseController
     @GetMapping("data")
     public ResultTable data(NewsFormBean newsFormBean, PageDomain pageDomain)
     {
+        //        String hql = buildSearchCondition(newsFormBean);
         DetachedCriteria dc = composeDetachedCriteria(newsFormBean);
         PaginationSupport ps = newsFormRepository.paginateByCriteria(dc, pageDomain.getPage(), pageDomain.getLimit());
+        //        PaginationSupport ps =
+        //            newsFormRepository.paginateByHql(hql, pageDomain.getPage(), pageDomain.getLimit(), new HashMap<>());
         return pageTable(ps.getItems(), ps.getTotalCount());
+    }
+    
+    public String buildSearchCondition(NewsFormBean newsFormBean)
+    {
+        String hql = "from NewsForm nf where 1=1 ";
+        if (newsFormBean.getNewsid() != null)
+        {
+            hql += " and news.id=" + newsFormBean.getNewsid();
+        }
+        if (StringUtils.isNotEmpty(newsFormBean.getTitle()))
+        {
+            hql += " and (nf.companyname like '%" + newsFormBean.getTitle() + "%' or nf.fullname1 like '%"
+                + newsFormBean.getTitle() + "%' or nf.title like '%" + newsFormBean.getTitle()
+                + "%' or nf.mobile1 like '%" + newsFormBean.getTitle() + "%' or nf.transportation like '%"
+                + newsFormBean.getTitle() + "%' or nf.carno like '%" + newsFormBean.getTitle()
+                + "%' or nf.fullname2 like '%" + newsFormBean.getTitle() + "%' or nf.mobile2 like '%"
+                + newsFormBean.getTitle() + "%')";
+        }
+        hql += " order by nf.created desc";
+        return hql;
     }
     
     public DetachedCriteria composeDetachedCriteria(NewsFormBean newsFormBean)
@@ -59,9 +84,22 @@ public class NewsFormController extends BaseController
         DetachedCriteria dc = DetachedCriteria.forClass(NewsForm.class);
         if (StringUtils.isNotEmpty(newsFormBean.getTitle()))
         {
-            
+            dc.add(Restrictions.or(Restrictions.ilike("companyname", newsFormBean.getTitle(), MatchMode.ANYWHERE),
+                Restrictions.ilike("fullname1", newsFormBean.getTitle(), MatchMode.ANYWHERE),
+                Restrictions.ilike("title", newsFormBean.getTitle(), MatchMode.ANYWHERE),
+                Restrictions.ilike("mobile1", newsFormBean.getTitle(), MatchMode.ANYWHERE),
+                Restrictions.ilike("transportation", newsFormBean.getTitle(), MatchMode.ANYWHERE),
+                Restrictions.ilike("carno", newsFormBean.getTitle(), MatchMode.ANYWHERE),
+                Restrictions.ilike("fullname2", newsFormBean.getTitle(), MatchMode.ANYWHERE),
+                Restrictions.ilike("mobile2", newsFormBean.getTitle(), MatchMode.ANYWHERE)));
+        }
+        if (newsFormBean.getNewsid() != null)
+        {
+            dc.createAlias("news", "news");
+            dc.add(Restrictions.eq("news.id", newsFormBean.getNewsid()));
         }
         dc.add(Restrictions.eq("deltag", NewsDicConstants.ICommon.DELETE_NO));
+        dc.addOrder(Order.desc("created"));
         return dc;
     }
     

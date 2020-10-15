@@ -395,15 +395,16 @@ public class NewsController extends BaseController
         String condition = " where 1=1";
         if (StringUtils.isNotEmpty(news.getTitle()))
         {
-            condition += " and (title like '%" + news.getTitle() + "%' or content like '%" + news.getTitle() + "%')";
+            condition +=
+                " and (n.title like '%" + news.getTitle() + "%' or n.content like '%" + news.getTitle() + "%')";
         }
         if (news.getStatus() != null)
         {
-            condition += " and status = " + news.getStatus();
+            condition += " and n.status = " + news.getStatus();
         }
         if (news.getIstop() != null)
         {
-            condition += " and istop=" + news.getIstop();
+            condition += " and n.istop=" + news.getIstop();
         }
         if (StringUtils.isNotEmpty(news.getChannelid()))
         {
@@ -412,7 +413,7 @@ public class NewsController extends BaseController
         }
         if (StringUtils.isNotEmpty(news.getMediaType()))
         {
-            condition += " and mediaType='" + news.getMediaType() + "'";
+            condition += " and n.mediaType='" + news.getMediaType() + "'";
         }
         condition +=
             " and n.authorChannel is null and n.deltag=" + NewsDicConstants.ICommon.DELETE_NO + " and  n.kind is null ";
@@ -1157,45 +1158,54 @@ public class NewsController extends BaseController
      * @param params
      * @return
      */
-	@RequestMapping("/selectNews")
-	public Result selectNews(@RequestParam Map<String, Object> params) {
-		List news = null;
-		try {
-			Integer pageNo = 0;
-			Integer pageSize = 10;
-			if (!StringUtils.isEmpty((String) params.get("pageNo"))) {
-				pageNo = Integer.parseInt((String) params.get("pageNo"));
-			}
-
-			if (!StringUtils.isEmpty((String) params.get("pageSize"))) {
-				pageSize = Integer.parseInt((String) params.get("pageSize"));
-			}
-
-			String limitStr = "limit " + pageNo * pageSize + "," + pageSize;
-
-			String type = params.get("type") != null ? (String) params.get("type") : "";
-			String wheresql = "where t.f_id is not null and nc.f_id is not null ";
-
-			Long teamId = params.get("teamId") != null ? Long.valueOf((String) params.get("teamId")) : null;
-			if (teamId != null) {
-				wheresql += " and newsc.f_channel_id = " + teamId;
-			}
-//			 convert(c.f_Logo using utf8) as logo,
-			String sql = " select  concat(t.f_id,'') newsId, ifnull(t.f_likes, 0) zanNum,ifnull(t.f_comments, 0) pinglunNum, ifnull(t.f_collects, 0) shoucangNum,  \n"
-					+ " ifnull(ui.f_likes, 0) userTotalNum,ui.f_username userName,c.f_id cid, t.f_title title, t.f_content content\n"
-					+ "from t_news_channel newsc \n" + "left join t_news t on t.f_id=newsc.f_news_id \n"
-					+ "left join t_channel nc on newsc.f_channel_id = nc.f_id and nc.f_kind = '小组' \n"
-					+ "left join t_channel c on t.f_author_channel_id = c.f_id \n"
-					+ "left join t_user_info ui on c.f_userinfo_id = ui.f_id\n" + wheresql + "\n"
-					+ "order by t.f_id desc \n" + limitStr;
-			news = newsRepository.findMapByNativeSql(sql);
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			return success(news);
-		}
-	}
-  
+    @RequestMapping("/selectNews")
+    public Result selectNews(@RequestParam Map<String, Object> params)
+    {
+        List news = null;
+        try
+        {
+            Integer pageNo = 0;
+            Integer pageSize = 10;
+            if (!StringUtils.isEmpty((String)params.get("pageNo")))
+            {
+                pageNo = Integer.parseInt((String)params.get("pageNo"));
+            }
+            
+            if (!StringUtils.isEmpty((String)params.get("pageSize")))
+            {
+                pageSize = Integer.parseInt((String)params.get("pageSize"));
+            }
+            
+            String limitStr = "limit " + pageNo * pageSize + "," + pageSize;
+            
+            String type = params.get("type") != null ? (String)params.get("type") : "";
+            String wheresql = "where t.f_id is not null and nc.f_id is not null ";
+            
+            Long teamId = params.get("teamId") != null ? Long.valueOf((String)params.get("teamId")) : null;
+            if (teamId != null)
+            {
+                wheresql += " and newsc.f_channel_id = " + teamId;
+            }
+            //			 convert(c.f_Logo using utf8) as logo,
+            String sql =
+                " select  concat(t.f_id,'') newsId, ifnull(t.f_likes, 0) zanNum,ifnull(t.f_comments, 0) pinglunNum, ifnull(t.f_collects, 0) shoucangNum,  \n"
+                    + " ifnull(ui.f_likes, 0) userTotalNum,ui.f_username userName,c.f_id cid, t.f_title title, t.f_content content\n"
+                    + "from t_news_channel newsc \n" + "left join t_news t on t.f_id=newsc.f_news_id \n"
+                    + "left join t_channel nc on newsc.f_channel_id = nc.f_id and nc.f_kind = '小组' \n"
+                    + "left join t_channel c on t.f_author_channel_id = c.f_id \n"
+                    + "left join t_user_info ui on c.f_userinfo_id = ui.f_id\n" + wheresql + "\n"
+                    + "order by t.f_id desc \n" + limitStr;
+            news = newsRepository.findMapByNativeSql(sql);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            return success(news);
+        }
+    }
     
     /**
      * 社区文章详情

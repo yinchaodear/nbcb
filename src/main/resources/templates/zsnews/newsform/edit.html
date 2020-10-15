@@ -1,107 +1,90 @@
 
 <!DOCTYPE html>
-<html lang="en"  xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
 <head>
 <meta charset="UTF-8">
 <title>编辑</title>
 <link rel="stylesheet" href="../../admin/css/pearCommon.css" />
 <link rel="stylesheet" href="../../component/layui/css/layui.css" />
+<style>
+.layui-input-block {
+	margin-left: 150px;
+}
+
+.layui-form-label {
+	width: 100px !important;
+}
+</style>
 </head>
 <body>
 	<form class="layui-form" action="">
 		<div class="mainBox">
 			<div class="main-container">
 				<div class="main-container">
-																														<div class="layui-form-item layui-hide"  >
-																				<label class="layui-form-label">id</label>
-								<div class="layui-input-block">
-									<input type="text" name="id" th:value="${ newsForm.id }"  autocomplete="off" placeholder="请输入id" class="layui-input">
-								</div>
-							</div>
-					
-																																				<div class="layui-form-item"  >
-														<label class="layui-form-label">userInfo</label>
-								<div class="layui-input-block">
-									<input type="text" name="userInfo" th:value="${ newsForm.userInfo }"  autocomplete="off" placeholder="请输入userInfo" class="layui-input">
-								</div>
-							</div>
-					
-																																				<div class="layui-form-item"  >
-														<label class="layui-form-label">news</label>
-								<div class="layui-input-block">
-									<input type="text" name="news" th:value="${ newsForm.news }"  autocomplete="off" placeholder="请输入news" class="layui-input">
-								</div>
-							</div>
-					
-																																				<div class="layui-form-item"  >
-														<label class="layui-form-label">companyname</label>
-								<div class="layui-input-block">
-									<input type="text" name="companyname" th:value="${ newsForm.companyname }"  autocomplete="off" placeholder="请输入companyname" class="layui-input">
-								</div>
-							</div>
-					
-																																				<div class="layui-form-item"  >
-														<label class="layui-form-label">fullname1</label>
-								<div class="layui-input-block">
-									<input type="text" name="fullname1" th:value="${ newsForm.fullname1 }"  autocomplete="off" placeholder="请输入fullname1" class="layui-input">
-								</div>
-							</div>
-					
-																																				<div class="layui-form-item"  >
-														<label class="layui-form-label">title</label>
-								<div class="layui-input-block">
-									<input type="text" name="title" th:value="${ newsForm.title }"  autocomplete="off" placeholder="请输入title" class="layui-input">
-								</div>
-							</div>
-					
-																																				<div class="layui-form-item"  >
-														<label class="layui-form-label">mobile1</label>
-								<div class="layui-input-block">
-									<input type="text" name="mobile1" th:value="${ newsForm.mobile1 }"  autocomplete="off" placeholder="请输入mobile1" class="layui-input">
-								</div>
-							</div>
-					
-																																				<div class="layui-form-item"  >
-														<label class="layui-form-label">transportation</label>
-								<div class="layui-input-block">
-									<input type="text" name="transportation" th:value="${ newsForm.transportation }"  autocomplete="off" placeholder="请输入transportation" class="layui-input">
-								</div>
-							</div>
-					
-																																				<div class="layui-form-item"  >
-														<label class="layui-form-label">carno</label>
-								<div class="layui-input-block">
-									<input type="text" name="carno" th:value="${ newsForm.carno }"  autocomplete="off" placeholder="请输入carno" class="layui-input">
-								</div>
-							</div>
-					
-																																				<div class="layui-form-item"  >
-														<label class="layui-form-label">fullname2</label>
-								<div class="layui-input-block">
-									<input type="text" name="fullname2" th:value="${ newsForm.fullname2 }"  autocomplete="off" placeholder="请输入fullname2" class="layui-input">
-								</div>
-							</div>
-					
-																																				<div class="layui-form-item"  >
-														<label class="layui-form-label">mobile2</label>
-								<div class="layui-input-block">
-									<input type="text" name="mobile2" th:value="${ newsForm.mobile2 }"  autocomplete="off" placeholder="请输入mobile2" class="layui-input">
-								</div>
-							</div>
-					
-									</div>
-			</div>
-		</div>
-		<div class="bottom">
-			<div class="button-container">
-				<button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="newsForm-save" id="submitbtn">
-					<i class="layui-icon layui-icon-ok"></i>
-					提交
-				</button>
-				<button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">
-					<i class="layui-icon layui-icon-refresh"></i>
-					重置
-				</button>
+					<div class="layui-form-item layui-hide">
+						<label class="layui-form-label">id</label>
+						<div class="layui-input-block">
+							<input type="text" name="id" th:value="${ newsForm.id }" autocomplete="off" placeholder="请输入id" class="layui-input">
+						</div>
+					</div>
+
+					<div class="layui-form-item">
+						<label class="layui-form-label">企业名称</label>
+						<div class="layui-input-block">
+							<input type="text" name="companyname" th:value="${ newsForm.companyname }" autocomplete="off" placeholder="请输入companyname" class="layui-input" readonly="readonly">
+						</div>
+					</div>
+
+					<div class="layui-form-item">
+						<label class="layui-form-label">参会人</label>
+						<div class="layui-input-block">
+							<input type="text" name="fullname1" th:value="${ newsForm.fullname1 }" autocomplete="off" placeholder="请输入fullname1" class="layui-input" readonly="readonly">
+						</div>
+					</div>
+
+					<div class="layui-form-item">
+						<label class="layui-form-label">参会人职务</label>
+						<div class="layui-input-block">
+							<input type="text" name="title" th:value="${ newsForm.title }" autocomplete="off" placeholder="请输入title" class="layui-input" readonly="readonly">
+						</div>
+					</div>
+
+					<div class="layui-form-item">
+						<label class="layui-form-label">联系电话</label>
+						<div class="layui-input-block">
+							<input type="text" name="mobile1" th:value="${ newsForm.mobile1 }" autocomplete="off" placeholder="请输入mobile1" class="layui-input" readonly="readonly">
+						</div>
+					</div>
+
+					<div class="layui-form-item">
+						<label class="layui-form-label">交通工具</label>
+						<div class="layui-input-block">
+							<input type="text" name="transportation" th:value="${ newsForm.transportation }" autocomplete="off" placeholder="请输入transportation" class="layui-input" readonly="readonly">
+						</div>
+					</div>
+
+					<div class="layui-form-item">
+						<label class="layui-form-label">车牌号</label>
+						<div class="layui-input-block">
+							<input type="text" name="carno" th:value="${ newsForm.carno }" autocomplete="off" placeholder="请输入carno" class="layui-input" readonly="readonly">
+						</div>
+					</div>
+
+					<div class="layui-form-item">
+						<label class="layui-form-label">联系人</label>
+						<div class="layui-input-block">
+							<input type="text" name="fullname2" th:value="${ newsForm.fullname2 }" autocomplete="off" placeholder="请输入fullname2" class="layui-input" readonly="readonly">
+						</div>
+					</div>
+
+					<div class="layui-form-item">
+						<label class="layui-form-label">联系电话</label>
+						<div class="layui-input-block">
+							<input type="text" name="mobile2" th:value="${ newsForm.mobile2 }" autocomplete="off" placeholder="请输入mobile2" class="layui-input" readonly="readonly">
+						</div>
+					</div>
+
+				</div>
 			</div>
 		</div>
 	</form>
@@ -111,13 +94,13 @@
 			let form = layui.form;
 			let $ = layui.jquery;
 			let MODULE_PATH = "/zsnews/newsform/";
-			
+
 			form.on('submit(newsForm-save)', function(data) {
 				var DISABLED = 'layui-btn-disabled';
 				$('#submitbtn').addClass(DISABLED);
 				$('#submitbtn').attr('disabled', 'disabled');
 				$.ajax({
-					url : MODULE_PATH+'update',
+					url : MODULE_PATH + 'update',
 					data : JSON.stringify(data.field),
 					dataType : 'json',
 					contentType : 'application/json',
@@ -129,7 +112,7 @@
 								time : 1000
 							}, function() {
 								$('#submitbtn').removeClass(DISABLED);
-		                        $('#submitbtn').removeAttr('disabled');
+								$('#submitbtn').removeAttr('disabled');
 								parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
 								parent.layui.table.reload("newsForm-table");
 							});
@@ -139,13 +122,13 @@
 								time : 1000
 							}, function() {
 								$('#submitbtn').removeClass(DISABLED);
-		                        $('#submitbtn').removeAttr('disabled');
+								$('#submitbtn').removeAttr('disabled');
 							});
 						}
 					},
-					error : function(XMLHttpRequest, textStatus, errorThrown){
+					error : function(XMLHttpRequest, textStatus, errorThrown) {
 						$('#submitbtn').removeClass(DISABLED);
-		               	$('#submitbtn').removeAttr('disabled');
+						$('#submitbtn').removeAttr('disabled');
 					}
 				})
 				return false;

@@ -233,7 +233,7 @@ public class ColumnController extends BaseController
     @GetMapping("listcolumn")
     public Result AppColum(ModelAndView modelAndView)
     {
-        String sql = "SELECT f_title as title,f_h5href as path,f_id FROM t_column order by f_display_order asc";
+        String sql = "SELECT f_title as title,f_h5href as path,f_id FROM t_column where f_status =0 order by f_display_order asc";
         List column = columnRepository.findMapByNativeSql(sql);
         Map result = new HashMap<>();
         result.put("column", column);

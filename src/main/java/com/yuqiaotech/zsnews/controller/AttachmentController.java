@@ -1,5 +1,6 @@
 package com.yuqiaotech.zsnews.controller;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,6 +9,7 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletOutputStream;
@@ -15,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,7 +29,12 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import com.alibaba.fastjson.JSONObject;
 import com.yuqiaotech.common.tools.UcpaasSms.UcpaasSms;
 import com.yuqiaotech.common.web.base.BaseController;
+import com.yuqiaotech.common.web.base.BaseRepository;
 import com.yuqiaotech.common.web.domain.response.Result;
+import com.yuqiaotech.zsnews.model.Channel;
+import com.yuqiaotech.zsnews.model.UserInfo;
+
+import sun.misc.BASE64Decoder;
 
 /**
  * Created on 2020/9/1 4:27 下午.
@@ -38,6 +46,13 @@ import com.yuqiaotech.common.web.domain.response.Result;
 @RequestMapping("/attachment")
 public class AttachmentController extends BaseController
 {
+	
+    
+    @Autowired
+    private BaseRepository<UserInfo, Long> userInfoRepository;
+    
+    @Autowired
+    private BaseRepository<Channel, Long> channelRepository;
     @ResponseBody
     @RequestMapping(value = "/showImage", method = RequestMethod.GET)
     public void showImage(String objectId, String objectType, String fileName, HttpServletRequest request,
@@ -46,6 +61,47 @@ public class AttachmentController extends BaseController
     {
         showImg(objectId, objectType, fileName, null, null, request, response);
     }
+    
+	@ResponseBody
+	@RequestMapping("/showImageAvaturl")
+	public void showImageAvaturl(@RequestParam Map<String, Object> params, HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
+		String objectId = (String) params.get("objectId");
+		String objectType = (String)params.get("objectType");
+		if("channel".equals(objectType)){
+			String sql = "SELECT  convert(f_logo using utf8) as f_avatar FROM t_channel where f_id =" + objectId;
+			List<Map<String, Object>> r = channelRepository.findMapByNativeSql(sql);
+			if (!r.isEmpty()) {
+				Map result = r.get(0);
+				String avaturl = (String) result.get("f_avatar");	
+	            avaturl =avaturl.substring(avaturl.indexOf("base64,")+7);    
+				String base64str = new String(avaturl);
+				BASE64Decoder decoder = new BASE64Decoder();
+				byte[] imgbyte = decoder.decodeBuffer(base64str);// 解码Base64图片数据
+				response.setContentType("image/jpeg");
+				ServletOutputStream outputStream = response.getOutputStream();
+				OutputStream outx = response.getOutputStream();
+				outx.write(imgbyte);
+			}	
+		}else{
+			String sql = "SELECT  convert(f_avatar using utf8) as f_avatar FROM t_user_info where f_id =" + objectId;
+			List<Map<String, Object>> r = channelRepository.findMapByNativeSql(sql);
+			if (!r.isEmpty()) {
+				Map result = r.get(0);
+				String avaturl = (String) result.get("f_avatar");	
+	            avaturl =avaturl.substring(avaturl.indexOf("base64,")+7);    
+				String base64str = new String(avaturl);
+				BASE64Decoder decoder = new BASE64Decoder();
+				byte[] imgbyte = decoder.decodeBuffer(base64str);// 解码Base64图片数据
+				response.setContentType("image/jpeg");
+				ServletOutputStream outputStream = response.getOutputStream();
+				OutputStream outx = response.getOutputStream();
+				outx.write(imgbyte);
+			}
+		}
+		
+
+	}
     
     @ResponseBody
     @RequestMapping("/showImage")

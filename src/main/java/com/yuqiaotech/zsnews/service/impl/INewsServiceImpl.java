@@ -282,7 +282,7 @@ public class INewsServiceImpl implements INewsService {
 			if (newsId != null) {
 				wheresql += " and c.f_news_id = " + newsId;
 				String sql = " select case when (select 1 from t_comment com where com.f_type='点赞' and f_comment_id = c.f_id and f_user_info_id = " + userInfoId + ") then 1 else 0 end as agreeFlag, date_format(c.f_created, '%m-%d') createdDate,c.f_id commentId,ifnull(t.agreeNum, 0) agreeNum, c.f_type commentType,c.f_news_id newsId, c.f_content content, c.f_user_info_id userInfoId, ui.f_username userName\n" +
-						", convert(ui.f_avatar using utf8) as avatar from t_comment c\n" +
+						",  ifnull(ui.f_avatar, 0) as avatar from t_comment c\n" +
 						" left join (\n" +
 						"	select f_comment_id commentId, count(*) agreeNum\n" +
 						"	from t_comment \n" +
@@ -304,7 +304,7 @@ public class INewsServiceImpl implements INewsService {
 					for (Map comment : comments) {
 						Long commentId = ((Number) comment.get("commentId")).longValue();
 						subSql = "select date_format(c.f_created, '%m-%d') createdDate,c.f_id commentId,ifnull(t.agreeNum, 0) agreeNum,case when (select 1 from t_comment com where com.f_type='点赞' and f_comment_id = c.f_id and f_user_info_id = " + userInfoId + ") then 1 else 0 end as agreeFlag, c.f_comment_id targetCommentId, c.f_type commentType,c.f_news_id newsId, c.f_content content, c.f_user_info_id userInfoId, ui.f_username userName, c.f_answer_user_id answerUserId, aui.f_username answerUserName\n" +
-								",  convert(ui.f_avatar using utf8) as avatar from t_comment c\n" +
+								", ifnull(ui.f_avatar, 0) as avatar from t_comment c\n" +
 								" left join (\n" +
 								"	select f_comment_id commentId, count(*) agreeNum\n" +
 								"	from t_comment \n" +

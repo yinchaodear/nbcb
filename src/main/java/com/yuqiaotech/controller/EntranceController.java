@@ -1,7 +1,12 @@
 package com.yuqiaotech.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,12 +16,30 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.yuqiaotech.common.logging.annotation.Logging;
 import com.yuqiaotech.common.logging.enums.BusinessType;
+import com.yuqiaotech.common.tools.common.CollectionUtils;
 import com.yuqiaotech.common.web.base.BaseController;
+import com.yuqiaotech.common.web.base.BaseRepository;
+import com.yuqiaotech.sysadmin.model.Authority;
+import com.yuqiaotech.sysadmin.model.ProtectedResource;
+import com.yuqiaotech.sysadmin.model.ProtectedResourceAuthority;
+import com.yuqiaotech.sysadmin.model.User;
+import com.yuqiaotech.zsnews.NewsDicConstants;
 
 @RestController
 @RequestMapping
 public class EntranceController extends BaseController
 {
+    @Autowired
+    private BaseRepository<User, Long> userRepository;
+    
+    @Autowired
+    private BaseRepository<Authority, Long> authorityRepository;
+    
+    @Autowired
+    private BaseRepository<ProtectedResource, Long> protectedResourceRepository;
+    
+    @Autowired
+    private BaseRepository<ProtectedResourceAuthority, Long> protectedResourceAuthorityRepository;
     
     /**
      * Describe: 获取登录视图
@@ -48,7 +71,28 @@ public class EntranceController extends BaseController
         {
             username = principal.toString();
         }
+        
+        User currentUser = getCurrentUser();
+        List<String> rlist = new ArrayList<>();
+        if (StringUtils.isNotEmpty(currentUser.getRoleids()))
+        {
+            Authority sysrole =
+                authorityRepository.findUniqueBy("id", Long.valueOf(currentUser.getRoleids()), Authority.class);
+            if (sysrole != null && sysrole.getDeltag() == NewsDicConstants.ICommon.DELETE_NO)
+            {
+                List<ProtectedResourceAuthority> pralist = protectedResourceAuthorityRepository
+                    .findByHql("from ProtectedResourceAuthority where authority.id=" + sysrole.getId());
+                
+                for (ProtectedResourceAuthority protectedResourceAuthority : pralist)
+                {
+                    rlist.add(protectedResourceAuthority.getProtectedResource().getPatternStr());
+                }
+            }
+        }
+        getSession().setAttribute("resourceids", CollectionUtils.join(rlist, ","));
         System.out.println("username:" + username);
+        System.out.println("resourceids:" + CollectionUtils.join(rlist, ","));
+        
         return JumpPage("index");
     }
     

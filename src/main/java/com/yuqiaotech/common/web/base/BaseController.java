@@ -10,12 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
-import com.yuqiaotech.common.SysConstants;
-import com.yuqiaotech.common.tools.token.JwtUtils;
-import com.yuqiaotech.security.domain.SecurityUserDetails;
-import com.yuqiaotech.security.domain.SecurityUserDetailsService;
-import com.yuqiaotech.zsnews.model.UserInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -27,11 +21,17 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.yuqiaotech.common.SysConstants;
 import com.yuqiaotech.common.tools.servlet.ServletUtil;
+import com.yuqiaotech.common.tools.token.JwtUtils;
 import com.yuqiaotech.common.web.domain.response.ResuTree;
 import com.yuqiaotech.common.web.domain.response.Result;
 import com.yuqiaotech.common.web.domain.response.ResultTable;
+import com.yuqiaotech.security.domain.SecurityUserDetails;
+import com.yuqiaotech.security.domain.SecurityUserDetailsService;
 import com.yuqiaotech.sysadmin.model.User;
+import com.yuqiaotech.zsnews.model.UserInfo;
 
 public class BaseController
 {
@@ -46,28 +46,34 @@ public class BaseController
     
     @Resource
     private BaseRepository<User, Long> userRepository;
+    
     @Resource
     private BaseRepository<UserInfo, Long> userInfoRepository;
+    
     @Resource
     private SecurityUserDetailsService securityUserDetailsService;
-
+    
     /** 后台用户ID */
     public Long getCurrentUserId()
     {
-        if(SysConstants.SECURITY_USERTYPE_ADMIN.equals(ServletUtil.getCurrentUserType())){
+        if (SysConstants.SECURITY_USERTYPE_ADMIN.equals(ServletUtil.getCurrentUserType()))
+        {
             return ServletUtil.getCurrentUserId();
-        }else{
+        }
+        else
+        {
             return null;
         }
     }
+    
     /** 后台用户 */
     public User getCurrentUser()
     {
         Long userId = getCurrentUserId();
-        if(userId!=null)
+        if (userId != null)
             return userRepository.findUniqueBy("id", userId, User.class);
         else
-            return null ;
+            return null;
     }
     
     public String getCurrentUsername()
@@ -79,62 +85,76 @@ public class BaseController
     {
         return ServletUtil.getCurrentUserType();
     }
-
+    
     /** app用户*/
     public Long getCurrentUserInfoId()
     {
-        Long userInfoId =null;
-        if(SysConstants.SECURITY_USERTYPE_FRONT.equals(ServletUtil.getCurrentUserType())){
-            userInfoId =ServletUtil.getCurrentUserId();
+        Long userInfoId = null;
+        if (SysConstants.SECURITY_USERTYPE_FRONT.equals(ServletUtil.getCurrentUserType()))
+        {
+            userInfoId = ServletUtil.getCurrentUserId();
         }
-
-        if(userInfoId==null) {
-            try {
+        
+        if (userInfoId == null)
+        {
+            try
+            {
                 String authToken = ServletUtil.getHeader("X-Token");
-                if (!StringUtils.isEmpty(authToken)) {
+                if (!StringUtils.isEmpty(authToken))
+                {
                     DecodedJWT tokenInfo = JwtUtils.verify(authToken);
                     String username = tokenInfo.getClaim("username").asString();
                     String password = tokenInfo.getClaim("password").asString();
-
-                    if (username != null) {
+                    
+                    if (username != null)
+                    {
                         //根据用户名获取用户对象
-                        SecurityUserDetails userDetails = (SecurityUserDetails) securityUserDetailsService.loadUserByUsername(username);
-
-                        if (userDetails != null) {
+                        SecurityUserDetails userDetails =
+                            (SecurityUserDetails)securityUserDetailsService.loadUserByUsername(username);
+                        
+                        if (userDetails != null)
+                        {
                             UsernamePasswordAuthenticationToken authentication =
-                                    new UsernamePasswordAuthenticationToken(userDetails, null, null);
-                            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(ServletUtil.getRequest()));
+                                new UsernamePasswordAuthenticationToken(userDetails, null, null);
+                            authentication.setDetails(
+                                new WebAuthenticationDetailsSource().buildDetails(ServletUtil.getRequest()));
                             //设置为已登录
-                            ServletUtil.getSession().setAttribute(SysConstants.SECURITY_USERTYPE_KEY, userDetails.getType());
-                            ServletUtil.getSession().setAttribute(SysConstants.SECURITY_USER_LOGINTYPE_KEY, userDetails.getLoginType());
-
                             ServletUtil.getSession()
-                                    .setAttribute(SysConstants.SECURITY_CONTEXT_KEY, (SecurityUserDetails) authentication.getPrincipal());
+                                .setAttribute(SysConstants.SECURITY_USERTYPE_KEY, userDetails.getType());
                             ServletUtil.getSession()
-                                    .setAttribute(SysConstants.SECURITY_USERNAME_KEY,
-                                            ((SecurityUserDetails) authentication.getPrincipal()).getUsername());
+                                .setAttribute(SysConstants.SECURITY_USER_LOGINTYPE_KEY, userDetails.getLoginType());
+                            
                             ServletUtil.getSession()
-                                    .setAttribute(SysConstants.SECURITY_USERID_KEY,
-                                            ((SecurityUserDetails) authentication.getPrincipal()).getId());
+                                .setAttribute(SysConstants.SECURITY_CONTEXT_KEY,
+                                    (SecurityUserDetails)authentication.getPrincipal());
+                            ServletUtil.getSession()
+                                .setAttribute(SysConstants.SECURITY_USERNAME_KEY,
+                                    ((SecurityUserDetails)authentication.getPrincipal()).getUsername());
+                            ServletUtil.getSession()
+                                .setAttribute(SysConstants.SECURITY_USERID_KEY,
+                                    ((SecurityUserDetails)authentication.getPrincipal()).getId());
                             SecurityContextHolder.getContext().setAuthentication(authentication);
-                            userInfoId = ((SecurityUserDetails) authentication.getPrincipal()).getId();
+                            userInfoId = ((SecurityUserDetails)authentication.getPrincipal()).getId();
                         }
                     }
                 }
-            }catch (Exception e){
+            }
+            catch (Exception e)
+            {
                 e.printStackTrace();
             }
         }
         return userInfoId;
     }
+    
     /** app用户*/
     public UserInfo getCurrentUserInfo()
     {
         Long userInfoId = getCurrentUserInfoId();
-        if(userInfoId!=null)
+        if (userInfoId != null)
             return userInfoRepository.findUniqueBy("id", userInfoId, UserInfo.class);
         else
-            return null ;
+            return null;
     }
     
     public HttpSession getSession()

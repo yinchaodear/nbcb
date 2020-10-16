@@ -39,7 +39,6 @@ layui.define(['table', 'jquery', 'element', 'form', 'pearAuth', 'pearTab', 'pear
 			}
 
 			this.menuRender = function(option) {
-
 				/** 侧 边 菜 单 组 件 初 始 化 */
 				sideMenu = pearMenu.render({
 					elem: 'sideMenu', //依赖容器
@@ -50,10 +49,13 @@ layui.define(['table', 'jquery', 'element', 'form', 'pearAuth', 'pearTab', 'pear
 					defaultMenu: 1,
 					defaultOpen: 0, //默认打开菜单
 					accordion: true,
-					url: option.data, //数据地址
+					url: option.url, //数据地址
+					data: option.data,
 					parseData: false, //请求后是否进行数据解析 函数
 					change: option.change,
-					collaspe:option.collapse
+					collaspe:option.collapse,
+					done: option.done ? option.done : function() {
+					}
 				})
                 sideMenu.selectItem(option.select);
 				if(option.collapse){

@@ -3,7 +3,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
 <head>
 <meta charset="UTF-8">
-<title>新增</title>
+<title>编辑</title>
 <link rel="stylesheet" href="../../admin/css/pearCommon.css" />
 <link rel="stylesheet" href="../../component/layui/css/layui.css" />
 </head>
@@ -12,37 +12,46 @@
 		<div class="mainBox">
 			<div class="main-container">
 				<div class="main-container">
+					<div class="layui-form-item layui-hide">
+						<label class="layui-form-label">id</label>
+						<div class="layui-input-block">
+							<input type="text" name="id" th:value="${ user.id }" autocomplete="off" placeholder="请输入id" class="layui-input">
+						</div>
+					</div>
+
 					<div class="layui-form-item">
 						<label class="layui-form-label">用户名</label>
 						<div class="layui-input-block">
-							<input type="text" name="username" autocomplete="off" placeholder="请输入用户名" class="layui-input" lay-verify="required">
+							<input type="text" name="username" th:value="${ user.username }" autocomplete="off" placeholder="请输入用户名" class="layui-input" disabled="disabled" lay-verify="required">
 						</div>
 					</div>
 					<div class="layui-form-item">
 						<label class="layui-form-label">登录密码</label>
 						<div class="layui-input-block">
-							<input type="password" name="password" autocomplete="off" placeholder="请输入登录密码" class="layui-input" lay-verify="required">
+							<input type="password" name="password" th:value="${ user.password }" autocomplete="off" placeholder="请输入登录密码" class="layui-input" lay-verify="required">
 						</div>
 					</div>
 					<div class="layui-form-item">
 						<label class="layui-form-label">姓名</label>
 						<div class="layui-input-block">
-							<input type="text" name="realName" autocomplete="off" placeholder="请输入姓名" class="layui-input">
+							<input type="text" name="realName" th:value="${ user.realName }" autocomplete="off" placeholder="请输入姓名" class="layui-input">
 						</div>
 					</div>
+
 					<div class="layui-form-item">
 						<label class="layui-form-label">手机号码</label>
 						<div class="layui-input-block">
-							<input type="text" name="mobile" autocomplete="off" placeholder="请输入手机号码" class="layui-input">
+							<input type="text" name="mobile" th:value="${ user.mobile }" autocomplete="off" placeholder="请输入手机号码" class="layui-input">
 						</div>
 					</div>
+					
 					<hql:queryForList hql="from Authority where deltag=0" id="rolelist" />
 					<div class="layui-form-item ">
 						<label class="layui-form-label">用户角色</label>
 						<div class="layui-input-block">
-							<select name="roleids" lay-search lay-verify="required">
+							<select name="roleids" lay-search lay-verify="required"   readonly="readonly" disabled="disabled">
 								<option value=""></option>
-								<option th:each="c : ${rolelist}" th:value="${c.id}" th:text="${c.authority}"></option>
+								<option th:each="c : ${rolelist}" th:value="${c.id}" th:text="${c.authority}" th:selected="${user.roleids!=null && user.roleids eq ''+c.id}"></option>
 							</select>
 						</div>
 					</div>
@@ -50,18 +59,18 @@
 					<div class="layui-form-item ">
 						<label class="layui-form-label">所属企业</label>
 						<div class="layui-input-block">
-							<select name="orgid" lay-search lay-verify="required">
+							<select name="orgid" disabled="disabled">
 								<option value=""></option>
-								<option th:each="c : ${orglist}" th:value="${c.id}" th:text="${c.orgName}"></option>
+								<option th:each="c : ${orglist}" th:value="${c.id}" th:text="${c.orgName}" th:selected="${user.orgid!=null && user.orgid eq ''+c.id}"></option>
 							</select>
 						</div>
 					</div>
 					<div class="layui-form-item ">
 						<label class="layui-form-label">账户状态</label>
 						<div class="layui-input-block">
-							<select name="status"  lay-verify="required">
-								<option value="1">启用</option>
-								<option value="0">停用</option>
+							<select name="status"   disabled="disabled">
+								<option value="1" th:selected="${user.status eq '1'}">启用</option>
+								<option value="0" th:selected="${user.status eq '0'}">停用</option>
 							</select>
 						</div>
 					</div>
@@ -93,11 +102,11 @@
 				$('#submitbtn').addClass(DISABLED);
 				$('#submitbtn').attr('disabled', 'disabled');
 				$.ajax({
-					url : MODULE_PATH + 'save',
+					url : MODULE_PATH + 'update',
 					data : JSON.stringify(data.field),
 					dataType : 'json',
 					contentType : 'application/json',
-					type : 'post',
+					type : 'put',
 					success : function(result) {
 						if (result.success) {
 							layer.msg(result.msg, {
@@ -108,7 +117,6 @@
 								$('#submitbtn').removeAttr('disabled');
 								parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
 								parent.layui.table.reload("user-table");
-								parent.reloadTree();
 							});
 						} else {
 							layer.msg(result.msg, {

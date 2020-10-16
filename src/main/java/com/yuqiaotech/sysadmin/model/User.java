@@ -14,6 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.yuqiaotech.common.web.base.BaseModel;
 
 /**
@@ -50,9 +51,9 @@ public class User extends BaseModel implements UserDetails, Serializable
     
     private boolean enabled;
     
-    private boolean accountNonExpired;
+    private boolean accountNonExpired;//删除即过期
     
-    private boolean accountNonLocked;
+    private boolean accountNonLocked;//暂停即锁定
     
     private boolean credentialsNonExpired;
     
@@ -71,8 +72,10 @@ public class User extends BaseModel implements UserDetails, Serializable
     private Integer version;
     
     private Organisation organisation;
-   
+    
     private String remark;//运营人的一些说明
+    
+    private String roleids;
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -227,6 +230,7 @@ public class User extends BaseModel implements UserDetails, Serializable
         this.nationId = nationId;
     }
     
+    @JsonIgnoreProperties(value = {"hibernateLazyInitializer"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "f_organisation_id")
     public Organisation getOrganisation()
@@ -361,15 +365,24 @@ public class User extends BaseModel implements UserDetails, Serializable
     {
         this.postalCode = postalCode;
     }
-
-	public String getRemark() {
-		return remark;
-	}
-
-	public void setRemark(String remark) {
-		this.remark = remark;
-	}
     
+    public String getRemark()
+    {
+        return remark;
+    }
     
+    public void setRemark(String remark)
+    {
+        this.remark = remark;
+    }
     
+    public String getRoleids()
+    {
+        return roleids;
+    }
+    
+    public void setRoleids(String roleids)
+    {
+        this.roleids = roleids;
+    }
 }

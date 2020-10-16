@@ -1,18 +1,17 @@
 package com.yuqiaotech.sysadmin.model;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+
+import com.yuqiaotech.common.web.base.BaseModel;
 
 /**
  * 组织机构。
  */
 @Entity
-public class Organisation
+public class Organisation extends BaseModel
 {
     
     private Long id;
@@ -23,7 +22,7 @@ public class Organisation
     
     private String orgCode;
     
-    private Organisation parentOrg;
+    private Integer deltag;//删除标识
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -84,32 +83,14 @@ public class Organisation
         this.orgType = orgType;
     }
     
-    /**
-     * 上级机构。
-     * @Editor
-     * type="sqlSelect"
-     * sql="from Organisation order by orgName"
-     * listKey="id"
-     * listValue="orgName"
-     * @searchItem
-     * displayType="sqlSelect"
-     * sql="from Organisation order by orgName"
-     * listKey="id"
-     * listValue="orgName"
-     * @nameProperty
-     * value="orgName"
-     * @return
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "f_parent_org_id")
-    public Organisation getParentOrg()
+    public Integer getDeltag()
     {
-        return parentOrg;
+        return deltag;
     }
     
-    public void setParentOrg(Organisation parentOrg)
+    public void setDeltag(Integer deltag)
     {
-        this.parentOrg = parentOrg;
+        this.deltag = deltag;
     }
     
 }

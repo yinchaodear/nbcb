@@ -1,41 +1,74 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <link rel="stylesheet" href="../../admin/css/pearCommon.css" />
-    <link rel="stylesheet" href="../../component/layui/css/layui.css" />
+<meta charset="UTF-8">
+<title>Title</title>
+<link rel="stylesheet" href="../../admin/css/pearCommon.css" />
+<link rel="stylesheet" href="../../component/layui/css/layui.css" />
+<link href="../../admin/css/pear-tree/dtree.css" rel="stylesheet" />
+<link href="../../admin/css/pear-tree/font/dtreefont.css" rel="stylesheet" />
+<style>
+#organizationTree {
+	width: 100% !important;
+	height: -webkit-calc(100vh - 130px);
+	height: -moz-calc(100vh - 130px);
+	height: calc(100vh - 130px);
+}
+</style>
 </head>
 <body class="pear-container">
-    <div class="layui-card">
-        <div class="layui-card-body">
-            <form class="layui-form" action="">
-                <div class="layui-form-item">
-                    <label class="layui-form-label">用户名</label>
-                    <div class="layui-input-inline">
-                        <input type="text" name="realName" placeholder="" class="layui-input">
-                    </div>
-                    <label class="layui-form-label">账号</label>
-                    <div class="layui-input-inline">
-                        <input type="text" name="username" placeholder="" class="layui-input">
-                    </div>
-                    <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="user-query">
-                        <i class="layui-icon layui-icon-search"></i>
-                        查询
-                    </button>
-                    <button type="reset" class="pear-btn pear-btn-md">
-                        <i class="layui-icon layui-icon-refresh"></i>
-                        重置
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div class="layui-card">
-        <div class="layui-card-body">
-            <table id="user-table" lay-filter="user-table"></table>
-        </div>
-    </div>
+
+	<div class="layui-row layui-col-space15">
+		<div class="layui-col-md3">
+			<div class="layui-card">
+				<div class="layui-card-body">
+					<div class="layui-row">
+						<div class="layui-col-md9" style="text-align: center; font-size: 18px; font-weight: 200;">组织机构</div>
+						<div class="layui-col-md3" style="text-align: right;">
+							<button class="pear-btn pear-btn-primary pear-btn-md" onclick="addorg()" title="新增组织">
+								<i class="layui-icon layui-icon-add-1"></i>
+							</button>
+						</div>
+					</div>
+				</div>
+				<div class="layui-card-body">
+					<div id="organizationTreeContent" style="overflow: auto">
+						<ul id="organizationTree" class="dtree" data-id="9527"></ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="layui-col-md9">
+			<div class="layui-card">
+				<div class="layui-card-body">
+					<form class="layui-form" action="">
+						<div class="layui-form-item">
+							<!-- <input type="hidden" name="orgid" id="orgid" class="layui-input" > -->
+							<div class="layui-form-item layui-inline">
+								<label class="layui-form-label">用户信息</label>
+								<div class="layui-input-inline">
+									<input type="text" name="searchstring" placeholder="请输入用户信息" class="layui-input">
+								</div>
+							</div>
+							<button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="user-query" id="searchbtn">
+								<i class="layui-icon layui-icon-search"></i>
+								查询
+							</button>
+							<button type="reset" class="pear-btn pear-btn-md">
+								<i class="layui-icon layui-icon-refresh"></i>
+								重置
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+			<div class="layui-card">
+				<div class="layui-card-body">
+					<table id="user-table" lay-filter="user-table"></table>
+				</div>
+			</div>
+		</div>
 </body>
 
 <script type="text/html" id="user-toolbar">
@@ -49,199 +82,338 @@
     </button>
 </script>
 
+<script type="text/html" id="status-enable">
+	<input type="checkbox" value="{{d.id}}" lay-skin="switch" lay-text="启用|停用"  lay-filter="status-enable" {{ d.accountNonLocked == 1 ? 'checked' : '' }}>
+</script>
+
 <script type="text/html" id="user-bar">
     <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i></button>
     <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i class="layui-icon layui-icon-delete"></i></button>
 </script>
 
-<script type="text/html" id="user-enable">
-    <input type="checkbox" name="enable" value="{{d.userId}}" lay-skin="switch" lay-text="启用|禁用" lay-filter="user-enable" {{ d.enable == '0' ? 'checked' : '' }} />
-</script>
-
-<script type="text/html" id="user-sex">
-    {{#if (d.sex == 0) { }}
-    <span>男</span>
-    {{# }else if(d.sex == 1){ }}
-    <span>女</span>
-    {{# } }}
-</script>
-
-<script type="text/html" id="user-login">
-    {{#if (d.login == 0) { }}
-    <span>在线</span>
-    {{# }else if(d.sex == 1){ }}
-    <span>离线</span>
-    {{# } }}
-</script>
-
-<script type="text/html" id="user-createTime">
-    {{layui.util.toDateString(d.createTime, 'yyyy-MM-dd')}}
-</script>
-
 <script src="../../component/layui/layui.js"></script>
 <script>
-    layui.use(['table','form','jquery'],function () {
-        let table = layui.table;
-        let form = layui.form;
-        let $ = layui.jquery;
+	layui.use([ 'table', 'form', 'jquery', 'dtree' ], function() {
+		let table = layui.table;
+		let form = layui.form;
+		let $ = layui.jquery;
+		let dtree = layui.dtree;
 
-        let MODULE_PATH = "/system/user/";
+		let MODULE_PATH = "/system/user/";
 
-        let cols = [
-            [
-                {type:'checkbox'},
-                {title: '姓名', field: 'realName', align:'center',width:120},
-                {title: '性别', field: 'sex', align:'center',templet:'#user-sex'},
-                {title: '电话', field: 'phone', align:'center'},
-                {title: '邮箱', field: 'email', align:'center'},
-                {title: '启用', field: 'enable', align:'center', templet:'#user-enable'},
-                {title: '注册', field: 'createTime', align:'center',templet:'#user-createTime'},
-                {title: '操作', toolbar: '#user-bar', align:'center', width:130}
-            ]
-        ]
+		let cols = [ [ {
+			type : 'checkbox'
+		}, {
+			title : '序号',
+			type : 'numbers',
+			align : 'center',
+			width : 80
+		}, {
+			title : '用户名',
+			field : 'username',
+			align : 'center',
+			width : 150
+		}, {
+			title : '姓名',
+			field : 'realName',
+			align : 'center',
+			width : 150
+		}, {
+			title : '角色',
+			field : 'about',
+			align : 'center',
+			width : 200
+		}, {
+			title : '创建时间',
+			field : 'created',
+			align : 'center',
+			width : 300,
+			templet : "<div>{{layui.util.toDateString(d.created, 'yyyy-MM-dd HH:mm:ss')}}</div>"
+		}, {
+			title : '是否启用',
+			field : 'accountNonLocked',
+			align : 'center',
+			width : 150,
+			templet : '#status-enable'
+		},{
+			title : '操作',
+			toolbar : '#user-bar',
+			align : 'center'
+		} ] ]
 
-        table.render({
-            elem: '#user-table',
-            url: MODULE_PATH + 'data',
-            page: true ,
-            cols: cols ,
-            skin: 'line',
-            toolbar: '#user-toolbar',
-            defaultToolbar: [{
-                layEvent: 'refresh',
-                icon: 'layui-icon-refresh',
-            }, 'filter', 'print', 'exports']
-        });
+		table.render({
+			elem : '#user-table',
+			url : MODULE_PATH + 'data',
+			page : true,
+			cols : cols,
+			skin : 'line',
+			toolbar : '#user-toolbar',
+			defaultToolbar : [ {
+				layEvent : 'refresh',
+				icon : 'layui-icon-refresh',
+			}, 'filter', 'print', 'exports' ]
+		});
 
-        table.on('tool(user-table)', function(obj){
-            if(obj.event === 'remove'){
-                window.remove(obj);
-            } else if(obj.event === 'edit'){
-                window .edit(obj);
-            }
-        });
+		table.on('tool(user-table)', function(obj) {
+			if (obj.event === 'remove') {
+				window.remove(obj);
+			} else if (obj.event === 'edit') {
+				window.edit(obj);
+			} else if (obj.event === 'power') {
+				window.power(obj);
+			}
+		});
 
-        table.on('toolbar(user-table)', function(obj){
-            if(obj.event === 'add'){
-                window.add();
-            } else if(obj.event === 'refresh'){
-                window.refresh();
-            } else if(obj.event === 'batchRemove'){
-                window.batchRemove(obj);
-            }
-        });
+		table.on('toolbar(user-table)', function(obj) {
+			if (obj.event === 'add') {
+				window.add();
+			} else if (obj.event === 'refresh') {
+				window.refresh();
+			} else if (obj.event === 'batchRemove') {
+				window.batchRemove(obj);
+			}
+		});
 
-        form.on('submit(user-query)', function(data){
-            window.refresh(data.field);
-            return false;
-        });
+		form.on('submit(user-query)', function(data) {
+			table.reload('user-table', {
+				where : data.field
+			})
+			return false;
+		});
+		
+		form.on('switch(status-enable)', function(obj) {
+			let loading = layer.load();
+			$.ajax({
+				url : MODULE_PATH + "status/" + this.value,
+				dataType : 'json',
+				type : 'get',
+				success : function(result) {
+					layer.close(loading);
+					if (result.success) {
+						if (obj.elem.checked) {
+							layer.msg('启用成功', {
+								icon : 1,
+								time : 3000
+							});
+						} else {
+							layer.msg('停用成功', {
+								icon : 1,
+								time : 3000
+							});
+						}
+					} else {
+						layer.msg('状态更新失败', {
+							icon : 2,
+							time : 3000
+						});
+					}
+				}
+			})
+		});
 
-        form.on('switch(user-enable)', function(obj){
-            let operate;
+		var DTree = dtree.render({
+			elem : "#organizationTree",
+			initLevel : "2", //默认展开层级为1
+			line : true, // 有线树
+			toolbar : true,
+			skin : "layui",
+			toolbarWay : "fixed", // "contextmenu"：右键菜单（默认），"fixed"："固定在节点后","follow"："跟随节点动态呈现"
+			toolbarFun : {
+				loadToolbarBefore : function(buttons, param, $div) {
+					/* console.log(buttons);
+					console.log(param);
+					console.log($div); */
+					buttons.addToolbar = ""; // 取消新增功能
+					if (param.nodeId && (param.nodeId.indexOf("admin_") > -1 || param.nodeId.indexOf("user_") > -1)) {
+						buttons.editToolbar = ""; // 取消编辑功能
+						buttons.delToolbar = ""; // 取消删除功能
+					} else {
+						buttons.editToolbar = "<a title='编辑组织'  onclick='editorg(" + param.nodeId + ")' ><i class='dtreefont dtree-icon-bianji'></i></a>";
+						buttons.delToolbar = "<a  title='删除组织'  onclick='delorg(" + param.nodeId + ")'><i class='dtreefont dtree-icon-roundclose'></i></a>";
+					}
+					console.log(buttons);
+					return buttons; // 将按钮对象返回
+				},
+				editToolbar : function(treeNode, $div) {
+					console.log(treeNode);
+					DTree.changeTreeNodeEdit(false);
+				},
+				delTreeNode : function(treeNode, $div) {
+					console.log(treeNode);
+				}
+			},
+			ficon : [ "1", "-1" ], // 设定一级图标样式。0表示方形加减图标，8表示小圆点图标
+			icon : [ "0", "2" ], // 设定二级图标样式。0表示文件夹图标，5表示叶子图标
+			method : 'get',
+			url : MODULE_PATH + "orgTree"
+		});
 
-            if(obj.elem.checked){
-                 operate = "enable";
-            }else{
-                 operate = "disable";
-            }
+		dtree.on("node(organizationTree)", function(obj) {
+			if (!obj.param.leaf) {
+				var $div = obj.dom;
+				DTree.clickSpread($div); //调用内置函数展开节点
+			} else {
+				console.log(obj.param.nodeId);
+				/* $("#orgid").val(obj.param.nodeId);
+				$("#searchbtn").click(); */
+			}
+		});
 
-            let loading = layer.load()
+		window.add = function() {
+			layer.open({
+				type : 2,
+				title : '新增',
+				shade : 0.1,
+				area : [ '1200px', '80%' ],
+				content : MODULE_PATH + 'add'
+			});
+		}
 
-            $.ajax({
-                url:'/system/user/'+operate,
-                data:JSON.stringify({userId:this.value}),
-                dataType:'json',
-                contentType:'application/json',
-                type:'put',
-                success:function(result){
-                    layer.close(loading);
-                    if(result.success){
-                        layer.msg(result.msg,{icon:1,time:1000},function(){});
-                    }else{
-                        layer.msg(result.msg,{icon:2,time:1000});
-                    }
-                }
-            })
+		window.edit = function(obj) {
+			layer.open({
+				type : 2,
+				title : '修改',
+				shade : 0.1,
+				area : [ '1200px', '80%' ],
+				content : MODULE_PATH + 'edit?id=' + obj.data['id']
+			});
+		}
 
-        });
+		window.remove = function(obj) {
+			layer.confirm('确定要删除', {
+				icon : 3,
+				title : '提示'
+			}, function(index) {
+				layer.close(index);
+				let loading = layer.load();
+				$.ajax({
+					url : MODULE_PATH + "remove/" + obj.data['id'],
+					dataType : 'json',
+					type : 'delete',
+					success : function(result) {
+						layer.close(loading);
+						if (result.success) {
+							layer.msg(result.msg, {
+								icon : 1,
+								time : 1000
+							}, function() {
+								obj.del();
+								reloadTree();
+							});
+						} else {
+							layer.msg(result.msg, {
+								icon : 2,
+								time : 1000
+							});
+						}
+					}
+				})
+			});
+		}
 
-        window.add = function(){
-            layer.open({
-                type: 2,
-                title: '新增',
-                shade: 0.1,
-                area: ['500px', '400px'],
-                content: MODULE_PATH + 'add'
-            });
-        }
+		window.batchRemove = function(obj) {
+			let data = table.checkStatus(obj.config.id).data;
+			if (data.length === 0) {
+				layer.msg("未选中数据", {
+					icon : 3,
+					time : 1000
+				});
+				return false;
+			}
+			let ids = "";
+			for (let i = 0; i < data.length; i++) {
+				ids += data[i].id + ",";
+			}
+			ids = ids.substr(0, ids.length - 1);
+			layer.confirm('确定要删除', {
+				icon : 3,
+				title : '提示'
+			}, function(index) {
+				layer.close(index);
+				let loading = layer.load();
+				$.ajax({
+					url : MODULE_PATH + "batchRemove/" + ids,
+					dataType : 'json',
+					type : 'delete',
+					success : function(result) {
+						layer.close(loading);
+						if (result.success) {
+							layer.msg(result.msg, {
+								icon : 1,
+								time : 1000
+							}, function() {
+								table.reload('user-table');
+								reloadTree();
+							});
+						} else {
+							layer.msg(result.msg, {
+								icon : 2,
+								time : 1000
+							});
+						}
+					}
+				})
+			});
+		}
 
-        window.edit = function(obj){
-            layer.open({
-                type: 2,
-                title: '修改',
-                shade: 0.1,
-                area: ['500px', '400px'],
-                content: MODULE_PATH + 'edit?userId='+obj.data['userId']
-            });
-        }
+		window.refresh = function() {
+			table.reload('user-table');
+		}
 
-        window.remove = function(obj){
-            layer.confirm('确定要删除该用户', {icon: 3, title:'提示'}, function(index){
-                layer.close(index);
-                let loading = layer.load();
-                $.ajax({
-                    url: MODULE_PATH+"remove/"+obj.data['userId'],
-                    dataType:'json',
-                    type:'delete',
-                    success:function(result){
-                        layer.close(loading);
-                        if(result.success){
-                            layer.msg(result.msg,{icon:1,time:1000},function(){
-                                obj.del();
-                            });
-                        }else{
-                            layer.msg(result.msg,{icon:2,time:1000});
-                        }
-                    }
-                })
-            });
-        }
+		window.addorg = function() {
+			layer.open({
+				type : 2,
+				title : '新增组织机构',
+				shade : 0.1,
+				area : [ '1200px', '80%' ],
+				content : '/system/organisation/add'
+			});
+		}
 
-        window.batchRemove = function(obj){
-            let data = table.checkStatus(obj.config.id).data;
-            if(data.length === 0){
-                layer.msg("未选中数据",{icon:3,time:1000});
-                return false;
-            }
-            let ids = "";
-            for(let i = 0;i<data.length;i++){
-                ids += data[i].userId+",";
-            }
-            ids = ids.substr(0,ids.length-1);
-            layer.confirm('确定要删除这些用户', {icon: 3, title:'提示'}, function(index){
-                layer.close(index);
-                let loading = layer.load();
-                $.ajax({
-                    url: MODULE_PATH+"batchRemove/"+ids,
-                    dataType:'json',
-                    type:'delete',
-                    success:function(result){
-                        layer.close(loading);
-                        if(result.success){
-                            layer.msg(result.msg,{icon:1,time:1000},function(){
-                                table.reload('user-table');
-                            });
-                        }else{
-                            layer.msg(result.msg,{icon:2,time:1000});
-                        }
-                    }
-                })
-            });
-        }
+		window.editorg = function(id) {
+			layer.open({
+				type : 2,
+				title : '修改组织机构',
+				shade : 0.1,
+				area : [ '1200px', '80%' ],
+				content : '/system/organisation/edit?id=' + id
+			});
+		}
 
-        window.refresh = function(param){
-            table.reload('user-table',{where:param});
-        }
-    })
+		window.delorg = function(id) {
+			layer.confirm('确定要删除组织', {
+				icon : 3,
+				title : '提示'
+			}, function(index) {
+				layer.close(index);
+				let loading = layer.load();
+				$.ajax({
+					url : "/system/organisation/remove/" + id,
+					dataType : 'json',
+					type : 'delete',
+					success : function(result) {
+						layer.close(loading);
+						if (result.success) {
+							layer.msg(result.msg, {
+								icon : 1,
+								time : 3000
+							}, function() {
+								reloadTree();
+							});
+						} else {
+							layer.msg(result.msg, {
+								icon : 2,
+								time : 3000
+							});
+						}
+					}
+				})
+			});
+		}
+
+		window.reloadTree = function() {
+			dtree.reload(DTree);
+		}
+	})
 </script>
 </html>

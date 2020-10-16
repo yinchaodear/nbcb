@@ -553,6 +553,18 @@ public class ShhNewsController extends BaseController
             }
         }
         
+        //增加审核的逻辑
+        if (isAdmin() || getCurrentResourceList().contains("1033"))
+        {
+            if (news.getStatus() == NewsDicConstants.INews.Status.CHECKING)
+            {
+                news.setStatus(NewsDicConstants.INews.Status.UP);
+                news.setCheckDate(new Date());
+                news.setCheckUser(getCurrentUser());
+                newsRepository.update(news);
+            }
+        }
+        
         return decide(true);
     }
     
@@ -968,6 +980,18 @@ public class ShhNewsController extends BaseController
                         }
                     }
                 }
+            }
+        }
+        
+        //增加审核的逻辑
+        if (isAdmin() || getCurrentResourceList().contains("1033"))
+        {
+            if (news.getStatus() == NewsDicConstants.INews.Status.CHECKING)
+            {
+                news.setStatus(NewsDicConstants.INews.Status.UP);
+                news.setCheckDate(new Date());
+                news.setCheckUser(getCurrentUser());
+                newsRepository.update(news);
             }
         }
         

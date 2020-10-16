@@ -1,7 +1,9 @@
 package com.yuqiaotech.common.web.base;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -64,6 +66,35 @@ public class BaseController
         {
             return null;
         }
+    }
+    
+    /**
+     * 获取当前用户的资源列表
+     * @return
+     */
+    public List<String> getCurrentResourceList()
+    {
+        String resourcestr =
+            com.yuqiaotech.common.tools.common.StringUtils.parseNull(getSession().getAttribute("resourceids"));
+        
+        List<String> resourceList = new ArrayList<>();
+        if (StringUtils.isNotEmpty(resourcestr))
+        {
+            String[] resarr = resourcestr.split(",");
+            for (String res : resarr)
+            {
+                if (StringUtils.isNotEmpty(res))
+                {
+                    resourceList.add(res);
+                }
+            }
+        }
+        return resourceList;
+    }
+    
+    public boolean isAdmin()
+    {
+        return "admin".equals(getCurrentUsername());
     }
     
     /** 后台用户 */

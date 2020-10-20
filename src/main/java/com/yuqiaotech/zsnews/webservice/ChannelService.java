@@ -24,6 +24,7 @@ import com.yuqiaotech.zsnews.model.Category;
 import com.yuqiaotech.zsnews.model.Channel;
 import com.yuqiaotech.zsnews.model.ChannelFollower;
 import com.yuqiaotech.zsnews.model.Column;
+import com.yuqiaotech.zsnews.model.News;
 import com.yuqiaotech.zsnews.model.UserInfo;
 
 /**
@@ -48,6 +49,9 @@ public class ChannelService extends BaseController
     
     @Autowired
     private BaseRepository<Column, Long> columnRepository;
+    
+	@Autowired
+	private BaseRepository<News, Long> newsRepository;
     
     @Autowired
     private BaseRepository<UserInfo, Long> userInfoRepository;
@@ -227,6 +231,39 @@ public class ChannelService extends BaseController
         Map result = new HashMap<>();
         result.put("channel", channel);
         result.put("category", category);
+        return success(result);
+    }
+    
+    
+    //主题的详情
+    /*
+     * cid 用户id 
+     * id  channel id
+     */
+    @GetMapping("queryTopicDetail")
+    public Result AppTopicGroup(ModelAndView modelAndView, @RequestParam Long id,@RequestParam Long nid)
+    {
+        
+        String sql ="SELECT * FROM t_topic where f_id ="+id;
+        List channel = channelRepository.findMapByNativeSql(sql);
+    	sql = "SELECT "
+				+ " case when t.f_collects  >=10000  then "
+				+ " concat(cast(  convert(t.f_collects/10000,decimal(10,1)) as char),'万' ) "
+				+ " else cast(t.f_collects   as char)  end as collects , "
+				+ " t.f_video_path, t.f_id, t.f_title ,t.f_media_type,t.f_displaytype,t.f_check_date ,t.f_display_order ,"
+				+ "case when t.f_comments >=10000  then  "
+				+ " concat(cast(  convert(t.f_comments/10000,decimal(10,1)) as char),'万' ) else cast(t.f_comments as char)  end as apprisecount "
+				+ " ,pm1.imgs,top.f_title as toptitle FROM t_news t "
+				+ "left join  (select pm.f_news_id as pmid , group_concat(f_picpath) as imgs from t_pic_mapping pm group by pm.f_news_id )"
+				+ " pm1 on pm1.pmid = t.f_id "
+				+ " inner join t_news_topic nt on t.f_id = nt.f_news_id "
+				+ "  inner join t_topic top on top.f_id = nt.f_topic_id   "
+				+ " where t.f_status=0 and t.f_id ="+nid;
+    	List news =newsRepository.findMapByNativeSql(sql);
+				
+        Map result = new HashMap<>();
+        result.put("channel", channel);
+        result.put("news", news);
         return success(result);
     }
     

@@ -95,7 +95,7 @@ public class NewsService extends BaseController {
 			    + " case when t.f_collects  >=10000  then "
 			    + " concat(cast(  convert(t.f_collects/10000,decimal(10,1)) as char),'万' ) "
 			    + " else cast(t.f_collects   as char)  end as collects ,"
-			    + " nt.f_id as ntid ,top.f_title as toptitle "
+			    + " top.f_id as ntid ,top.f_title as toptitle "
 				+ " FROM t_news t "
 				+ " left  join  t_channel d on d.f_id =t.f_author_channel_id  "
 				+ " left join t_news_topic nt on t.f_id = nt.f_news_id  left join t_topic top on top.f_id = nt.f_topic_id  "
@@ -210,6 +210,37 @@ public class NewsService extends BaseController {
 		return success(result);
 	}
 
+	/*
+	 * 根据类型来 判断是 浙商号页面下的,还是小组,然后根据status 来判断是推荐，还是关注 id：channel的id category:
+	 * 文章的category
+	 */
+	@GetMapping("querynewsByTopicID")
+	public Result AppNewsDataTopic(ModelAndView modelAndView, @RequestParam Long topicid,
+			@RequestParam Long pageNo,@RequestParam Long pageSize) {
+
+	    System.out.println("NewsService.AppNewsDataTopic()");
+		String wheresql = "";
+		String sql = "SELECT "
+				+ " case when t.f_collects  >=10000  then "
+				+ " concat(cast(  convert(t.f_collects/10000,decimal(10,1)) as char),'万' ) "
+				+ " else cast(t.f_collects   as char)  end as collects , "
+				+ " t.f_video_path, t.f_id, t.f_title ,t.f_media_type,t.f_displaytype,t.f_check_date ,t.f_display_order ,"
+				+ "case when t.f_comments >=10000  then  "
+				+ " concat(cast(  convert(t.f_comments/10000,decimal(10,1)) as char),'万' ) else cast(t.f_comments as char)  end as apprisecount "
+				+ " ,pm1.imgs,top.f_title as toptitle FROM t_news t "
+				+ "left join  (select pm.f_news_id as pmid , group_concat(f_picpath) as imgs from t_pic_mapping pm group by pm.f_news_id )"
+				+ " pm1 on pm1.pmid = t.f_id "
+				+ " inner join t_news_topic nt on t.f_id = nt.f_news_id and "
+				+ " nt.f_topic_id = "+topicid
+				+ "  inner join t_topic top on top.f_id = nt.f_topic_id   "
+				+ " where t.f_status=0 "
+				+ " order by t.f_display_order ,t.f_updated  desc limit "+pageNo*pageSize+ ", "+pageSize;
+		List news = newsRepository.findMapByNativeSql(sql);
+		Map result = new HashMap<>();
+		result.put("news", news);
+		return success(result);
+	}
+	
 	// 政务下面的文章 就固定是文章了，没有channel关联 分别为 政务,政务活动，政务通知
 	@GetMapping("querynewsGovernment")
 	public Result AppNewsGovernment(ModelAndView modelAndView, @RequestParam String type, @RequestParam String kind,@RequestParam Long pageNo,@RequestParam Long pageSize) {

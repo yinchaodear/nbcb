@@ -82,7 +82,7 @@ public class INewsServiceImpl implements INewsService {
 				String sql = " select case when (select 1 from t_comment com where com.f_type='点赞' and f_news_id = t.f_id and f_user_info_id = " + userInfoId + ") then 1 else 0 end as agreeFlag,\n" +						
  						"case when (n.f_id is not null ) then 1 else 0 end as collectFlag,\n" +
 						"concat(t.f_id,'') newsId, ifnull(t.f_likes, 0) zanNum,ifnull(t.f_comments, 0) pinglunNum, ifnull(t.f_collects, 0) shoucangNum,  \n" +
-						" ifnull(ui.f_likes, 0) userTotalNum,c.f_title authorChannelName,ui.f_username userName, t.f_title title, t.f_content content\n" +
+						" ifnull(ui.f_likes, 0) userTotalNum,c.f_title authorChannelName,ui.f_username userName,c.f_remark remark, t.f_title title, t.f_content content\n" +
 						" ,convert(c.f_Logo using utf8) as logo from t_news t\n" +
 						"left join t_channel c on t.f_author_channel_id = c.f_id \n" +
 						"left join t_user_info ui on c.f_userinfo_id = ui.f_id\n" +

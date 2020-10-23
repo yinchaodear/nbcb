@@ -1014,6 +1014,9 @@ public class NewsController extends BaseController
             {
                 news.setContent(news.getContent().replace("objectId=" + objectId, "objectId=" + news.getId()));
             }
+            String  newContent = news.getContent().replaceAll("line-height:[^;']*(;)?", "");//去掉css里的行高和字体
+            newContent = newContent.replaceAll("font-family:[^;']*(;)?", "");
+            news.setContent(newContent);
         }
         newsRepository.update(news);
         

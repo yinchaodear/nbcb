@@ -421,6 +421,9 @@ public class NewsService extends BaseController {
 					content = abstractImg(content, news);
 				}
 				content = content.replace("&amp;", "&");
+
+				content = content.replaceAll("line-height:[^;']*(;)?", "");//去掉css里的行高和字体
+				content = content.replaceAll("font-family:[^;']*(;)?", "");
 				news.setContent(content);
 			}
 			if (!StringUtils.isEmpty(content)) {

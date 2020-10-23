@@ -271,7 +271,7 @@ public class AttachmentController extends BaseController
              * 这里还要加上发送短信验证码的代码
              */
             String mobile = (String)params.get("phone");
-            String templateId = "560383";
+            String templateId = "572018";
             
             String number = "";
             number = GenerateNumber();

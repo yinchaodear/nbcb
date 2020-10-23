@@ -145,7 +145,7 @@ public class ChannelService extends BaseController
         		+ " on t.f_id =m.f_channel_id inner join t_category c on c.f_id =m.f_category_id  "
         		+ " where t.f_kind = '"+kind+"' and t.f_type ='"+type+"' group by c.f_title";
         List categorygroup = channelRepository.findMapByNativeSql(sql);
-        String sqlgroup = "SELECT  distinct t.f_title,t.f_remark ,t.f_id, convert(t.f_Logo using utf8) as logo, b.* , case when t.f_collects >=10000  then  concat(cast(  convert(t.f_collects/10000,decimal(10,1)) as char),'万' )"
+        String sqlgroup = "SELECT  distinct t.f_title,t.f_remark ,t.f_id,  b.* , case when t.f_collects >=10000  then  concat(cast(  convert(t.f_collects/10000,decimal(10,1)) as char),'万' )"
                 + " else cast(t.f_collects  as char)  end as number  FROM  t_channel t  left  join (select cf.f_id as cfid ,cf.f_channel_id as chid "
                 + ",cf.f_user_info_id as cid from t_channel_follower cf inner join t_channel c  on c.f_id = "
                 + "cf.f_channel_id  where f_user_info_id = " + getCurrentUserInfoId() + " and " + wherekindandtype

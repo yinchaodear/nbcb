@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.yuqiaotech.common.tools.common.FileUtils;
 import com.yuqiaotech.zsnews.NewsDicConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -382,6 +383,9 @@ public class NewsService extends BaseController {
 		String title = (String) params.get("title");
 		String content = (String) params.get("content");
 		String type = (String) params.get("type");
+		Long objectId=null;
+		if(params.get("objectId")!=null)
+			objectId=(Long) params.get("objectId");
 		
 
 		String kind = (String) params.get("kind");
@@ -422,6 +426,31 @@ public class NewsService extends BaseController {
 				}
 				content = content.replace("&amp;", "&");
 
+				if (content.contains("objectId=" + objectId))
+				{
+					content=content.replaceAll("objectId=" + objectId, "objectId=" + news.getId());
+					//把图片移动到material对应的ID下
+					File srcFile = new File(attachmentRoot + "/news/" + objectId + "/");
+					File dstFile = new File(attachmentRoot + "/news/" + news.getId() + "/");
+					if (srcFile.exists())
+					{
+						try
+						{
+							org.apache.commons.io.FileUtils.copyDirectory(srcFile, dstFile);
+						}
+						catch (IOException e)
+						{
+							e.printStackTrace();
+						}
+						FileUtils.deleteDir(srcFile);
+					}
+				}
+				if (content.contains("http://139.224.9.182:9292/")) {
+					content = content.replaceAll("http://139.224.9.182:9292/", "../../");
+				}
+				if (content.contains("http://zsapp.yuqiaoerp.com/")) {
+					content = content.replaceAll("http://zsapp.yuqiaoerp.com/", "../../");
+				}
 				content = content.replaceAll("line-height:[^;']*(;)?", "");//去掉css里的行高和字体
 				content = content.replaceAll("font-family:[^;']*(;)?", "");
 				news.setContent(content);

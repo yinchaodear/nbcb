@@ -1,6 +1,6 @@
 # Tomcat 端口
 server:
-  port: 9292
+  port: 18082
   session:
     tracking-modes: cookie
   tomcat:

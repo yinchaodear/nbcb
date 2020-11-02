@@ -1,5 +1,5 @@
 #附件根目录
-attachmentRoot: /mnt/zs/attach
+attachmentRoot: /mnt/mntnas/zs/attach
 
 # 数据源配置
 spring:

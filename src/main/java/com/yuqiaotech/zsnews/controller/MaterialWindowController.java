@@ -107,15 +107,24 @@ public class MaterialWindowController extends BaseController
             if (material.getStatus() == null || material.getStatus() == NewsDicConstants.ICommon.STATUS_DOWN)
             {
                 //如果是从下架变上架，要看同一个资源位有无已经上架的素材
-                String checkOne = "from Material where column.id=" + material.getColumn().getId() + " and (type="
-                    + NewsDicConstants.IMaterial.Type.WINDOW + " or type=" + NewsDicConstants.IMaterial.Type.APP
-                    + ") and status=" + NewsDicConstants.ICommon.STATUS_UP + " and deltag="
-                    + NewsDicConstants.ICommon.DELETE_NO + " and id != " + mid;
-                List<Material> dblist = materialRepository.findByHql(checkOne);
+                List<Material> dblist =new ArrayList<>();
+                if(material.getColumn()!=null && material.getColumn().getId()!=null) {
+                    String checkOne = "from Material where column.id=" + material.getColumn().getId() + " and (type="
+                            + NewsDicConstants.IMaterial.Type.WINDOW + " or type=" + NewsDicConstants.IMaterial.Type.APP
+                            + ") and status=" + NewsDicConstants.ICommon.STATUS_UP + " and deltag="
+                            + NewsDicConstants.ICommon.DELETE_NO + " and id != " + mid;
+                    dblist = materialRepository.findByHql(checkOne);
+                }else{
+                    String checkOne = "from Material where type=" + NewsDicConstants.IMaterial.Type.APP
+                            + " and status=" + NewsDicConstants.ICommon.STATUS_UP
+                            + " and deltag="+ NewsDicConstants.ICommon.DELETE_NO + " and id != " + mid;
+                    dblist = materialRepository.findByHql(checkOne);
+                }
                 if (CollectionUtils.isNotEmpty(dblist))
                 {
                     return failure("当前资源位已经存在上架资源，不可重复上架");
                 }
+
             }
             if (material.getStatus() == null || material.getStatus() == NewsDicConstants.ICommon.STATUS_DOWN)
             {

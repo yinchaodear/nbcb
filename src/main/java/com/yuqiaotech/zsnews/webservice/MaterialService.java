@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.yuqiaotech.zsnews.NewsDicConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -63,12 +64,22 @@ public class MaterialService extends BaseController
     @GetMapping("materialswipercolumn")
     public Result MaterialSwipercolumn(@RequestParam Long columid)
     {
-        System.out.println("MaterialService.MaterialSwiper()"+columid);
-        String sql ="SELECT  t.f_id  ,f_picpath FROM t_pic_mapping  m inner join t_material t on  m.f_material_id = t.f_id  "
-        		+ " where t.f_type =2  and t.f_column_id  = "+columid +" and t.f_status=0";
-        List pic = materialRepository.findMapByNativeSql(sql);
         Map result = new HashMap<>();
-        result.put("pic",pic);
+        System.out.println("MaterialService.MaterialSwiper,columid=("+columid+"),"+columid);
+        if(columid==null || columid==0) {
+            //开机闪屏图片
+            String sql = "SELECT  t.f_id  ,f_picpath FROM t_pic_mapping  m inner join t_material t on  m.f_material_id = t.f_id  "
+                    + " where t.f_type ="+NewsDicConstants.IMaterial.Type.APP
+                    +"  and t.f_deltag  ="+ NewsDicConstants.ICommon.DELETE_NO
+                    +" and t.f_status="+NewsDicConstants.ICommon.STATUS_UP;
+            List pic = materialRepository.findMapByNativeSql(sql);
+            result.put("pic", pic);
+        }else{
+            String sql = "SELECT  t.f_id  ,f_picpath FROM t_pic_mapping  m inner join t_material t on  m.f_material_id = t.f_id  "
+                    + " where t.f_type =2  and t.f_column_id  = " + columid + " and t.f_status=0";
+            List pic = materialRepository.findMapByNativeSql(sql);
+            result.put("pic", pic);
+        }
         return success(result);
     }
     /*

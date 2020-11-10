@@ -1,0 +1,46 @@
+
+	body {
+		background-size: 100% 100%;
+		margin: 0px;
+		color: white;
+	}
+	.bg-img {
+		min-height: 100vh;
+		/* min-height:572px;  */
+		background-image: url(bgimg-mobile.jpg);
+
+		padding:20px;
+	}
+	.tf-container {
+		flex-direction: column;
+		height: 100%;
+	}
+	.tf-con-icon {
+		height: 120px;
+	}
+	.con-icon-img {
+		height: 100px;
+		width: 100px;
+	}
+	.con-icon-text {
+		font-size: 26px;
+		height: 100px;
+		line-height: 100px;
+		display: inline;
+	}
+	.tf-con-head {
+		font-size: 12px;
+		display: flex;
+		flex-direction: column;
+	}
+	.tf-con-head div {
+		/*font-size: 25px;*/
+		margin-bottom: 10px;
+	}
+	.tf-con-down {
+		margin-left: -92px;
+		display: flex;
+		flex-direction: column-reverse;
+		justify-content: center;
+		/*align-items: center;*/
+	}

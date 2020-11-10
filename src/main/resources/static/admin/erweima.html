@@ -3,10 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="stylesheet" href="downloadcss/weixin.css">
 <title></title>
 </head>
 <body>
-<div id="forWeixin" style="display: none; color: red;"> <strong style="color: red;">您是使用微信扫描，请点击右上角按钮，选择在浏览器中打开</strong> </div>
+<div id="forWeixin" style="display: block;">
+<div class="bg-img tf-container">
+    <strong style="color: red;">您是使用微信扫描，请点击右上角按钮，选择在浏览器中打开</strong>
+<div style="margin-top:20px;">
+    <br/>
+    <div class="tf-con-icon ">
+        <img class="con-icon-img" src="images/logo.png">
+        &nbsp;&nbsp;
+        <div class="con-icon-text">世界浙商</div>
+    </div>
+    <div class="tf-con-head">
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;为了发挥好桥梁纽带和助手作用、促进“两个健康”，团结凝聚广大民营企业家，作为浙江省工商联、浙江日报报业集团主办的世界浙商唯一官方新媒体平台，双方将共同合作开发世界浙商网APP，并向全省工商联系统、各地各级商会、全球浙商推广，将世界浙商网APP打造成为世界浙商的融媒体中心。</div>
+    </div>
+</div>
+</div>
+</div>
 </body>
 </html>
 <script type="text/javascript">
@@ -22,10 +38,12 @@
 		}(),
 		language : (navigator.browserLanguage || navigator.language).toLowerCase()
 	}
-    if (Terminal.platform.is_weixin) {
-        document.getElementById('forWeixin').style.display='';
-    } else if (Terminal.platform.android) {
-		location.href = "http://www.javaxp.net/app/erp/android/zsapp.apk";
+    if (Terminal.platform.android) {
+        if (Terminal.platform.is_weixin) {
+            document.getElementById('forWeixin').style.display='';
+        }else{
+            location.href = "http://www.javaxp.net/app/erp/android/zsapp.apk";
+        }
 	} else if (Terminal.platform.iPhone||Terminal.platform.iPad) {
 		location.href = "https://apps.apple.com/cn/app/%E4%B8%96%E7%95%8C%E6%B5%99%E5%95%86/id1533955605";
 	}else{

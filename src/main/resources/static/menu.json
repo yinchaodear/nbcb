@@ -1,7 +1,7 @@
 [
 	{
 		"id": "101",
-		"title": "发布管理",
+		"title": "易收宝管理",
 		"type": "0",
 		"openType": null,
 		"icon": "../admin/images/fbgl.png",
@@ -9,16 +9,16 @@
 		"children": [
 			{
 				"id": "1011",
-				"title": "栏目管理",
+				"title": "公司客户查询",
 				"type": "1",
 				"openType": null,
 				"icon": "layui-icon layui-icon-user",
-				"href": "/zsnews/column/main",
+				"href": "/zsnews/company/main",
 				"children": []
 			},
 			{
 				"id": "1012",
-				"title": "频道管理",
+				"title": "本月月活查询",
 				"type": "1",
 				"openType": null,
 				"icon": "layui-icon layui-icon-vercode",

@@ -17,7 +17,7 @@ public class YuqiaoApplication
     public static void main(String[] args)
     
     {
-    	System.err.println("启动");
+    	System.err.println("启动宁波银行管理");
         SpringApplication.run(YuqiaoApplication.class, args);
     }
 }

@@ -1,6 +1,6 @@
 # Tomcat 端口
 server:
-  port: 18082
+  port: 9090
   session:
     tracking-modes: cookie
   tomcat:
@@ -10,7 +10,7 @@ spring:
   # Druid Pool 运行环境
   profiles:
     # 运 行 环 境，【修改这里】prod=生产，dev=开发
-    active: prod
+    active: dev
         # 服务模块
   devtools:
     restart:

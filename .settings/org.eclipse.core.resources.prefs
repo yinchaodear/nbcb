@@ -1,3 +1,5 @@
 eclipse.preferences.version=1
 encoding//src/main/resources/static/menu.json=UTF-8
+encoding//src/main/resources/templates/zsnews/company/upload.html=UTF-8
+encoding//src/main/resources/templates/zsnews/companydetail/upload.html=UTF-8
 encoding/<project>=UTF-8

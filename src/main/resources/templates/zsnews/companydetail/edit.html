@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hql="" xmlns:nativeSql="">
+<head>
+<meta charset="UTF-8">
+<title>编辑</title>
+<link rel="stylesheet" href="../../admin/css/pearCommon.css" />
+<link rel="stylesheet" href="../../component/layui/css/layui.css" />
+<link rel="stylesheet" href="../../admin/css/pear-icon/iconfont.css" />
+<style>
+.delbtn {
+	font-size: 15px;
+	color: red;
+	font-weight: bold;
+	cursor: pointer;
+	border: 1px solid red;
+	border-radius: 50%;
+}
+
+.hrefdiv {
+	width: 60%;
+	margin-left: 20px;
+	margin-bottom: 0px;
+	margin-right: 0px;
+}
+</style>
+</head>
+<body>
+	<form class="layui-form" action="">
+		<input type="hidden" name="objectId" id="objectId" th:value="${ column.id  }" />
+		<input type="hidden" name="objectType" id="objectType" value="column" />
+		<div class="mainBox">
+			<div class="main-container">
+				<div class="main-container">
+					<div class="layui-form-item layui-hide">
+						<label class="layui-form-label">id</label>
+						<div class="layui-input-block">
+							<input type="text" name="id" th:value="${ column.id }" autocomplete="off" placeholder="请输入id" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">名称</label>
+						<div class="layui-input-block">
+							<input type="text" name="title" autocomplete="off" placeholder="请输入名称" th:value="${ column.title }" class="layui-input" maxlength="50">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">地址</label>
+						<div class="layui-input-block">
+							<input type="text" name="h5href" autocomplete="off" placeholder="请输入地址" th:value="${ column.h5href }" class="layui-input" maxlength="200">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">顺序号</label>
+						<div class="layui-input-block">
+							<input type="text" name="displayOrder" autocomplete="off" placeholder="请输入顺序号" class="layui-input" maxlength="5" th:value="${ column.displayOrder}" lay-verify="number">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">描述</label>
+						<div class="layui-input-block">
+							<textarea name="remark" placeholder="请输入描述" class="layui-textarea" maxlength="500" th:text="${ column.remark}"></textarea>
+						</div>
+					</div>
+					
+					<div class="layui-form-item">
+						<input type="hidden" name="picname1" id="picname1" />
+						<label class="layui-form-label">头像</label>
+						<div class="layui-input-block">
+							<div class="layui-inline" style="width: 100%;">
+								<img class="layui-upload-img" id="previewImg1">
+								<span class="icon pear-icon delbtn" title="删除头像" onclick="delsucai(1)" id="delbtn1" style="display: none;">&#xe66e;</span>
+							</div>
+							<div class="layui-upload-drag" id="upload-drag1">
+								<span class="icon pear-icon" style="font-size: 32px; color: #333;">&#xe669;</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="bottom">
+			<div class="button-container">
+				<button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" id="submitbtn" lay-filter="column-save">
+					<i class="layui-icon layui-icon-ok"></i>
+					提交
+				</button>
+			</div>
+		</div>
+	</form>
+	<script src="../../component/layui/layui.js"></script>
+	<script th:inline="javascript">
+		var upload;
+		var form;
+		var $;
+		var objectId = [[${column.id}]];
+		var objectType = 'column';
+		layui.use([ 'form', 'jquery', 'upload'  ], function() {
+			form = layui.form;
+			$ = layui.jquery;
+			upload = layui.upload;
+			let MODULE_PATH = "/zsnews/column/";
+
+			
+			upload.render({
+				elem : '.layui-upload-drag',
+				url : '/attachment/uploadFile',
+				method : 'POST',
+				before : function(obj) {
+					this.data.objectId = objectId;
+					this.data.objectType = objectType;
+				},
+				done : function(res) {
+					var currentidx = 1;
+					var imgsrc = '/attachment/showImage?objectId=' + objectId + "&objectType="+objectType+"&fileName=" + res.msg;
+					$('#previewImg' + currentidx).css('width', '30%');
+					$('#previewImg' + currentidx).css('height', '100%');
+					$('#previewImg' + currentidx).attr('src', imgsrc);
+					$("#upload-drag" + currentidx).css("display", "none");
+					$("#delbtn" + currentidx).css("display", "");
+					$("#picname" + currentidx).val(res.msg);
+				}
+			});
+			
+			var picname1 = [[${ column.logo}]];
+			if(picname1 && picname1!=null &&  picname1!=''&&  picname1!='null'){
+				initpic(1,picname1);
+			}
+			
+			form.on('submit(column-save)', function(data) {
+				var DISABLED = 'layui-btn-disabled';
+				$('#submitbtn').addClass(DISABLED);
+				$('#submitbtn').attr('disabled', 'disabled');
+				$.ajax({
+					url : MODULE_PATH + 'update',
+					data : JSON.stringify(data.field),
+					dataType : 'json',
+					contentType : 'application/json',
+					type : 'put',
+					success : function(result) {
+						if (result.success) {
+							layer.msg(result.msg, {
+								icon : 1,
+								time : 3000
+							}, function() {
+								$('#submitbtn').removeClass(DISABLED);
+								$('#submitbtn').removeAttr('disabled');
+								parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+								parent.layui.table.reload("column-table");
+							});
+						} else {
+							layer.msg(result.msg, {
+								icon : 2,
+								time : 3000
+							}, function() {
+								$('#submitbtn').removeClass(DISABLED);
+								$('#submitbtn').removeAttr('disabled');
+							});
+						}
+					},
+					error : function(XMLHttpRequest, textStatus, errorThrown) {
+						$('#submitbtn').removeClass(DISABLED);
+						$('#submitbtn').removeAttr('disabled');
+					}
+				})
+				return false;
+			});
+		})
+		function initpic(currentidx,imgsrc){
+			$('#previewImg' + currentidx).css('width', '30%');
+			$('#previewImg' + currentidx).css('height', '100%');
+			$('#previewImg' + currentidx).attr('src', imgsrc);
+			$("#upload-drag" + currentidx).css("display", "none");
+			$("#delbtn" + currentidx).css("display", "");
+			$("#picname" + currentidx).val(imgsrc);
+		}
+		
+		function delsucai(idx) {
+			$("#previewImg" + idx).attr("style", "");
+			$("#previewImg" + idx).attr("src", "");
+			$("#upload-drag" + idx).css("display", "");
+			$("#delbtn" + idx).css("display", "none");
+			$("#picname" + idx).val('');
+		}
+	</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-package com.yuqiaotech;
+ package com.yuqiaotech;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

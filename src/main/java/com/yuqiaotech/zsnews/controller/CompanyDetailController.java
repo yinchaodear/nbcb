@@ -45,19 +45,22 @@ import com.yuqiaotech.zsnews.NewsDicConstants;
 import com.yuqiaotech.zsnews.bean.ColumnBean;
 import com.yuqiaotech.zsnews.model.Column;
 import com.yuqiaotech.zsnews.model.Company;
+import com.yuqiaotech.zsnews.model.CompanyDetail;
 import com.yuqiaotech.zsnews.service.UploadService;
 
 @RestController
-@RequestMapping("zsnews/company")
-public class CompanyController extends BaseController
+@RequestMapping("zsnews/companydetail")
+public class CompanyDetailController extends BaseController
 {
-    private static String MODULE_PATH = "zsnews/company/";
+    private static String MODULE_PATH = "zsnews/companydetail/";
     
     @Autowired
     private BaseRepository<Column, Long> columnRepository;
     
     @Autowired
     private BaseRepository<Company, Long> companyRepository;
+    @Autowired
+    private BaseRepository<CompanyDetail, Long> companydetailRepository;
     @Autowired
     private UploadService uploadService;
     
@@ -161,24 +164,21 @@ public class CompanyController extends BaseController
 			Map lo = (Map) list.get(i);
 			// TODO 随意发挥
 			System.out.println(lo);
-			Company company = null;
-			String name = uploadService.columnsForBlank(lo.get("客户名称"));
-			company = companyRepository.findUniqueBy("name",name,Company.class);
-			if(company==null){
-		      company =new Company();
-		      company.setName(name);
-		      addnumber++;
+		
+			if("汇总".equals(lo.get("门店名称"))){
+				continue;
 			}
-			company.setAccount(uploadService.toStr(lo.get("客户经理")));
-			company.setOrganization(uploadService.columnsForBlank(lo.get("实际经营机构")));
-			company.setYear(uploadService.toStr(lo.get("进件年")));
-			company.setModel(uploadService.toStr(lo.get("规模")));
-			company.setStatus(uploadService.toStr(lo.get("商户状态")));
-            company =companyRepository.save(company);
+			CompanyDetail detail= new CompanyDetail();
+			detail.setName(uploadService.toStr(uploadService.columnsForBlank(lo.get("商户名称"))));
+			detail.setCode(uploadService.toStr(lo.get("商户编号")));
+			detail.setBankcode(uploadService.toStr(lo.get("收款账户")));
+			detail.setOrganization(uploadService.toStr(lo.get("所属网点")));
+			detail.setModel(uploadService.toStr(lo.get("商户模式")));
+			detail.setStatus(uploadService.toStr(lo.get("商户状态")));
             number++;
 		}
 		String msg ="共处理数据"+number+"条"+",新增数据"+addnumber+"条";
-		System.out.println("CompanyController.upload()");
+		System.out.println("CompanyDetailController.upload()");
 		modelAndView.addObject("msg",msg);
 		modelAndView.setViewName(MODULE_PATH+"upload");
 		return modelAndView;

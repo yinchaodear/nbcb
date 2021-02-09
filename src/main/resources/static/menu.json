@@ -18,11 +18,11 @@
 			},
 			{
 				"id": "1012",
-				"title": "本月月活查询",
+				"title": "月活查询统计工具",
 				"type": "1",
 				"openType": null,
 				"icon": "layui-icon layui-icon-vercode",
-				"href": "/zsnews/channel/main",
+				"href": "/zsnews/companydetail/main",
 				"children": []
 			},
 			{

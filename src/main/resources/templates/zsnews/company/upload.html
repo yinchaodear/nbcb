@@ -1,0 +1,70 @@
+<!-- <%@ page contentType="text/html;charset=UTF-8"  import="java.io.*"%> -->
+
+<html   xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+<title>客户数据导入</title>
+
+<script type="text/javascript">
+    function isExcelFile(){
+    	var excelFile = document.getElementById("excelFile").value;
+    	if(excelFile == null || excelFile == '')
+    		{
+    		alert("请选择文件！");
+    		return false;
+    		}
+    	var extend = excelFile.substring(excelFile.lastIndexOf(".")+1,excelFile.length);
+    	if(extend!="xls"){
+    		alert("请上传后缀名为xls的文件！");
+    		return false;
+    	}
+    }
+</script>
+</head>
+<body>
+<font color="red"><div th:text="${msg }"></div></font>
+<form  method="post" enctype="multipart/form-data" id="form" action="/zsnews/company/uploadfile">
+<fieldset>
+	<legend>企业客户数据导入</legend>
+	<table width="100%" cellspacing="0" cellpadding="0" class="edit_table">
+		<tr>
+			<td colspan="2" align="center"><font color="red"></font></td>
+		</tr>
+		<tr>
+			<td colspan="2" align="center">&nbsp</td>
+		</tr>
+		<tr>
+			<td colspan="2" align="center">&nbsp</td>
+		</tr>
+
+		<tr>
+			<td align="right" nowrap="nowrap">选择Excel文件:</td>
+			<td align="left">
+				<input type="file" name="excelFile" id="excelFile" value=""  />			
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	
+				请选择Excel内容放在第
+				<select name="sheetNo" id="sheetNo">
+				    <option value="0" selected="selected">1</option>
+				    <option value="1">2</option>
+				    <option value="2">3</option>
+				    <option value="3">4</option>
+				    <option value="4">5</option>
+			    </select>
+   				 个sheet
+    		</td>
+   		</tr>
+	    <tr>
+			<td colspan="5">
+				<input type="submit"  value="上传" class="button"  onclick="return isExcelFile()" />
+<!-- 				<input type="submit" name="method:importExcelForTemp" value="临时处理" class="small_button"  onclick="return isExcelFile()" /> -->
+				<!-- 临时 
+				<input type="submit" name="method:importProductExcel" value="更新" class="small_button"  onclick="return isExcelFile()" />
+				-->
+				
+			</td>
+		</tr>
+	</table>
+</fieldset>
+</form>
+</body>
+
+</html>
